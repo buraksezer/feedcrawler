@@ -1,0 +1,86 @@
+html, body {
+    height: 100%;
+    color: #333333;
+}
+
+body {
+    font-family: 'Open Sans',Helvetica,sans-serif !important;
+}
+
+.container {
+    width: 100%;
+}
+
+.navbar-inner,
+.btn {
+    background-image: none;
+}
+
+.btn-toolbar {
+    margin-top: 0;
+}
+.map {
+    overflow:hidden;
+}
+
+iframe {
+    width:100%;
+    height:100%;
+    position: absolute;
+}
+
+a.brand {
+    -webkit-transition: color .5s;
+    -moz-transition: color .5s;
+    -o-transition: color .5s;
+    transition: color .5s;
+}
+
+a.brand:hover {
+    color: #0caee3;
+}
+
+
+#navigator {
+    margin-left: -124px;
+    width: 248px;
+}
+#navigator {
+    left: 50%;
+    margin-left: -30px;
+    position: absolute;
+    width: 160px;
+    z-index: 149;
+}
+
+.page-header h1 small {
+    font-size: 12px;
+}
+
+ul.entry-list li {
+    list-style: none;
+}
+
+ul.entry-list {
+    display: none;
+}
+
+div.feed-item {
+    border-top-color: #DDDDDD;
+    border-top-style: solid;
+    border-top-width: 1px;
+    line-height: 20px;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 8px;
+    text-align: left;
+    vertical-align: top;
+}
+div.feed-item p {
+    font-size: 15px;
+    font-weight: bold;
+}
+
+div.feed-item p:hover {
+    cursor: pointer;
+}

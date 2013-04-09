@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block custom_css %}
+<style>
+body{   padding-top: 41px;max-height:100%; overflow:hidden;}
+</style>
+{% endblock %}
+
+{% block title %}FeedCraft | {{ entry.title }}{% endblock %}
+{% block container %}
+<div id="fc-csrf">{% csrf_token %}</div>
+    <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+            <div class="container-fluid">
+                <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </a>
+                <a class="brand" href="{% url "home" %}"><i>Feed<strong>Craft</strong><small> &alpha;</small></i></a>
+                <div id="navigator" class="btn-toolbar">
+                    <div class="btn-group">
+                        <a class="btn" id="nav-previous" data-placement="bottom" data-toggle="tooltip"
+                            data-original-title="{{ previous.title }}" href="{{ previous.link }}"><i class="icon-arrow-left"></i></a>
+                        <a class="btn" id="nav-next" data-placement="bottom" data-original-title="{{ next.title }}"
+                            href="{{ next.link }}"><i class="icon-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div data-link="{{ entry.link }}" data-entry-id="{{ entry.id }}" data-feed-id="{{ entry.feed.id }}" class="container">
+        <div id="explorer" class="map" >
+            <iframe id="frame" frameborder="0" marginheight="0" marginwidth="0" src="{{ entry.link }}">Göster amcalara pipini </a></small></iframe>
+        </div>
+    </div>
+{% endblock %}
