@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "feedcraft_base.html" %}
 
 {% block custom_css %}
 <style>
@@ -6,7 +6,7 @@ body{   padding-top: 41px;max-height:100%; overflow:hidden;}
 </style>
 {% endblock %}
 
-{% block title %}FeedCraft | {{ entry.title }}{% endblock %}
+{% block title %}FeedCraft &alpha; | {{ entry.title }}{% endblock %}
 {% block container %}
 <div id="fc-csrf">{% csrf_token %}</div>
     <div class="navbar navbar-fixed-top">

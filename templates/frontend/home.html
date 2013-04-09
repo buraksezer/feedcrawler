@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "feedcraft_base.html" %}
 {% block custom_css %}
     <style type="text/css">
 
@@ -63,7 +63,7 @@
       <!-- Begin page content -->
       <div class="container">
         <div class="page-header">
-          <h1>FeedCraft
+          <h1>FeedCraft &alpha;
             {% if user.is_authenticated %}
             <small>Welcome {{ user.username }}</small>
             {% endif %}

@@ -1,5 +1,6 @@
 settings.py
 collect_static
+celerybeat-schedule
 
 *.py[cod]
 
