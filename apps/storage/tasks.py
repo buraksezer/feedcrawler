@@ -1,9 +1,37 @@
 # -*- coding: utf-8 -*-
+import os
+import logging
 from time import mktime
 from datetime import datetime
 from feedparser import parse
 from celery.task import Task
 from apps.storage.models import Feed, Entry, EntryTag
+
+logfile = "feedcraft-sync.log"
+
+
+def initialize_logging():
+    # Early form of logging facility
+
+    # Create logfile if it does not exist
+    # FIXME-1: Can I use with statement in bellow case?
+    # FIXME-2: We must use a more proper way to serve constant values
+    if not os.access(logfile, os.F_OK):
+        f = open(logfile, 'w')
+        f.close()
+
+    # initialize
+    if os.access(logfile, os.W_OK):
+        logger = logging.getLogger("feedcraft-sync")
+        hdlr = logging.FileHandler(logfile)
+        formatter = logging.Formatter('%(created)f %(asctime)s %(levelname)s %(message)s')
+        hdlr.setFormatter(formatter)
+        logger.addHandler(hdlr)
+        logger.setLevel(logging.INFO)
+        return logger
+    else:
+        print("ERROR: I could not open {feedcraft-sync.log} file with write permissions. Please check this!")
+        raise SystemExit(0)
 
 
 def run_sync(feed_objects):
@@ -15,7 +43,7 @@ def run_sync(feed_objects):
             print(">> "+feed_object.feed_url+": this doesn't seem a valid feed url!")
             continue
 
-        print(">> Checking new feeds for "+feed_object.feed_url)
+        log.info(">> Checking new feeds for "+feed_object.feed_url)
 
         if hasattr(data_bundle.feed, "language"):
             feed_object.language = data_bundle.feed.language
@@ -31,9 +59,11 @@ def run_sync(feed_objects):
         feed_object.save()
 
         for entry in data_bundle.entries:
-            if not Entry.objects.filter(entry_id=entry.id):
+            entry_id = entry.id if hasattr(entry, "id") else entry.link
+            if not Entry.objects.filter(entry_id=entry_id):
                 entry_item = Entry(title=entry.title, feed=feed_object)
-                entry_item.entry_id = entry.id
+                # FIXME: What if entry object has not link variable?
+                entry_item.entry_id = entry.id if hasattr(entry, "id") else entry.link
                 if hasattr(entry, "content"):
                     entry_item.content = entry.content[0].value
                     if hasattr(entry.content[0], "language") and entry.content[0].language is not None:
@@ -55,7 +85,7 @@ def run_sync(feed_objects):
                     entry_item.license = entry.license
                 entry_item.link = entry.link
                 # TODO: Logging needed
-                print("===> New entry %s" % entry.title)
+                log.info("===> New entry %s" % entry.title)
                 entry_item.save()
 
                 if hasattr(entry, "tags"):
@@ -83,5 +113,8 @@ class FirstSync(Task):
     def run(self, **kwargs):
         feed_objects = Feed.objects.filter(last_sync=None)
         if feed_objects:
-            print("Running first-sync for some items")
+            log.info("Running first-sync for some items")
             run_sync(feed_objects)
+
+# Start logging
+log = initialize_logging()
