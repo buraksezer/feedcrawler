@@ -1,6 +1,5 @@
 # Create your views here.
 
-from django.utils import simplejson as json
 from django.contrib import messages
 from django.http import HttpResponse #, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404, redirect
