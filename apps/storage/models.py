@@ -24,6 +24,10 @@ class Feed(models.Model):
     def __unicode__(self):
         return self.feed_url
 
+#class Channel(models.Model):
+#    name = models.CharField(max_length=256)
+#    feed = models.ManyToManyField(Feed)
+
 
 class FeedTag(models.Model):
     tag = models.CharField(unique=True, max_length=512)
@@ -93,3 +97,13 @@ class Comment(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     entry = models.OneToOneField(Entry)
     user = models.OneToOneField(User)
+
+
+class EntryLike(models.Model):
+    entry = models.OneToOneField(Entry)
+    user = models.ManyToManyField(User)
+
+
+class EntryDislike(models.Model):
+    entry = models.OneToOneField(Entry)
+    user = models.ManyToManyField(User)

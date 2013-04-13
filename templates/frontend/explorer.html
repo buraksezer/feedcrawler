@@ -20,17 +20,20 @@ body{   padding-top: 41px;max-height:100%; overflow:hidden;}
                 <a class="brand" href="{% url "home" %}"><i>Feed<strong>Craft</strong><small> &alpha;</small></i></a>
                 <div id="navigator" class="btn-toolbar">
                     <div class="btn-group">
+                        <a href="#" class="btn entry-dislike" data-value="-1"><i class="icon-thumbs-down"></i></a>
                         <a class="btn" id="nav-previous" data-placement="bottom" data-toggle="tooltip"
                             data-original-title="{{ previous.title }}" href="{{ previous.link }}"><i class="icon-arrow-left"></i></a>
                         <a class="btn" id="nav-next" data-placement="bottom" data-original-title="{{ next.title }}"
                             href="{{ next.link }}"><i class="icon-arrow-right"></i></a>
+                        <a href="#" class="btn entry-like" data-value="1"><i class="icon-thumbs-up"></i></a>
+
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div data-link="{{ entry.link }}" data-entry-id="{{ entry.id }}" data-feed-id="{{ entry.feed.id }}" class="container">
+    <div id="feedcraft-container" data-link="{{ entry.link }}" data-entry-id="{{ entry.id }}" data-feed-id="{{ entry.feed.id }}" class="container">
         <div id="explorer" class="map" >
             <iframe id="frame" frameborder="0" marginheight="0" marginwidth="0" src="{{ entry.link }}">Göster amcalara pipini </a></small></iframe>
         </div>

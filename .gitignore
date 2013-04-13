@@ -1,7 +1,7 @@
 settings.py
 collect_static
 celerybeat-schedule
-
+*.log
 *.py[cod]
 
 # C extensions

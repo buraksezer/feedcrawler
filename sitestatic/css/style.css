@@ -47,7 +47,7 @@ a.brand:hover {
 }
 #navigator {
     left: 50%;
-    margin-left: -30px;
+    margin-left: -90px;
     position: absolute;
     width: 160px;
     z-index: 149;
@@ -83,4 +83,10 @@ div.feed-item p {
 
 div.feed-item p:hover {
     cursor: pointer;
+}
+
+/* like related styles */
+
+.like-voted {
+    background-color: #333333;
 }
