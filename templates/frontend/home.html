@@ -77,7 +77,12 @@
             <div id="fc-csrf">{% csrf_token %}</div>
             {% for feed, entries in data.items %}
                 <div class="feed-item">
-                    <p>{{ feed.title }}</p>
+                    <!-- What if Feed title is None -->
+                    {% if feed.title %}
+                        <p>{{ feed.title }}</p>
+                    {% else %}
+                        <p>{{ feed.feed_url }}</p>
+                    {% endif %}
                     <ul class="entry-list well">
                         {% for entry in entries %}
                             <li><a class="entry-item" href="/explorer/{{ feed.id }}/{{ entry.slug }}" data-id="{{ feed.id }}">{{ entry.title }}</a></li>
