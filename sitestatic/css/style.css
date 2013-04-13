@@ -90,3 +90,12 @@ div.feed-item p:hover {
 .like-voted {
     background-color: #333333;
 }
+
+/* entry-list modal */
+
+#entry-list-modal a.entry {
+    border-bottom-color: #EEEEEE;
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+    margin-bottom: 7px;
+}

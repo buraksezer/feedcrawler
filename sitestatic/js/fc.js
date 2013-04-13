@@ -53,6 +53,14 @@ $(document).ready(function() {
         common_vote("dislike");
     });
 
+    $("#entry-list").click(function(evt) {
+        evt.preventDefault();
+        $.post("/entrylist/", {csrfmiddlewaretoken: $("#fc-csrf input").val(),
+            feed_id: $("#feedcraft-container").data("feed-id")}, function(result) {
+                $("#feedcraft-container").append(result);
+                $('#entry-list-modal').modal();
+        });
+    });
     $('#nav-next').tooltip();
     $('#nav-previous').tooltip();
     get_votes();

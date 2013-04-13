@@ -1,5 +1,6 @@
 # Create your views here.
 
+from django.utils import simplejson as json
 from django.contrib import messages
 from django.http import HttpResponse #, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404, redirect
@@ -137,3 +138,18 @@ def vote(request):
             return HttpResponse(0)
     else:
         return HttpResponse("You must be logged in for using this.")
+
+
+def entry_list(request):
+    '''Returns a json data object for representing entry list for current feed item'''
+    if request.user.is_authenticated():
+        if request.method == "POST":
+            entries = Entry.objects.filter(feed=request.POST["feed_id"])
+            if not entries:
+                return HttpResponse("No entry found for %s" % request.POST["feed_id"])
+            result = []
+            for index, entry in enumerate(entries, 1):
+                result.append({"id": entry.id, "title": entry.title, "slug": entry.slug})
+            return render_to_response('frontend/entry_list.html', {"title": entries[0].feed.title, "feed_id": request.POST["feed_id"], \
+                    "entries": result}, context_instance=RequestContext(request))
+            #return HttpResponse(json.dumps(result), content_type="application/json")

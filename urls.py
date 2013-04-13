@@ -11,6 +11,7 @@ urlpatterns = patterns('',
     url(r'^explorer/(?P<feed_id>[^\.]+)/(?P<slug>[^\.]+)', 'apps.frontend.views.explorer', name='explorer'),
     url(r'^subscribe/', 'apps.frontend.views.subscribe', name='subscribe'),
     url(r'^vote/', 'apps.frontend.views.vote', name='vote'),
+    url(r'^entrylist/', 'apps.frontend.views.entry_list', name='entrylist'),
 
     # Examples:
     # url(r'^$', 'FeedCraft.views.home', name='home'),
