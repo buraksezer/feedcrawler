@@ -1,65 +1,85 @@
-# Create your views here.
-
-from django.contrib import messages
-from django.http import HttpResponse #, HttpResponseRedirect
-from django.shortcuts import render_to_response, get_object_or_404, redirect
-from django.contrib.auth import authenticate, login
+import json
+from collections import OrderedDict
+from django.http import HttpResponse
+from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.contrib.auth.models import User
-
-
-from apps.frontend.forms import AuthenticationForm, SubscribeForm
-
+from apps.frontend.forms import SubscribeForm
 from apps.storage.models import Feed, FeedTag, Entry, EntryLike, EntryDislike
+
+# For doing realtime stuff
+from announce import AnnounceClient
+announce_client = AnnounceClient()
 
 
 def home(request):
-    data = {}
+    data = OrderedDict()
     for item in Feed.objects.filter(users=request.user.id):
         data[item] = Entry.objects.filter(feed=item.id)
     return render_to_response('frontend/home.html', {"data": data}, context_instance=RequestContext(request))
 
 
-def explorer(request, feed_id, slug):
+def wrapper(request):
+    if request.method != "POST":
+        return HttpResponse("You must send a POST request.")
     if not request.user.is_authenticated():
         return HttpResponse("You must be login for using this.")
-    entry = Entry.objects.filter(feed=feed_id, slug=slug)[0]
+
+    request.session["feed_id"] = request.POST["feed_id"]
+    request.session["entry_id"] = request.POST["entry_id"]
+    return HttpResponse(1)
+
+
+def get_user_feeds(request):
+    if not request.user.is_authenticated():
+        return HttpResponse("You must be login for using this.")
+    return render_to_response('frontend/get_user_feeds.html', {"current_feed_id": int(request.POST["current_feed_id"]),
+        "feeds": Feed.objects.filter(users=request.user.id).order_by("id")},
+        context_instance=RequestContext(request))
+
+
+def get_feed_entries(request):
+    if request.method != "POST":
+        return HttpResponse("You must send a POST request.")
+    if not request.user.is_authenticated():
+        return HttpResponse("You must be login for using this.")
+    data = OrderedDict()
+    for entry in Entry.objects.filter(feed=request.POST["feed_id"]):
+        if not entry.published_at in data:
+            data[entry.published_at] = [entry]
+        else:
+            data[entry.published_at].append(entry)
+    return render_to_response('frontend/get_feed_entries.html', {"current_entry_id": int(request.POST["current_entry_id"]),
+        "feed_id":request.POST["feed_id"],
+        "data": data}, context_instance=RequestContext(request))
+
+
+def get_previous_and_next_items(request):
+    feed_id = request.session["feed_id"]
+    entry_id = request.session["entry_id"]
     # The next entry
-    next_items = Entry.objects.filter(feed=feed_id, id__gt=entry.id)
-    next = {} if not next_items else {"link": "/explorer/"+feed_id+"/"+next_items[len(next_items)-1].slug, \
-        "title": next_items[len(next_items)-1].title}
-
+    next_items = Entry.objects.filter(feed=feed_id, id__gt=entry_id)
+    next = {}
+    if next_items and len(next_items)-1 >= 0:
+        next = {"feed_id": feed_id, "link": next_items[len(next_items)-1].link,
+        "id": next_items[len(next_items)-1].id, "title": next_items[len(next_items)-1].title}
     # The previous item
-    previous_items = Entry.objects.filter(feed=feed_id, id__lt=entry.id)
-    previous = {} if len(previous_items) == 0 else {"link": "/explorer/"+feed_id+"/"+previous_items[0].slug, \
+    previous_items = Entry.objects.filter(feed=feed_id, id__lt=entry_id)
+    previous = {} if not previous_items else {"feed_id": feed_id, "link": previous_items[0].link, "id": previous_items[0].id,
         "title": previous_items[0].title}
+    return HttpResponse(json.dumps({"next": next, "previous": previous}), content_type='application/json')
 
+
+def explorer(request):
+    if not request.user.is_authenticated():
+        return HttpResponse("You must be login for using this.")
+    if request.method != "GET":
+        return HttpResponse("You must send a GET request.")
+
+    entry_id = request.session["entry_id"]
     return render_to_response('frontend/explorer.html', {
-        'entry': get_object_or_404(Entry, slug=slug),
-        'previous': previous,
-        'next': next
+        'entry': get_object_or_404(Entry, id=entry_id),
     }, context_instance=RequestContext(request))
-
-
-def auth(request):
-    if request.method == "POST":
-        form = AuthenticationForm(request.POST)
-        if form.is_valid():
-            user = authenticate(username=form.cleaned_data["username"], password=form.cleaned_data["password"])
-            if user is not None:
-                if user.is_active:
-                    login(request, user)
-                    # Redirect to a success page.
-                    return redirect("home")
-                else:
-                    return HttpResponse("disabled account")
-                # Return a 'disabled account' error message
-            else:
-                return HttpResponse("invalid login")
-            # Return an 'invalid login' error message.
-    else:
-        form = AuthenticationForm()
-        return render_to_response('frontend/auth.html', {"form": form}, context_instance=RequestContext(request))
 
 
 def subscribe(request):
@@ -88,8 +108,7 @@ def subscribe(request):
                     if tags:
                         add_tags()
                 else:
-                    messages.add_message(request, messages.INFO, 'You have already subscribed this feed.')
-                return redirect("home")
+                    return HttpResponse(json.dumps({"code": 1, "text": "You have already subscribed this feed."}), content_type='application/json')
             except Feed.DoesNotExist:
                 new_feed = Feed(feed_url=url)
                 new_feed.save()
@@ -98,11 +117,10 @@ def subscribe(request):
                 feed_obj.save()
                 if tags:
                     add_tags()
-                messages.add_message(request, messages.INFO, 'New feed source has been added successfully.')
-                return redirect("home")
-            return HttpResponse(tags)
+                announce_client.register_group(request.user.id, feed_obj.id)
+                return HttpResponse(json.dumps({"code": 1, "text": 'New feed source has been added successfully.'}), content_type='application/json')
         else:
-            return HttpResponse("corrupted form")
+            return HttpResponse(json.dumps({"code": 0, "text": "Broken form"}), content_type='application/json')
     else:
         form = SubscribeForm()
         return render_to_response('frontend/subscribe.html', {"form": form}, context_instance=RequestContext(request))
@@ -137,18 +155,3 @@ def vote(request):
             return HttpResponse(0)
     else:
         return HttpResponse("You must be logged in for using this.")
-
-
-def entry_list(request):
-    '''Returns a json data object for representing entry list for current feed item'''
-    if request.user.is_authenticated():
-        if request.method == "POST":
-            entries = Entry.objects.filter(feed=request.POST["feed_id"])
-            if not entries:
-                return HttpResponse("No entry found for %s" % request.POST["feed_id"])
-            result = []
-            for index, entry in enumerate(entries, 1):
-                result.append({"id": entry.id, "title": entry.title, "slug": entry.slug})
-            return render_to_response('frontend/entry_list.html', {"title": entries[0].feed.title, "feed_id": request.POST["feed_id"], \
-                    "entries": result}, context_instance=RequestContext(request))
-            #return HttpResponse(json.dumps(result), content_type="application/json")

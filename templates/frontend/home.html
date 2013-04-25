@@ -1,104 +1,55 @@
 {% extends "feedcraft_base.html" %}
-{% block custom_css %}
-    <style type="text/css">
-
-      /* Sticky footer styles
-      -------------------------------------------------- */
-
-      html,
-      body {
-        height: 100%;
-        /* The html and body elements cannot have any padding or margin. */
-      }
-
-      /* Wrapper for page content to push down footer */
-      #wrap {
-        min-height: 100%;
-        height: auto !important;
-        height: 100%;
-        /* Negative indent footer by it's height */
-        margin: 0 auto -60px;
-      }
-
-      /* Set the fixed height of the footer here */
-      #push,
-      #footer {
-        height: 60px;
-      }
-      #footer {
-        background-color: #f5f5f5;
-      }
-
-      /* Lastly, apply responsive CSS fixes as necessary */
-      @media (max-width: 767px) {
-        #footer {
-          margin-left: -20px;
-          margin-right: -20px;
-          padding-left: 20px;
-          padding-right: 20px;
-        }
-      }
-
-
-
-      /* Custom page CSS
-      -------------------------------------------------- */
-      /* Not required for template or sticky footer method. */
-
-      .container {
-        width: auto;
-        max-width: 680px;
-      }
-      .container .credit {
-        margin: 20px 0;
-      }
-
-    </style>
-{% endblock %}
-
 {% block container %}
-    <!-- Part 1: Wrap all page content here -->
-    <div id="wrap">
-
-      <!-- Begin page content -->
-      <div class="container">
-        <div class="page-header">
-          <h1>FeedCraft &alpha;
+<div id="fc-csrf">{% csrf_token %}</div>
+<div class="navbar navbar-fixed-top">
+  <div class="navbar-inner">
+    <div class="container-fluid">
+      <a class="brand" href="{% url "home" %}"><i>Feed<strong>Craft</strong><small> &alpha;</small></i></a>
+      <div class="nav-collapse">
+        <ul class="nav pull-right">
             {% if user.is_authenticated %}
-            <small>Welcome {{ user.username }}</small>
+            <li><a href="#subscribe-modal" data-toggle="modal">Subscribe</a></li>
+            <li class="divider-vertical"></li>
+            <li class="dropdown">
+                <a href="#" data-toggle="dropdown" role="button" id="drop4" class="dropdown-toggle">{{ user.username }} <b class="caret"></b></a>
+                <ul aria-labelledby="drop4" role="menu" class="dropdown-menu" id="menu1">
+                    <li role="presentation"><a href="#" tabindex="-1" role="menuitem">Profile</a></li>
+                    <li role="presentation"><a href="/accounts/signout" tabindex="-1" role="menuitem">Sign Out</a></li>
+                    <!--<li class="divider" role="presentation"></li>-->
+                </ul>
+            </li>
+            {% else %}
+            <li><a href="/accounts/signin">Sign in</a></li>
             {% endif %}
-          </h1>
-        </div>
-        <p class="lead">A new way for reading feed and following trendy topics on the Internet</p>
-        {% if not user.is_authenticated %}
-            <p>Please <a href="{% url "auth" %}" >login</a> to start using</a>
-        {% else %}
-            <a href="{% url "subscribe" %}">Subscribe</a>
-            <div id="fc-csrf">{% csrf_token %}</div>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+    {% if user.is_authenticated %}
+    <div class="main">
+        <div class="temporary-home">
             {% for feed, entries in data.items %}
-                <div class="feed-item">
-                    <!-- What if Feed title is None -->
-                    {% if feed.title %}
-                        <p>{{ feed.title }}</p>
-                    {% else %}
-                        <p>{{ feed.feed_url }}</p>
-                    {% endif %}
-                    <ul class="entry-list well">
-                        {% for entry in entries %}
-                            <li><a class="entry-item" href="/explorer/{{ feed.id }}/{{ entry.slug }}" data-id="{{ feed.id }}">{{ entry.title }}</a></li>
-                        {% endfor %}
-                    </ul>
-                </div>
+            <div class="feed" data-feed-id="{{ feed.id }}">
+                {% if feed.title %}
+                <p><img src="/static/img/rss.png"></img> {{ feed.title }} <span class="badge badge-important">{{ entries|length }}</span></p>
+                {% else %}
+                <p><img src="/static/img/rss.png"></img> {{ feed.feed_url }} <span class="badge badge-important">{{ entries|length }}</span></p>
+                {% endif %}
+                <ul class="entries well">
+                    {% for entry in entries %}
+                    <li><a class="entry-item" href="#" data-id="{{ entry.id }}">{{ entry.title }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
             {% endfor %}
-        {% endif %}
-      </div>
-
-      <div id="push"></div>
+        </div>
     </div>
-
-    <div id="footer">
-      <div class="container">
-        <p class="muted credit">FeedCraft Developers &copy; 2013</p>
-      </div>
-    </div>
+    {% else %}
+    <h1 style="text-align: center; margin-top: 300px">Welcome to FeedCraft <i>&alpha;</i></h1>
+    <p style="text-align: center;">Please <a href="/accounts/signin">sign in</a> to use</p>
+{% endif %}
+</div>
 {% endblock %}

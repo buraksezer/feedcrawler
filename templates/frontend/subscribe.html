@@ -1,55 +1,32 @@
-{% extends "feedcraft_base.html" %}
-{% block custom_css %}
-
-    <style type="text/css">
-      body {
-        padding-top: 40px;
-        padding-bottom: 40px;
-        background-color: #f5f5f5;
-      }
-
-      .form-subscribe {
-        max-width: 300px;
-        padding: 19px 29px 29px;
-        margin: 0 auto 20px;
-        background-color: #fff;
-        border: 1px solid #e5e5e5;
-        -webkit-border-radius: 5px;
-           -moz-border-radius: 5px;
-                border-radius: 5px;
-        -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.05);
-           -moz-box-shadow: 0 1px 2px rgba(0,0,0,.05);
-                box-shadow: 0 1px 2px rgba(0,0,0,.05);
-      }
-      .form-subscribe .form-subscribe-heading,
-      .form-subscribe .checkbox {
-        margin-bottom: 10px;
-      }
-      .form-subscribe input[type="text"],
-      .form-subscribe input[type="password"] {
-        font-size: 16px;
-        height: auto;
-        margin-bottom: 15px;
-        padding: 7px 9px;
-      }
-
-    </style>
-{% endblock %}
-
 {% block container %}
 {% if user.is_authenticated %}
-    <div class="container">
-
-      <form class="form-subscribe" action="{% url "subscribe" %}" method="POST">{% csrf_token %}
-        <h2 class="form-subscribe-heading">Sabs form</h2>
-        {{ form }}
-        <!--
-        <input type="text" class="input-block-level" placeholder="Email address">
-        <input type="password" class="input-block-level" placeholder="Password">-->
-        <button class="btn btn-large btn-primary" type="submit">Subscribe</button>
-      </form>
-
-    </div> <!-- /container -->
+<!-- Modal -->
+<div id="subscribe-modal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="subscribeModalLabel" aria-hidden="true">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="subscribeModalLabel">Subscribe a new feed</h3>
+    </div>
+    <div class="modal-body">
+        <ul class="nav nav-stacked">
+            <form class="form-subscribe" action="{% url "subscribe" %}" method="POST">{% csrf_token %}
+                {{ form.non_field_errors }}
+                <div class="fieldWrapper">
+                    {{ form.subject.errors }}
+                    <label for="id_feed_url">Website or RSS:</label>
+                    {{ form.feed_url }}
+                </div>
+                <div class="fieldWrapper">
+                    {{ form.subject.errors }}
+                    <label for="id_tags">Select Tags:</label>
+                    {{ form.tags }}
+                </div>
+                <button class="btn btn-big btn-primary" type="submit">Add this site</button>
+                <span class="warning"></span>
+                <img class="loading-gif" src='/static/img/ajax-loader.gif'></img>
+            </form>
+        </ul>
+    </div>
+</div>
 {% else %}
     <p>nyan-cat.gif</p>
 {% endif %}

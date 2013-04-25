@@ -7,8 +7,10 @@ from feedparser import parse
 from celery.task import Task
 from apps.storage.models import Feed, Entry, EntryTag
 
-logfile = "feedcraft-sync.log"
+from announce import AnnounceClient
+announce_client = AnnounceClient()
 
+logfile = "feedcraft-sync.log"
 
 def initialize_logging():
     # Early form of logging facility
@@ -58,6 +60,8 @@ def run_sync(feed_objects):
         feed_object.last_sync = datetime.now()
         feed_object.save()
 
+        data_bundle.entries.reverse()
+
         for entry in data_bundle.entries:
             entry_id = entry.id if hasattr(entry, "id") else entry.link
             if not Entry.objects.filter(entry_id=entry_id):
@@ -86,6 +90,7 @@ def run_sync(feed_objects):
                 entry_item.link = entry.link
                 # TODO: Logging needed
                 log.info("===> New entry %s" % entry.title)
+                announce_client.broadcast_group(feed_object.id, 'notifications', data={'msg': "===> New entry %s" % entry.title})
                 entry_item.save()
 
                 if hasattr(entry, "tags"):

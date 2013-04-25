@@ -7,15 +7,13 @@ admin.autodiscover()
 urlpatterns = patterns('',
     url(r'^$', 'apps.frontend.views.home', name='home'),
     url(r'^accounts/', include('userena.urls')),
-    url(r'^auth/', 'apps.frontend.views.auth', name='auth'),
-    url(r'^explorer/(?P<feed_id>[^\.]+)/(?P<slug>[^\.]+)', 'apps.frontend.views.explorer', name='explorer'),
+    url(r'^explorer/', 'apps.frontend.views.explorer', name='explorer'),
     url(r'^subscribe/', 'apps.frontend.views.subscribe', name='subscribe'),
     url(r'^vote/', 'apps.frontend.views.vote', name='vote'),
-    url(r'^entrylist/', 'apps.frontend.views.entry_list', name='entrylist'),
-
-    # Examples:
-    # url(r'^$', 'FeedCraft.views.home', name='home'),
-    # url(r'^FeedCraft/', include('FeedCraft.foo.urls')),
+    url(r'^getuserfeeds/', 'apps.frontend.views.get_user_feeds', name='getuserfeeds'),
+    url(r'^getfeedentries/', 'apps.frontend.views.get_feed_entries', name='getfeed'),
+    url(r'^wrapper/', 'apps.frontend.views.wrapper', name='wrapper'),
+    url(r'^get_previous_next/', 'apps.frontend.views.get_previous_and_next_items', name='get_previous_next'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

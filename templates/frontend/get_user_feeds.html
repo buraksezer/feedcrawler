@@ -1,0 +1,20 @@
+<div id="feed-source-list" class="column span3">
+    <div class="padding">
+        {% for feed in feeds %}
+        {% if feed.id == current_feed_id %}
+        <div class="feed-item active" data-feed-id="{{ feed.id }}">
+        {% else %}
+        <div class="feed-item" data-feed-id="{{ feed.id }}">
+        {% endif %}
+            {% if feed.title %}
+            <p><img src="/static/img/rss.png"></img> {{ feed.title }} <span class="badge badge-important">{{ entries|length }}</span></p>
+            {% else %}
+            <p><img src="/static/img/rss.png"></img> {{ feed.feed_url }} <span class="badge badge-important">{{ entries|length }}</span></p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+<div id="feed-entry-list" class="column span3">
+    <div class="entry-padding"></div>
+</div>
