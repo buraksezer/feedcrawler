@@ -35,13 +35,8 @@
     <link rel="shortcut icon" href="/ico/favicon.png">
 </head>
 
-<body>
+<body id="{% block layout_id %}{% endblock %}">
     {% block container %}{% endblock %}
-    <div class="footer">
-        <div class="content">
-            <p class="muted credit"><i>FeedCraft Developers &copy; 2013</i></p>
-        </div>
-    </div>
 </body>
 
 </html>

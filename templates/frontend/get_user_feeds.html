@@ -7,10 +7,11 @@
         <div class="feed-item" data-feed-id="{{ feed.id }}">
         {% endif %}
             {% if feed.title %}
-            <p><img src="/static/img/rss.png"></img> {{ feed.title }} <span class="badge badge-important">{{ entries|length }}</span></p>
+            <span class="feed-title"><img src="/static/img/rss.png"></img> {{ feed.title }}</span>
             {% else %}
-            <p><img src="/static/img/rss.png"></img> {{ feed.feed_url }} <span class="badge badge-important">{{ entries|length }}</span></p>
+            <span class="feed-title"><img src="/static/img/rss.png"></img> {{ feed.feed_url }}</span>
             {% endif %}
+            <span class="badge badge-info">{{ entries|length }}</span>
         </div>
         {% endfor %}
     </div>

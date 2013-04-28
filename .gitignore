@@ -1,3 +1,4 @@
+node
 settings.py
 collect_static
 celerybeat-schedule

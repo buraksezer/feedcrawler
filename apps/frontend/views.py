@@ -13,10 +13,15 @@ announce_client = AnnounceClient()
 
 
 def home(request):
-    data = OrderedDict()
-    for item in Feed.objects.filter(users=request.user.id):
-        data[item] = Entry.objects.filter(feed=item.id)
-    return render_to_response('frontend/home.html', {"data": data}, context_instance=RequestContext(request))
+    entries = []
+    # FIXME: This method may have caused performance issues.
+    if request.user.is_authenticated():
+        for entry in Entry.objects.all():
+            if entry.feed.users.filter(id=request.user.id):
+                entries.append(entry)
+                if len(entries) == 15:
+                    break
+    return render_to_response('frontend/home.html', {"entries": entries}, context_instance=RequestContext(request))
 
 
 def wrapper(request):
@@ -55,6 +60,8 @@ def get_feed_entries(request):
 
 
 def get_previous_and_next_items(request):
+    # Why do we use get_next/previous_by_foo methods for doing this?
+    # Those methods are broken for our case?
     feed_id = request.session["feed_id"]
     entry_id = request.session["entry_id"]
     # The next entry

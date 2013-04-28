@@ -1,4 +1,5 @@
 {% extends "feedcraft_base.html" %}
+{% block layout_id %}dashboard-layout{% endblock %}
 {% block container %}
 <div id="fc-csrf">{% csrf_token %}</div>
 <div class="navbar navbar-fixed-top">
@@ -27,25 +28,46 @@
   </div>
 </div>
 
-<div class="container">
+<div id="dashboard" class="container">
     {% if user.is_authenticated %}
-    <div class="main">
-        <div class="temporary-home">
-            {% for feed, entries in data.items %}
-            <div class="feed" data-feed-id="{{ feed.id }}">
-                {% if feed.title %}
-                <p><img src="/static/img/rss.png"></img> {{ feed.title }} <span class="badge badge-important">{{ entries|length }}</span></p>
-                {% else %}
-                <p><img src="/static/img/rss.png"></img> {{ feed.feed_url }} <span class="badge badge-important">{{ entries|length }}</span></p>
-                {% endif %}
-                <ul class="entries well">
-                    {% for entry in entries %}
-                    <li><a class="entry-item" href="#" data-id="{{ entry.id }}">{{ entry.title }}</a></li>
-                    {% endfor %}
-                </ul>
-            </div>
-            {% endfor %}
+    <div class="row-fluid">
+        <div class="span3">
+            <p>user space</p>
         </div>
+        <div class="span6 timeline">
+            <div class="new-entry-counter" data-item-count="0"><a href="#"></a></div>
+            <div class="dashboard-entries">
+                {% if not entries %}
+                <p class="empty-timeline">Hey! There are no feed in your timeline.</p>
+                <p class="empty-timeline">You should add some feed source to start using FeedCraft.</p>
+                {% endif %}
+                {% for entry in entries %}
+                    <div class="dashboard-entry" data-feed-id="{{ entry.feed.id }}" data-entry-id="{{ entry.id }}">
+                        <a href="#" class="entry-title">{{ entry.title }}</a> on
+                        <a href="#" class="feed">{{ entry.feed.title }}</a>
+                        <div class="timeline-entry-interaction">
+                            {% if entry.entrydislike.user.count %}
+                            <span style="float:right;" class="dislike-count">{{ entry.entrydislike.user.count }} dislike</span>
+                            {% endif %}
+                            {% if entry.entrylike.user.count %}
+                            <span style="float:right;" class="like-count">{{ entry.entrylike.user.count }} likes</span>
+                            {% endif %}
+                            <!--<span class="comment-count">43 comments</span>-->
+                            <span class="like">Like</span>
+                            <span class="dislike">Dislike</span>
+                            <span class="Comment">Comment</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="span3">
+            <p>recommendation</p>
+        </div>
+
+        <!-- <div class="padding">
+            <div class="full span9"></div>
+        </div>-->
     </div>
     {% else %}
     <h1 style="text-align: center; margin-top: 300px">Welcome to FeedCraft <i>&alpha;</i></h1>

@@ -103,10 +103,9 @@ $(document).ready(function() {
         });
     });
 
-    // This is a temporary solution
-    $("ul.entries").delegate(".entry-item", "click", function(evt) {
-        var feed_id = $(this).closest("div.feed").data("feed-id");
-        var entry_id = $(this).data("id");
+    $(document).on('click', ".dashboard-entry .entry-title", function(evt) {
+        var feed_id = $(this).closest(".dashboard-entry").data("feed-id");
+        var entry_id = $(this).closest(".dashboard-entry").data("entry-id");
         var csrf = $("#fc-csrf input").val();
         $.post("/wrapper/", {feed_id: feed_id, entry_id: entry_id, csrfmiddlewaretoken: csrf}, function(result) {
             if (result == "1") {
@@ -206,7 +205,7 @@ $(document).ready(function() {
         evt.preventDefault();
         if (!$("#subscribe-modal").length) {
             $.get("/subscribe/", function(result) {
-                $(".container .main").prepend(result);
+                $(".container").prepend(result);
                 $('#subscribe-modal').modal();
             });
         }
@@ -223,6 +222,12 @@ $(document).ready(function() {
                 $("#subscribe-modal .loading-gif").css("display", "none");
             }
         });
+    });
+
+    $(document).on("click", ".new-entry-counter", function(evt) {
+        $("p.empty-timeline").remove();
+        $(".dashboard-entry:hidden").css("display", "block");
+        $(".timeline .new-entry-counter").css("display", "none");
     });
 
     get_votes();

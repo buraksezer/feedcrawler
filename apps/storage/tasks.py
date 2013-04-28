@@ -90,9 +90,13 @@ def run_sync(feed_objects):
                 entry_item.link = entry.link
                 # TODO: Logging needed
                 log.info("===> New entry %s" % entry.title)
-                announce_client.broadcast_group(feed_object.id, 'notifications', data={'msg': "===> New entry %s" % entry.title})
                 entry_item.save()
-
+                announce_client.broadcast_group(feed_object.id, 'new_entry', data={'id': entry_item.id,
+                    'feed_id': feed_object.id,
+                    'link': entry.link,
+                    'published_at': entry_item.published_at.strftime("%B %d, %y") if isinstance(entry_item.published_at, datetime) else entry_item.published_at,
+                    'feed_title': feed_object.title,
+                    'title':entry.title})
                 if hasattr(entry, "tags"):
                     for tag in entry.tags:
                         if not EntryTag.objects.filter(tag=tag.term):
