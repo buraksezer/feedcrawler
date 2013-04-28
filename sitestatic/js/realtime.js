@@ -1,4 +1,5 @@
 $(document).ready(function () {
+    $("body").data("page-title", document.title);
     // .init() will authenticate against the announce.js server, and open the WebSocket connection.
     announce.init();
 
@@ -20,7 +21,6 @@ $(document).ready(function () {
         }
 
         if ($("#dashboard .timeline").length) {
-            console.log("burda");
             // Update dashboard for new entries
             var entry = '<div style="display:none;" class="dashboard-entry" data-entry-id="'+data.id+'" data-feed-id="'+data.feed_id+'">'+
             '<a class="entry-title" href="#">'+data.title+'</a> on '+
@@ -30,7 +30,6 @@ $(document).ready(function () {
             '<span class="dislike">Dislike </span>'+
             '<span class="Comment">Comment </span>'+
             '</div></div>';
-
             var item_count = $(".timeline .new-entry-counter").data("item-count");
             $(".timeline .new-entry-counter").data("item-count", item_count + 1);
             $(".timeline .new-entry-counter a").empty();
@@ -40,6 +39,8 @@ $(document).ready(function () {
                 var msg = "1 new entry";
             }
             $(".timeline .new-entry-counter a").text(msg);
+            var title_item_count = item_count + 1;
+            document.title = $("body").data("page-title") +" ("+title_item_count+")";
             $(".timeline .new-entry-counter:hidden").css("display", "block");
             $("#dashboard .timeline .dashboard-entries").prepend(entry);
         }

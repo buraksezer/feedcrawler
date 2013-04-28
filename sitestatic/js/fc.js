@@ -225,9 +225,11 @@ $(document).ready(function() {
     });
 
     $(document).on("click", ".new-entry-counter", function(evt) {
+        $(".timeline .new-entry-counter").data("item-count", 0);
         $("p.empty-timeline").remove();
         $(".dashboard-entry:hidden").css("display", "block");
         $(".timeline .new-entry-counter").css("display", "none");
+        document.title = $("body").data("page-title");
     });
 
     get_votes();
