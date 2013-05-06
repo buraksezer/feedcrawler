@@ -1,13 +1,35 @@
+(function(window,undefined){
+
+    // Prepare
+    var History = window.History; // Note: We are using a capital H instead of a lower h
+    if ( !History.enabled ) {
+         // History.js is disabled for this browser.
+         // This is because we can optionally choose to support HTML4 browsers or not.
+        return false;
+    }
+
+    // Bind to StateChange Event
+    History.Adapter.bind(window, 'statechange', function(){ // Note: We are using statechange instead of popstate
+        var State = History.getState(); // Note: We are using History.getState() instead of event.state
+        History.log(State.data, State.title, State.url);
+    });
+
+})(window);
+
+
 $(document).ready(function() {
     function get_previous_next_items() {
+        var entry_id = $("#iframe-container").data("entry-id");
+        var feed_id = $("#iframe-container").data("feed-id");
         if (!$("#iframe-container").length) return;
-        $.get("/get_previous_next/", function(result) {
+        $.get("/get_previous_next/"+feed_id+"/"+entry_id, function(result) {
             if (!jQuery.isEmptyObject(result.next)) {
                 $("#nav-next").removeAttr("disabled");
                 $("#nav-next").data("feed-id", result.next.feed_id);
                 $("#nav-next").data("title", "FeedCraft | "+result.next.title);
                 $("#nav-next").data("entry-id", result.next.id);
                 $("#nav-next").data("link", result.next.link);
+                $("#nav-next").attr("href", "/explorer/"+result.next.id);
             } else {
                 $("#nav-next").attr("disabled", "disabled");
             }
@@ -18,6 +40,7 @@ $(document).ready(function() {
                 $("#nav-previous").data("entry-id", result.previous.id);
                 $("#nav-previous").data("title", "FeedCraft | "+result.previous.title);
                 $("#nav-previous").data("feed-id", result.previous.feed_id);
+                $("#nav-previous").attr("href", "/explorer/"+result.previous.id);
             } else {
                 $("#nav-previous").attr("disabled", "disabled");
             }
@@ -63,6 +86,20 @@ $(document).ready(function() {
         }
     }
 
+    function check_subscription() {
+        if (!$(".check-subscription").length) return;
+        $.each($(".check-subscription"), function(idx, value) {
+            $.post("/check_subscribe/", {username: $(value).data("username"),
+                csrfmiddlewaretoken: $("#fc-csrf input").val()}, function(result) {
+                if (result == 1) {
+                    $(".subscribe-user-icon").css("display", "none");
+                    $(".unsubscribe-button").css("display", "block");
+                }
+            });
+        });
+    }
+
+
     $("div.feed").delegate("p", "click", function(evt) {
         var feed_item = $(this).closest(".feed").find("ul.entries")
 
@@ -74,48 +111,32 @@ $(document).ready(function() {
     });
 
     $(document).on("click", "a.trigger-wrapper,#nav-previous,#nav-next", function(evt) {
+        evt.preventDefault();
         var feed_id = $(this).data("feed-id");
         var entry_id = $(this).data("entry-id");
-        var csrf = $("#fc-csrf input").val();
         var link = $(this).data("link");
         var title = $(this).data("title");
         var my_entry_item = $(this);
-        $.post("/wrapper/", {feed_id: feed_id, entry_id: entry_id, csrfmiddlewaretoken: csrf}, function(result) {
-            if (result == "1") {
-                $("#frame").attr("src", link);
-                document.title = title;
-                $("#iframe-container").data("feed-id", feed_id);
-                $("#iframe-container").data("entry-id", entry_id);
-                $("#iframe-container").data("link", link);
-                $.each($("#feed-entry-list .trigger-wrapper"), function(idx, item) {
-                    if ($(item).hasClass("current-entry")) {
-                        $(item).removeClass("current-entry");
-                    }
-                    if ($(item).data("entry-id") == entry_id) {
-                        $(item).addClass("current-entry");
-                    }
-                });
-                $(my_entry_item).addClass("current-entry");
-                get_votes();
-                get_previous_next_items();
+        History.pushState({id:entry_id}, title, "/explorer/"+entry_id);
+        $("#frame").attr("src", link);
+        $("#iframe-container").data("feed-id", feed_id);
+        $("#iframe-container").data("entry-id", entry_id);
+        $("#iframe-container").data("link", link);
+        $.each($("#feed-entry-list .trigger-wrapper"), function(idx, item) {
+            if ($(item).hasClass("current-entry")) {
+                $(item).removeClass("current-entry");
             }
-            /* catch error cases */
+            if ($(item).data("entry-id") == entry_id) {
+                $(item).addClass("current-entry");
+            }
         });
+        $(my_entry_item).addClass("current-entry");
+        get_votes();
+        get_previous_next_items();
     });
 
-    $(document).on('click', ".dashboard-entry .entry-title", function(evt) {
-        var feed_id = $(this).closest(".dashboard-entry").data("feed-id");
-        var entry_id = $(this).closest(".dashboard-entry").data("entry-id");
-        var csrf = $("#fc-csrf input").val();
-        $.post("/wrapper/", {feed_id: feed_id, entry_id: entry_id, csrfmiddlewaretoken: csrf}, function(result) {
-            if (result == "1") {
-                window.location.href = "/explorer/";
-            }
-            /* catch error cases */
-        });
-    });
-
-    $(document).on('click', "div.feed-item", function(evt) {
+    $(document).on('click', "#feed-source-list div.feed-item", function(evt) {
+        evt.preventDefault();
         var feed_id = $(this).data("feed-id");
         var my_feed_item = $(this);
         var current_entry_id = $("#iframe-container").data("entry-id");
@@ -183,6 +204,27 @@ $(document).ready(function() {
         }
     });
 
+    $(document).on('click', ".right-bar div.feed-item", function(evt) {
+        var feed_id = $(this).data("feed-id");
+        var my_feed_item = $(this);
+        $.post("/get_entries_by_feed_id/", {feed_id: feed_id, csrfmiddlewaretoken: $("#fc-csrf input").val()},
+            function(result) {
+                $("#dashboard .timeline").empty();
+                $("#dashboard .timeline").append(result);
+            }
+        );
+    });
+
+    $(document).on('click', ".right-bar .feed-stream", function(evt) {
+        var my_feed_item = $(this);
+        $.post("/render_timeline_standalone/", {csrfmiddlewaretoken: $("#fc-csrf input").val()},
+            function(result) {
+                $("#dashboard .timeline").empty();
+                $("#dashboard .timeline").append(result);
+            }
+        );
+    });
+
     $("a[href=#share-modal]").click(function(evt) {
         var link = $("#iframe-container").data("link");
         $("#share-modal div.modal-body input.link").val(link);
@@ -232,6 +274,38 @@ $(document).ready(function() {
         document.title = $("body").data("page-title");
     });
 
+    $(".subscribe-user-icon").click(function(evt) {
+        evt.preventDefault();
+        $.post("/subscribe_user/", {username: $(this).data("username"), csrfmiddlewaretoken: $("#fc-csrf input").val()},
+            function(result) {
+                // FIXME: Processing gif is required.
+                if (result == 1) {
+                    $(".subscribe-user-icon").css("display", "none");
+                    $(".unsubscribe-button").css("display", "block");
+                } else {
+                    // FIXME: Warning area is required.
+                    console.log("hatalar oldu");
+                }
+            }
+        );
+    });
+
+    $(".unsubscribe-button").click(function(evt) {
+        evt.preventDefault();
+        $.post("/unsubscribe_user/", {username: $(this).data("username"), csrfmiddlewaretoken: $("#fc-csrf input").val()},
+            // FIXME: Processing gif is required.
+            function(result) {
+                if (result == 1) {
+                    $(".subscribe-user-icon").css("display", "block");
+                    $(".unsubscribe-button").css("display", "none");
+                }
+            }
+        );
+    });
+
+    check_subscription();
     get_votes();
     get_previous_next_items();
+    // Initialize tooltips
+    $(".subscribe-user-icon").tooltip();
 });

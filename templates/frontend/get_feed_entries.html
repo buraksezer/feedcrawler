@@ -4,9 +4,9 @@
         {% for entry in entries %}
             <div class="entry">
                 {% if entry.id == current_entry_id %}
-                    <a href="#" data-title="FeedCraft | {{ entry.title|safe }}" data-feed-id="{{ feed_id }}" data-entry-id="{{ entry.id }}" data-link="{{ entry.link }}" class="title trigger-wrapper current-entry">{{ entry|safe }}</a>
+                    <a href="/exporer/{{ entry.id }}" data-title="FeedCraft | {{ entry.title|safe }}" data-feed-id="{{ feed_id }}" data-entry-id="{{ entry.id }}" data-link="{{ entry.link }}" class="title trigger-wrapper current-entry">{{ entry|safe }}</a>
                 {% else %}
-                    <a href="#" data-title="FeedCraft | {{ entry.title|safe }}" data-feed-id="{{ feed_id }}" data-entry-id="{{ entry.id }}" data-link="{{ entry.link }}" class="title trigger-wrapper">{{ entry|safe }}</a>
+                    <a href="/exporer/{{ entry.id }}" data-title="FeedCraft | {{ entry.title|safe }}" data-feed-id="{{ feed_id }}" data-entry-id="{{ entry.id }}" data-link="{{ entry.link }}" class="title trigger-wrapper">{{ entry|safe }}</a>
                 {% endif %}
             </div>
         {% endfor %}

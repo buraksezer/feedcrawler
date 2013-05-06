@@ -6,33 +6,64 @@ from django.template import RequestContext
 from django.contrib.auth.models import User
 from apps.frontend.forms import SubscribeForm
 from apps.storage.models import Feed, FeedTag, Entry, EntryLike, EntryDislike
+from userena.utils import signin_redirect, get_profile_model, get_user_model
 
 # For doing realtime stuff
 from announce import AnnounceClient
 announce_client = AnnounceClient()
 
+# Cassandra related functions
+import cass
+
+# Utility functions
+def get_user_profile(username):
+    user = get_object_or_404(get_user_model(), username__iexact=username)
+    profile_model = get_profile_model()
+    try:
+        profile = user.get_profile()
+    except profile_model.DoesNotExist:
+        profile = profile_model.objects.create(user=user)
+    return profile
+
+
+def get_user_timeline(user_id):
+    entries = []
+    for entry in Entry.objects.all():
+        if entry.feed.users.filter(id=user_id):
+            entries.append(entry)
+            if len(entries) == 15:
+                break
+    return entries
+
+
+def render_timeline_standalone(request):
+    if not request.user.is_authenticated():
+        return HttpResponse("You must be sign in to do this.")
+    return render_to_response('frontend/partials/dashboard_timeline.html', {"timeline": True,
+        'entries': get_user_timeline(request.user.id)}, context_instance=RequestContext(request))
+
 
 def home(request):
+    profile = None
     entries = []
     # FIXME: This method may have caused performance issues.
     if request.user.is_authenticated():
-        for entry in Entry.objects.all():
-            if entry.feed.users.filter(id=request.user.id):
-                entries.append(entry)
-                if len(entries) == 15:
-                    break
-    return render_to_response('frontend/home.html', {"entries": entries}, context_instance=RequestContext(request))
+        entries = get_user_timeline(request.user.id)
+        profile = get_user_profile(request.user.username)
+    return render_to_response('frontend/home.html', {"timeline": True, "entries": entries,
+        "feeds": Feed.objects.filter(users=request.user.id).order_by("id"),
+        "profile": profile}, context_instance=RequestContext(request))
 
 
-def wrapper(request):
-    if request.method != "POST":
-        return HttpResponse("You must send a POST request.")
+def explorer(request, entry_id):
     if not request.user.is_authenticated():
         return HttpResponse("You must be login for using this.")
+    if request.method != "GET":
+        return HttpResponse("You must send a GET request.")
 
-    request.session["feed_id"] = request.POST["feed_id"]
-    request.session["entry_id"] = request.POST["entry_id"]
-    return HttpResponse(1)
+    return render_to_response('frontend/explorer.html', {
+        'entry': get_object_or_404(Entry, id=entry_id),
+    }, context_instance=RequestContext(request))
 
 
 def get_user_feeds(request):
@@ -41,6 +72,19 @@ def get_user_feeds(request):
     return render_to_response('frontend/get_user_feeds.html', {"current_feed_id": int(request.POST["current_feed_id"]),
         "feeds": Feed.objects.filter(users=request.user.id).order_by("id")},
         context_instance=RequestContext(request))
+
+
+def get_entries_by_feed_id(request):
+    if request.method != "POST":
+        return HttpResponse("You must send a POST request.")
+    if not request.user.is_authenticated():
+        return HttpResponse("You must be login for using this.")
+    depth = 1 if request.POST.get("depth") is None else int(request.POST.get("depth"))
+    entries = Entry.objects.filter(feed=request.POST["feed_id"])[:depth*10]
+    feed_title = Feed.objects.get(id=request.POST["feed_id"]).title
+    return render_to_response('frontend/partials/dashboard_timeline.html', {"feed_title": feed_title,
+        'depth': depth+1,
+        "entries": entries}, context_instance=RequestContext(request))
 
 
 def get_feed_entries(request):
@@ -59,11 +103,9 @@ def get_feed_entries(request):
         "data": data}, context_instance=RequestContext(request))
 
 
-def get_previous_and_next_items(request):
+def get_previous_and_next_items(request, feed_id, entry_id):
     # Why do we use get_next/previous_by_foo methods for doing this?
     # Those methods are broken for our case?
-    feed_id = request.session["feed_id"]
-    entry_id = request.session["entry_id"]
     # The next entry
     next_items = Entry.objects.filter(feed=feed_id, id__gt=entry_id)
     next = {}
@@ -75,18 +117,6 @@ def get_previous_and_next_items(request):
     previous = {} if not previous_items else {"feed_id": feed_id, "link": previous_items[0].link, "id": previous_items[0].id,
         "title": previous_items[0].title}
     return HttpResponse(json.dumps({"next": next, "previous": previous}), content_type='application/json')
-
-
-def explorer(request):
-    if not request.user.is_authenticated():
-        return HttpResponse("You must be login for using this.")
-    if request.method != "GET":
-        return HttpResponse("You must send a GET request.")
-
-    entry_id = request.session["entry_id"]
-    return render_to_response('frontend/explorer.html', {
-        'entry': get_object_or_404(Entry, id=entry_id),
-    }, context_instance=RequestContext(request))
 
 
 def subscribe(request):
@@ -124,8 +154,8 @@ def subscribe(request):
                 feed_obj.save()
                 if tags:
                     add_tags()
-                announce_client.register_group(request.user.id, feed_obj.id)
-                return HttpResponse(json.dumps({"code": 1, "text": 'New feed source has been added successfully.'}), content_type='application/json')
+            announce_client.register_group(request.user.id, feed_obj.id)
+            return HttpResponse(json.dumps({"code": 1, "text": 'New feed source has been added successfully.'}), content_type='application/json')
         else:
             return HttpResponse(json.dumps({"code": 0, "text": "Broken form"}), content_type='application/json')
     else:
@@ -162,3 +192,29 @@ def vote(request):
             return HttpResponse(0)
     else:
         return HttpResponse("You must be logged in for using this.")
+
+
+def subscribe_user(request):
+    if not request.user.is_authenticated():
+        return HttpResponse("You must be logged in for doing this.")
+    subscriber = request.POST["username"]
+    if cass.subscribe_user(request.user.username, subscriber):
+        return HttpResponse(1)
+    return HttpResponse(0)
+
+
+def unsubscribe_user(request):
+    if not request.user.is_authenticated():
+        return HttpResponse("You must be logged in for doing this.")
+    subscriber = request.POST["username"]
+    if cass.unsubscribe_user(request.user.username, subscriber):
+        return HttpResponse(1)
+    return HttpResponse(0)
+
+
+def check_subscribe(request):
+    if not request.user.is_authenticated():
+        return HttpResponse("You must be logged in for doing this.")
+    if cass.check_subscription(request.POST["username"], request.user.username):
+        return HttpResponse(1)
+    return HttpResponse(0)

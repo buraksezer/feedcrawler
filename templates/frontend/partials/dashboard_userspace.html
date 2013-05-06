@@ -1,0 +1,16 @@
+<div class="user">
+    <img class="mugshot img-rounded" src="{{ profile.get_mugshot_url }}"/>
+    {% if profile.user.get_full_name %}
+    <dd class="username"><a href="/user/{{ user.username }}/">{{ profile.user.get_full_name }}</a></dd>
+    {% else %}
+    <dd class="username"><a href="/user/{{ user.username }}/">{{ profile.user.username }}</a></dd>
+    {% endif %}
+</div>
+<div class="bookmarks">
+    <span class="bookmark-header">Bookmarks</span>
+    <span><br/>Not implemented yet</span>
+</div>
+<div class="history">
+    <span class="history-header">Last visited</span>
+    <span><br/>Not implemented yet</span>
+</div>

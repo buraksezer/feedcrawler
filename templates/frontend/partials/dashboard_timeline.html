@@ -1,0 +1,34 @@
+{% if timeline %}
+<div class="new-entry-counter" data-item-count="0"><a href="#"></a></div>
+{% else %}
+<div class="timeline-feed-entries-title">
+    <h4>Latest entries of {{ feed_title }}</h4>
+    <div class="divider"></div>
+</div>
+{% endif %}
+<div class="dashboard-entries" data-depth="{{ depth }}">
+    {% if not entries %}
+        {% if timeline %}
+        <p class="empty-timeline">Hey! There are no feed in your timeline.</p>
+        <p class="empty-timeline">You should add some feed source to start using FeedCraft.</p>
+        {% endif%}
+    {% endif %}
+    {% for entry in entries %}
+    <div class="dashboard-entry" data-feed-id="{{ entry.feed.id }}" data-entry-id="{{ entry.id }}">
+        <a href="/explorer/{{ entry.id }}" class="entry-title">{{ entry.title }}</a> on
+        <a href="/explorer/{{ entry.id }}" class="feed">{{ entry.feed.title }}</a>
+        <div class="timeline-entry-interaction">
+            {% if entry.entrydislike.user.count %}
+            <span style="float:right;" class="dislike-count">{{ entry.entrydislike.user.count }} dislike</span>
+            {% endif %}
+            {% if entry.entrylike.user.count %}
+            <span style="float:right;" class="like-count">{{ entry.entrylike.user.count }} likes</span>
+            {% endif %}
+            <!--<span class="comment-count">43 comments</span>-->
+            <span class="like">Like</span>
+            <span class="dislike">Dislike</span>
+            <span class="Comment">Comment</span>
+        </div>
+    </div>
+    {% endfor %}
+</div>

@@ -7,25 +7,20 @@
 {% endblock %}
 
 {% block title %}FeedCraft &alpha; | {{ entry.title }}{% endblock %}
-{% block container %}
-<div id="fc-csrf">{% csrf_token %}</div>
-    <div class="navbar navbar-fixed-top">
-        <div class="navbar-inner">
-            <div class="container-fluid">
-                <a class="brand" href="{% url "home" %}"><i>Feed<strong>Craft</strong><small> &alpha;</small></i></a>
+{% block navbar_content %}
                 <div id="navigator" class="btn-toolbar">
                     <div class="btn-group">
                         <a href="#" class="btn entry-dislike" data-value="-1"><i class="icon-thumbs-down"></i></a>
 
                         <a class="btn" id="nav-previous" data-link="" data-feed-id="" data-placement="bottom" data-toggle="tooltip"
-                            data-title="" data-entry-id="" href="#"><i class="icon-arrow-left"></i></a>
+                            data-title="" data-entry-id=""><i class="icon-arrow-left"></i></a>
 
                         <a class="btn" id="feed-navigation" data-placement="bottom" data-original-title="Entry List"
                             href="#"><i class="icon-th-list"></i>
                         </a>
 
                         <a class="btn" id="nav-next" data-link="" data-placement="bottom" data-feed-id="" data-entry-id="" data-title=""
-                            href="#"><i class="icon-arrow-right"></i></a>
+                            ><i class="icon-arrow-right"></i></a>
 
                         <a href="#" class="btn entry-like" data-value="1"><i class="icon-thumbs-up"></i></a>
 
@@ -36,17 +31,16 @@
                     <li><a href="#share-modal" data-toggle="modal">Share</a></li>
                     <li class="divider-vertical"></li>
                     <li class="dropdown">
-                        <a href="#" data-toggle="dropdown" role="button" id="drop4" class="dropdown-toggle">{{ user.username }} <b class="caret"></b></a>
+                        <a href="#" data-toggle="dropdown" role="button" id="drop4" class="dropdown-toggle"><i class="foundicon-settings"></i></a>
                         <ul aria-labelledby="drop4" role="menu" class="dropdown-menu" id="menu1">
                             <li role="presentation"><a href="#" tabindex="-1" role="menuitem">Profile</a></li>
-                            <li role="presentation"><a href="/accounts/signout" tabindex="-1" role="menuitem">Sign Out</a></li>
+                            <li role="presentation"><a href="/user/signout" tabindex="-1" role="menuitem">Sign Out</a></li>
                             <!--<li class="divider" role="presentation"></li>-->
                         </ul>
                     </li>
                 </ul>
-            </div>
-        </div>
-    </div>
+{% endblock %}
+{% block container %}
     <div id="explorer" class="container">
         <div class="main">
             <div id="share-modal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="share-modalLabel" aria-hidden="true">
@@ -72,7 +66,7 @@
             </div>
         </div>
     </div>
-</div>
+
 <div class="footer">
     <div class="content">
         <p class="muted credit"><i>FeedCraft Developers &copy; 2013</i></p>

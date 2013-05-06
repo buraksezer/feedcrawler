@@ -12,7 +12,7 @@ $(document).ready(function () {
             if (data.feed_id == active_feed_id) {
                 $.each($("#feed-entry-list .entries").find(".day"), function(idx, day) {
                     if (data.published_at == null || data.published_at == $(day).text()) {
-                        var new_item = '<div class="entry"><a href="#" class="title trigger-wrapper" data-link="'+data.link+
+                        var new_item = '<div class="entry"><a href="/explorer/'+data.id+'" class="title trigger-wrapper" data-link="'+data.link+
                         '" data-entry-id="'+data.id+'" data-feed-id="'+data.feed_id+'" data-title="FeedCraft | '+data.title+'">'+data.title+'</a></div>'
                         $(day).after(new_item);
                     }
@@ -20,10 +20,10 @@ $(document).ready(function () {
             }
         }
 
-        if ($("#dashboard .timeline").length) {
+        if ($("#dashboard .timeline .new-entry-counter").length) {
             // Update dashboard for new entries
             var entry = '<div style="display:none;" class="dashboard-entry" data-entry-id="'+data.id+'" data-feed-id="'+data.feed_id+'">'+
-            '<a class="entry-title" href="#">'+data.title+'</a> on '+
+            '<a class="entry-title" href="/explorer/'+data.id+'">'+data.title+'</a> on '+
             '<a class="feed" href="#">'+data.feed_title+'</a>'+
             '<div class="timeline-entry-interaction">'+
             '<span class="like">Like </span>'+
@@ -40,7 +40,7 @@ $(document).ready(function () {
             }
             $(".timeline .new-entry-counter a").text(msg);
             var title_item_count = item_count + 1;
-            document.title = $("body").data("page-title") +" ("+title_item_count+")";
+            document.title = "("+title_item_count+") "+$("body").data("page-title");
             $(".timeline .new-entry-counter:hidden").css("display", "block");
             $("#dashboard .timeline .dashboard-entries").prepend(entry);
         }

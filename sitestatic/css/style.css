@@ -1,6 +1,6 @@
 html, body {
     height: 100%;
-    color: #333333;
+    color: #555555;
 }
 
 body {
@@ -41,6 +41,10 @@ body {
     margin-top: 0;
 }
 
+.feed-stream img,
+.feed-item img {
+    margin-top: -5px;
+}
 
 iframe {
     width:100%;
@@ -48,6 +52,7 @@ iframe {
     position: absolute;
 }
 
+[class*="foundicon-"],
 a.brand {
     -webkit-transition: color .5s;
     -moz-transition: color .5s;
@@ -55,6 +60,7 @@ a.brand {
     transition: color .5s;
 }
 
+[class*="foundicon-"]:hover,
 a.brand:hover {
     color: #0caee3;
 }
@@ -87,10 +93,16 @@ div.feed-item span.feed-title {
     font-weight: bold;
 }
 
+.right-bar .feed-stream:hover,
 div.feed-item:hover {
     cursor: pointer;
 }
 
+.right-bar .feed-stream:hover {
+
+}
+
+.right-bar .feed-stream:hover,
 div.feed-item span.feed-title:hover {
     color: #0CAEE3;
 }
@@ -126,6 +138,7 @@ div.feed-item span.badge {
     margin-left: 10px;
 }
 
+.right-bar .feed-stream,
 #feed-entry-list .entry a,
 .feed-item span.feed-title {
     -webkit-transition: color .5s;
@@ -330,4 +343,148 @@ html, body {
     text-align: center;
     font-style: italic;
     font-size: 17px;
+}
+
+/* Feed Sources */
+.right-bar {
+    background-color: #FFFFFF;
+    border-top: 1px solid #E2E2E2;
+    border-bottom: 1px solid #E2E2E2;
+    border-right: 1px solid #E2E2E2;
+    border-left: 1px solid #E2E2E2;
+    padding: 13px;
+    margin-left: 3px !important;
+}
+
+.feed-stream {
+}
+
+.right-bar .feed-item {
+    padding-left: 0;
+}
+
+.right-bar .feed-item .feed-title {
+    font-weight: normal !important;
+}
+
+.right-bar span.feed-title {
+    font-size: 13px !important;
+}
+
+/* user area on dashboard */
+
+.userspace {
+    background-color: #FFFFFF;
+    border-top: 1px solid #E2E2E2;
+    border-left: 1px solid #E2E2E2;
+    border-bottom: 1px solid #E2E2E2;
+    border-right: 1px solid #E2E2E2;
+    padding: 13px;
+    margin-right: 2.5px;
+}
+
+.userspace .username{
+    margin-left: 50px;
+    margin-top: -41px;
+}
+
+.userspace .username a {
+    color: #555555;
+}
+
+.userspace .username a:hover {
+    color: #005580;
+}
+
+.userspace div.user img.mugshot {
+    height: 40px;
+    weight: 40px;
+}
+
+/* bookmarks */
+
+.bookmarks {
+    margin-top :35px;
+    height: 20px;
+}
+
+.history {
+    margin-top :70px;
+}
+
+.history-header,
+.bookmark-header {
+    font-weight: bold;
+    font-size: 15px;
+}
+
+/* user profile */
+
+#profile-layout {
+    background-color: #FAFAFA;
+}
+
+#user-profile {
+    padding: 60px;
+}
+
+.profile-user-info,
+.profile-dashboard,
+.profile-timeline {
+    padding: 10px;
+    margin-top: 2px;
+}
+
+.profile-dashboard {
+    margin-right: 2px;
+    height: 170px;
+}
+
+.profile-timeline {
+    height: 170px;
+}
+
+.profile-box {
+    background-color: #FFFFFF;
+    border-top: 1px solid #E2E2E2;
+    border-left: 1px solid #E2E2E2;
+    border-right: 1px solid #E2E2E2;
+    border-bottom: 1px solid #E2E2E2;
+}
+
+.profile-dashboard .username {
+    margin-left: 100px;
+    margin-top: -80px;
+    font-size: 20px;
+}
+
+
+.divider {
+    border-bottom: 1px solid #E2E2E2;
+}
+
+.profile-dashboard .divider {
+    margin-top: 72px;
+}
+
+.profile-timeline h4 {
+    margin-top: 0;
+}
+
+.profile-timeline .header-inner {
+    border-bottom: 1px solid #E2E2E2;
+}
+
+.subscribe-user-icon {
+    float:right;
+}
+
+.unsubscribe-button {
+    border-radius: 0 !important;
+    display: none;
+    float: right;
+}
+
+.timeline-feed-entries-title h4 {
+    padding-left: 5px;
 }

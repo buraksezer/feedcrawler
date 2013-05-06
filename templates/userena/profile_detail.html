@@ -1,0 +1,43 @@
+{% extends 'feedcraft_base.html' %}
+{% block layout_id %}profile-layout{% endblock %}
+{% block title %}{{ profile.user.username }} on FeedCraft &alpha;{% endblock %}
+
+{% block container %}
+<div class="container">
+    <div id="user-profile">
+        <div class="row-fluid">
+            <div class="profile-box span4 profile-dashboard">
+                <img class="mugshot img-rounded" src="{{ profile.get_mugshot_url }}"/>
+                {% if profile.user.get_full_name %}
+                <dd class="username">{{ profile.user.get_full_name }}</dd>
+                {% else %}
+                <dd class="username">{{ profile.user.username }}</dd>
+                {% endif %}
+                <div class="divider"></div>
+                <span>Bookmarks and etc.</span>
+            </div>
+            <div class="profile-box span8 profile-timeline">
+                <div class="header-inner">
+                    <!-- Code duplication -->
+                    {% if user.username == profile.user.username %}
+                    <h4>Your recent actions</h4>
+                    {% else %}
+                    {% if profile.user.get_full_name %}
+                    <h4>{{ profile.user.get_full_name }}'s near actions
+                        <a data-username="{{ profile.user.username }}" data-placement="bottom" data-toggle="tooltip" data-original-title="Subscribe this user" class="check-subscription subscribe-user-icon" href="{% url "subscribe_user" %}"><img src="/static/img/fc-webicon-rss-s.png"/></a>
+                        <a data-username="{{ profile.user.username }}"  class="unsubscribe-button btn btn-small btn-success" href="#">Unsubscribe</a>
+                    </h4>
+                    {% else %}
+                    <h4>{{ profile.user.username }}'s near actions
+                        <a data-username="{{ profile.user.username }}" data-placement="bottom" data-toggle="tooltip" data-original-title="Subscribe this user" class="check-subscription subscribe-user-icon" href="{% url "subscribe_user" %}"><img src="/static/img/fc-webicon-rss-s.png"/></a>
+                        <a data-username="{{ profile.user.username }}" class="unsubscribe-button btn btn-small btn-success" href="#">Unsubscribe</a>
+                    </h4>
+                    {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
