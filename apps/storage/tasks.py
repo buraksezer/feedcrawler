@@ -1,129 +1,185 @@
-# -*- coding: utf-8 -*-
-import os
-import logging
+import time
+import feedparser
+
 from time import mktime
 from datetime import datetime
-from feedparser import parse
 from celery.task import Task
-from apps.storage.models import Feed, Entry, EntryTag
-
 from announce import AnnounceClient
+from apps.storage.models import Feed, Entry, EntryTag
+from django.utils.timezone import utc
+from utils import log as logging
+from django.conf import settings
+
+try:
+    import threadpool
+except ImportError:
+    threadpool = None
+
 announce_client = AnnounceClient()
 
-logfile = "feedcraft-sync.log"
+class ProcessEntry(object):
+    def __init__(self, feed, entries):
+        self.feed = feed
+        self.entries = entries
+        for entry in self.entries:
+            self.process(entry)
 
-def initialize_logging():
-    # Early form of logging facility
+    def process(self, entry):
+        entry_id = entry.id if hasattr(entry, "id") else entry.link
+        if not Entry.objects.filter(entry_id=entry_id):
+            entry_item = Entry(title=entry.title, feed=self.feed)
+            # FIXME: What if entry object has not link variable?
+            entry_item.entry_id = entry.id if hasattr(entry, "id") else entry.link
+            if hasattr(entry, "content"):
+                entry_item.content = entry.content[0].value
+                if hasattr(entry.content[0], "language") and entry.content[0].language is not None:
+                    entry_item.language = entry.content[0]["language"]
+                if hasattr(entry.content[0], "type"):
+                    entry_item.content_type = entry.content[0].type
+            else:
+                entry_item.content = entry.summary
+                entry_item.content_type = entry.summary_detail.type
+                if hasattr(entry.summary_detail, "language") and entry.summary_detail.language is not None:
+                    entry_item.language = entry.summary_detail.language
 
-    # Create logfile if it does not exist
-    # FIXME-1: Can I use with statement in bellow case?
-    # FIXME-2: We must use a more proper way to serve constant values
-    if not os.access(logfile, os.F_OK):
-        f = open(logfile, 'w')
-        f.close()
+            if hasattr(entry, "published_parsed"):
+                entry_item.published_at = datetime.fromtimestamp(mktime(entry.published_parsed))
 
-    # initialize
-    if os.access(logfile, os.W_OK):
-        logger = logging.getLogger("feedcraft-sync")
-        hdlr = logging.FileHandler(logfile)
-        formatter = logging.Formatter('%(created)f %(asctime)s %(levelname)s %(message)s')
-        hdlr.setFormatter(formatter)
-        logger.addHandler(hdlr)
-        logger.setLevel(logging.INFO)
-        return logger
-    else:
-        print("ERROR: I could not open {feedcraft-sync.log} file with write permissions. Please check this!")
-        raise SystemExit(0)
+            if hasattr(entry, "author") and entry.author is not None:
+                entry_item.author = entry.author
+
+            if hasattr(entry, "license") and entry.license is not None:
+                entry_item.license = entry.license
+
+            entry_item.link = entry.link
+            entry_item.save()
+
+            announce_client.broadcast_group(self.feed.id, 'new_entry', data={'id': entry_item.id,
+                'feed_id': self.feed.id,
+                'link': entry.link,
+                'published_at': entry_item.published_at.strftime("%B %d, %y") if isinstance(entry_item.published_at, datetime) else entry_item.published_at,
+                'feed_title': self.feed.title,
+                'title':entry.title}
+            )
 
 
-def run_sync(feed_objects):
-    for feed_object in feed_objects:
-        data_bundle = parse(feed_object.feed_url)
+class ProcessFeed(object):
+    def __init__(self, feed):
+        self.feed = feed
+        self.user_agent = "FeedCraft RSS Reader User Agent"
 
-        if not hasattr(data_bundle.feed, "link"):
-            # TODO: We must use a logging mech.
-            print(">> "+feed_object.feed_url+": this doesn't seem a valid feed url!")
-            continue
+    def process(self):
+        self.parsed = feedparser.parse(self.feed.feed_url, agent=self.user_agent, \
+            etag=self.feed.etag)
 
-        log.info(">> Checking new feeds for "+feed_object.feed_url)
+        if hasattr(self.parsed, 'status'):
+            # TODO: Other status codes, 200, 301 and etc...
+            if self.parsed.status == 304:
+                return True
+            elif self.parsed.status >= 400:
+                logging.error("HTTP ERROR %s: id:%s url:%s" % (self.parsed.status, \
+                    self.feed.id, self.feed.feed_url))
+                return False
+            if hasattr(self.parsed, 'bozo') and self.parsed.bozo:
+                logging.warn("!BOZO! Feed is not well formed: id:%s url:%s" % \
+                    (self.feed.id, self.feed.feed_url))
 
-        if hasattr(data_bundle.feed, "language"):
-            feed_object.language = data_bundle.feed.language
-        if hasattr(data_bundle, "encoding"):
-            feed_object.encoding = data_bundle.encoding
-        if hasattr(data_bundle.feed, "subtitle"):
-            feed_object.subtitle = data_bundle.feed.subtitle
-        if hasattr(data_bundle.feed, "image") and hasattr(data_bundle.feed.image, "href"):
-            feed_object.image = data_bundle.feed.image.href
-        feed_object.title = data_bundle.feed.title
+        if 'links' in self.parsed.feed:
+            for link in self.parsed.feed.links:
+                if link.rel == 'hub':
+                    # Hub detected!
+                    self.feed.hub = link.href
+
+        self.feed.etag = self.parsed.get('etag', '')
+        # some times this is None (it never should) *sigh*
+        if self.feed.etag is None:
+            self.feed.etag = ''
+
+        self.feed.tagline = self.parsed.feed.get('tagline', '')
+
+        if hasattr(self.parsed.feed, "language"):
+            self.feed.language = self.parsed.feed.language
+
+        if hasattr(self.parsed.feed, "encoding"):
+            self.feed.encoding = self.parsed.feed.encoding
+
+        if hasattr(self.parsed.feed, "subtitle"):
+            self.feed.subtitle = self.parsed.feed.subtitle
+
+        if hasattr(self.parsed.feed, "image") and hasattr(self.parsed.feed.image, "href"):
+            self.feed.image = self.parsed.feed.image.href
+
+        if hasattr(self.parsed.feed, 'title'):
+            self.feed.title = self.parsed.feed.title
+
         # TODO: UTC seems problematic
-        feed_object.last_sync = datetime.now()
-        feed_object.save()
+        self.feed.last_sync = datetime.utcnow().replace(tzinfo=utc)
 
-        data_bundle.entries.reverse()
+        # Save this feed
+        self.feed.save()
 
-        for entry in data_bundle.entries:
-            entry_id = entry.id if hasattr(entry, "id") else entry.link
-            if not Entry.objects.filter(entry_id=entry_id):
-                entry_item = Entry(title=entry.title, feed=feed_object)
-                # FIXME: What if entry object has not link variable?
-                entry_item.entry_id = entry.id if hasattr(entry, "id") else entry.link
-                if hasattr(entry, "content"):
-                    entry_item.content = entry.content[0].value
-                    if hasattr(entry.content[0], "language") and entry.content[0].language is not None:
-                        entry_item.language = entry.content[0]["language"]
-                    if hasattr(entry.content[0], "type"):
-                        entry_item.content_type = entry.content[0].type
-                else:
-                    entry_item.content = entry.summary
-                    entry_item.content_type = entry.summary_detail.type
-                    if hasattr(entry.summary_detail, "language") and entry.summary_detail.language is not None:
-                        entry_item.language = entry.summary_detail.language
-                if hasattr(entry, "updated_parsed"):
-                    entry_item.updated_at = datetime.fromtimestamp(mktime(entry.updated_parsed))
-                if hasattr(entry, "published_parsed"):
-                    entry_item.published_at = datetime.fromtimestamp(mktime(entry.published_parsed))
-                if hasattr(entry, "author") and entry.author is not None:
-                    entry_item.author = entry.author
-                if hasattr(entry, "license") and entry.license is not None:
-                    entry_item.license = entry.license
-                entry_item.link = entry.link
-                # TODO: Logging needed
-                log.info("===> New entry %s" % entry.title)
-                entry_item.save()
-                announce_client.broadcast_group(feed_object.id, 'new_entry', data={'id': entry_item.id,
-                    'feed_id': feed_object.id,
-                    'link': entry.link,
-                    'published_at': entry_item.published_at.strftime("%B %d, %y") if isinstance(entry_item.published_at, datetime) else entry_item.published_at,
-                    'feed_title': feed_object.title,
-                    'title':entry.title})
-                if hasattr(entry, "tags"):
-                    for tag in entry.tags:
-                        if not EntryTag.objects.filter(tag=tag.term):
-                            entry_tag_item = EntryTag(tag=tag.term)
-                            entry_tag_item.save()
-                        else:
-                            entry_tag_item = EntryTag.objects.get(tag=tag.term)
-                        entry_tag_item.entry.add(entry_item)
-                        entry_tag_item.save()
+        self.entries = self.parsed.entries
+        self.entries.reverse()
+
+
+class DriveSync(object):
+    def __init__(self, feed):
+        sync_feed = ProcessFeed(feed)
+        retval = sync_feed.process()
+
+        if retval is None:
+            # Process Entries
+            ProcessEntry(feed, sync_feed.entries)
+
+
+class Dispatcher(object):
+    def __init__(self):
+        if threadpool:
+            self.tpool = threadpool.ThreadPool(settings.SYNC_THREAD_COUNT)
+        else:
+            self.tpool = None
+
+    def add_job(self, feed):
+        """ adds a feed processing job to the pool
+        """
+        if self.tpool:
+            req = threadpool.WorkRequest(DriveSync, (feed,))
+            self.tpool.putRequest(req)
+        else:
+            # no threadpool module, just run the job
+            DriveSync(feed)
+
+    def poll(self):
+        """ polls the active threads
+        """
+        if not self.tpool:
+            # no thread pool, nothing to poll
+            return
+        while True:
+            try:
+                time.sleep(0.2)
+                self.tpool.poll()
+            except KeyboardInterrupt:
+                print('! Cancelled by user')
+                break
+            except threadpool.NoResultsPending:
+                break
 
 
 class SyncFeed(Task):
     name = 'sync-feed'
 
     def run(self, **kwargs):
-        feed_objects = kwargs.get("feed_objects", Feed.objects.all())
-        run_sync(feed_objects)
-
+        dispatcher = Dispatcher()
+        for feed in Feed.objects.filter(is_active=True):
+            dispatcher.add_job(feed)
+        dispatcher.poll()
 
 class FirstSync(Task):
     name = 'first-sync'
 
     def run(self, **kwargs):
-        feed_objects = Feed.objects.filter(last_sync=None)
-        if feed_objects:
-            log.info("Running first-sync for some items")
-            run_sync(feed_objects)
-
-# Start logging
-log = initialize_logging()
+        dispatcher = Dispatcher()
+        for feed in Feed.objects.filter(is_active=True, last_sync=None):
+            dispatcher.add_job(feed)
+        dispatcher.poll()

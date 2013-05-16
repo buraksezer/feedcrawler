@@ -2,6 +2,7 @@ node
 settings.py
 collect_static
 celerybeat-schedule
+log/*.log
 *.log
 *.py[cod]
 

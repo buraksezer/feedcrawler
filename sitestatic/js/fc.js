@@ -303,6 +303,22 @@ $(document).ready(function() {
         );
     });
 
+    $("#post-to-my-feed button").click(function(evt) {
+        var feed_id = $("#iframe-container").data("feed-id");
+        var entry_id = $("#iframe-container").data("entry-id");
+        var note = $("#post-to-my-feed .make-textbox").html();
+        $.post("/share_entry/", {note: note, entry_id: entry_id, feed_id: feed_id, csrfmiddlewaretoken: $("#fc-csrf input").val()},
+            function(result){
+                console.log(result);
+            }
+        );
+    });
+
+    $(".fake-textbox").click(function(evt) {
+        $(this).css("display", "none");
+        $(".make-textbox").css("display", "block");
+    });
+
     check_subscription();
     get_votes();
     get_previous_next_items();

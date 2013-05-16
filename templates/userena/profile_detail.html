@@ -16,7 +16,7 @@
                 <div class="divider"></div>
                 <span>Bookmarks and etc.</span>
             </div>
-            <div class="profile-box span8 profile-timeline">
+            <div class="span8 profile-timeline">
                 <div class="header-inner">
                     <!-- Code duplication -->
                     {% if user.username == profile.user.username %}
@@ -35,6 +35,42 @@
                     {% endif %}
                     {% endif %}
                 </div>
+                {% for shared_item in shared_items %}
+                <div class="share-box" data-entry-id="{{ shared_item.entry.id }}">
+                    <img class="mugshot img-rounded" src="{{shared_item.participant.get_mugshot_url }}"/>
+                    {% if profile.user.get_full_name %}
+                    <div class="participant">
+                        <a href="/user/{{ shared_item.participant.user.username }}">{{ shared_item.participant.user.get_full_name }}</a>
+                        {% else %}
+                        <a href="/user/{{ shared_item.participant.user.username }}">{{ shared_item.participant.user.username }}</a>
+                        {% endif %}
+                        <div class="entry-timestamp">
+                            <i class="foundicon-calendar"></i>
+                            {{ shared_item.timestamp|date:"D d" }}
+                        </div>
+                    </div>
+                    <div class="share-box-entry">
+                        <a href="/explorer/{{ shared_item.entry.id }}" class="entry-title">{{ shared_item.entry.title }}</a>
+                        on
+                        <a href="/explorer/{{ shared_item.entry.id }}" class="feed">{{ shared_item.entry.feed.title }}</a>
+                    </div>
+                    {% if shared_item.note %}
+                        <div class="note">{{ shared_item.note|safe }}</div>
+                    {% endif %}
+                    <div class="timeline-entry-interaction">
+                        {% if shared_item.entry.entrydislike.user.count %}
+                        <span style="float:right;" class="dislike-count">{{ shared_item.entry.entrydislike.user.count }} dislike</span>
+                        {% endif %}
+                        {% if shared_item.entry.entrylike.user.count %}
+                        <span style="float:right;" class="like-count">{{ shared_item.entry.entrylike.user.count }} likes</span>
+                        {% endif %}
+                        <!--<span class="comment-count">43 comments</span>-->
+                        <span class="like">Like</span>
+                        <span class="dislike">Dislike</span>
+                        <span class="Comment">Comment</span>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
         </div>
     </div>

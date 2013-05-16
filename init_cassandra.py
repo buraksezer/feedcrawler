@@ -17,13 +17,12 @@ def run_cassandra():
         sysman.drop_keyspace('FeedCraftDB')
 
     sysman.create_keyspace('FeedCraftDB', SIMPLE_STRATEGY, {'replication_factor': '1'})
-    #sys.create_column_family('FeedCraftDB', 'User', comparator_type=UTF8_TYPE)
+    sysman.create_column_family('FeedCraftDB', 'User', comparator_type=UTF8_TYPE)
     sysman.create_column_family('FeedCraftDB', 'Friends', comparator_type=BYTES_TYPE)
     sysman.create_column_family('FeedCraftDB', 'Followers', comparator_type=BYTES_TYPE)
-    #sys.create_column_family('FeedCraftDB', 'Tweet', comparator_type=UTF8_TYPE)
-    #sys.create_column_family('FeedCraftDB', 'Timeline', comparator_type=LONG_TYPE)
-    #sys.create_column_family('FeedCraftDB', 'Userline', comparator_type=LONG_TYPE)
-
+    sysman.create_column_family('FeedCraftDB', 'Peed', comparator_type=UTF8_TYPE)
+    sysman.create_column_family('FeedCraftDB', 'Timeline', comparator_type=LONG_TYPE)
+    sysman.create_column_family('FeedCraftDB', 'Userline', comparator_type=LONG_TYPE)
     print 'All done!'
 
 run_cassandra()

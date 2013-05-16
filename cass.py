@@ -6,20 +6,20 @@ from pycassa.cassandra.ttypes import NotFoundException
 
 __all__ = ['get_user_by_username', 'get_friend_usernames',
     'get_follower_usernames', 'get_users_for_usernames', 'get_friends',
-    'get_followers', 'get_timeline', 'get_userline', 'get_tweet', 'save_user',
-    'save_tweet', 'add_friends', 'remove_friends', 'DatabaseError',
+    'get_followers', 'get_timeline', 'get_userline', 'get_peed', 'save_user',
+    'save_peed', 'add_friends', 'remove_friends', 'DatabaseError',
     'NotFound', 'InvalidDictionary', 'PUBLIC_USERLINE_KEY']
 
 POOL = ConnectionPool('FeedCraftDB')
 
-#USER = ColumnFamily(POOL, 'User')
+USER = ColumnFamily(POOL, 'User')
 FRIENDS = ColumnFamily(POOL, 'Friends')
 FOLLOWERS = ColumnFamily(POOL, 'Followers')
-#TWEET = ColumnFamily(POOL, 'Tweet')
-#TIMELINE = ColumnFamily(POOL, 'Timeline')
-#USERLINE = ColumnFamily(POOL, 'Userline')
+PEED = ColumnFamily(POOL, 'Peed')
+TIMELINE = ColumnFamily(POOL, 'Timeline')
+USERLINE = ColumnFamily(POOL, 'Userline')
 
-# NOTE: Having a single userline key to store all of the public tweets is not
+# NOTE: Having a single userline key to store all of the public peeds is not
 #       scalable.  Currently, Cassandra requires that an entire row (meaning
 #       every column under a given key) to be able to fit in memory.  You can
 #       imagine that after a while, the entire public timeline would exceed
@@ -62,10 +62,10 @@ def _get_line(cf, username, start, limit):
     """
     Gets a timeline or a userline given a username, a start, and a limit.
     """
-    # First we need to get the raw timeline (in the form of tweet ids)
+    # First we need to get the raw timeline (in the form of peed ids)
 
-    # We get one more tweet than asked for, and if we exceed the limit by doing
-    # so, that tweet's key (timestamp) is returned as the 'next' key for
+    # We get one more peed than asked for, and if we exceed the limit by doing
+    # so, that peed's key (timestamp) is returned as the 'next' key for
     # pagination.
     start = long(start) if start else ''
     next = None
@@ -87,25 +87,27 @@ def _get_line(cf, username, start, limit):
         #  if from timeline.
         del timeline[oldest_timestamp]
 
-    # Now we do a multiget to get the tweets themselves
-    tweet_ids = timeline.values()
-    tweets = TWEET.multiget(tweet_ids)
+    # Now we do a multiget to get the peeds themselves
+    peed_ids = timeline.values()
+    peeds = PEED.multiget(peed_ids)
 
-    # We want to get the information about the user who made the tweet
-    # First, pull out the list of unique users for our tweets
-    usernames = list(set([tweet['username'] for tweet in tweets.values()]))
-    users = USER.multiget(usernames)
+    # We want to get the information about the user who made the peed
+    # First, pull out the list of unique users for our peeds
+    #usernames = list(set([peed['username'] for peed in peeds.values()]))
+    #users = USER.multiget(usernames)
 
-    # Then, create a list of tweets with the user record and id
+    # Then, create a list of peeds with the user record and id
     # attached, and the body decoded properly.
-    result_tweets = list()
-    for tweet_id, tweet in tweets.iteritems():
-        tweet['user'] = users.get(tweet['username'])
-        tweet['body'] = tweet['body'].decode('utf-8')
-        tweet['id'] = tweet_id
-        result_tweets.append(tweet)
+    result_peeds = list()
+    timestamps = timeline.keys()
+    for index, (peed_id, peed) in enumerate(peeds.iteritems()):
+        #peed['user'] = users.get(peed['username'])
+        peed['note'] = peed['note'].decode('utf-8')
+        peed['id'] = peed_id
+        peed['timestamp'] = timestamps[index]
+        result_peeds.append(peed)
 
-    return (result_tweets, next)
+    return (result_peeds, next)
 
 
 # QUERYING APIs
@@ -127,11 +129,13 @@ def get_friend_usernames(username, count=5000):
     """
     return _get_friend_or_follower_usernames(FRIENDS, username, count)
 
+
 def get_follower_usernames(username, count=5000):
     """
     Given a username, gets the usernames of the people following that user.
     """
     return _get_friend_or_follower_usernames(FOLLOWERS, username, count)
+
 
 def get_users_for_usernames(usernames):
     """
@@ -160,66 +164,69 @@ def get_followers(username, count=5000):
 
 def get_timeline(username, start=None, limit=40):
     """
-    Given a username, get their tweet timeline (tweets from people they follow).
+    Given a username, get their peed timeline (peeds from people they follow).
     """
     return _get_line(TIMELINE, username, start, limit)
 
 def get_userline(username, start=None, limit=40):
     """
-    Given a username, get their userline (their tweets).
+    Given a username, get their userline (their peeds).
     """
     return _get_line(USERLINE, username, start, limit)
 
-def get_tweet(tweet_id):
+def get_peed(peed_id):
     """
-    Given a tweet id, this gets the entire tweet record.
+    Given a peed id, this gets the entire peed record.
     """
     try:
-        tweet = TWEET.get(str(tweet_id))
+        peed = peed.get(str(peed_id))
     except NotFoundException:
-        raise NotFound('Tweet %s not found' % (tweet_id,))
-    tweet['body'] = tweet['body'].decode('utf-8')
-    return tweet
+        raise NotFound('peed %s not found' % (peed_id,))
+    peed['note'] = peed['note'].decode('utf-8')
+    return peed
 
-def get_tweets_for_tweet_ids(tweet_ids):
+
+def get_peeds_for_peed_ids(peed_ids):
     """
-    Given a list of tweet ids, this gets the associated tweet object for each
+    Given a list of peed ids, this gets the associated peed object for each
     one.
     """
     try:
-        tweets = TWEET.multiget(map(str, tweet_ids))
+        peeds = PEED.multiget(map(str, peed_ids))
     except NotFoundException:
-        raise NotFound('Tweets %s not found' % (tweet_ids,))
-    return tweets.values()
+        raise NotFound('peeds %s not found' % (peed_ids,))
+    return peeds.values()
 
 
 # INSERTING APIs
 
-def save_user(username, user):
+def save_user(username):
     """
     Saves the user record.
     """
-    USER.insert(str(username), user)
+    USER.insert(str(username), {"ts": str(long(time.time() * 1e6))})
 
-def save_tweet(tweet_id, username, tweet):
+
+def save_peed(peed_id, username, peed):
     """
-    Saves the tweet record.
+    Saves the peed record.
     """
     # Generate a timestamp for the USER/TIMELINE
     ts = long(time.time() * 1e6)
 
-    # Make sure the tweet body is utf-8 encoded
-    tweet['body'] = tweet['body'].encode('utf-8')
+    # Make sure the peed body is utf-8 encoded
+    peed['note'] = peed['note'].encode('utf-8')
 
-    # Insert the tweet, then into the user's timeline, then into the public one
-    TWEET.insert(str(tweet_id), tweet)
-    USERLINE.insert(str(username), {ts: str(tweet_id)})
-    USERLINE.insert(PUBLIC_USERLINE_KEY, {ts: str(tweet_id)})
-    # Get the user's followers, and insert the tweet into all of their streams
+    print peed["note"]
+
+    # Insert the peed, then into the user's timeline, then into the public one
+    PEED.insert(str(peed_id), peed)
+    USERLINE.insert(str(username), {ts: str(peed_id)})
+    USERLINE.insert(PUBLIC_USERLINE_KEY, {ts: str(peed_id)})
+    # Get the user's followers, and insert the peed into all of their streams
     follower_usernames = [username] + get_follower_usernames(username)
     for follower_username in follower_usernames:
-        TIMELINE.insert(str(follower_username), {ts: str(tweet_id)})
-
+        TIMELINE.insert(str(follower_username), {ts: str(peed_id)})
 
 def subscribe_user(username, subscriber):
     """

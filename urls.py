@@ -6,6 +6,7 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     url(r'^$', 'apps.frontend.views.home', name='home'),
+    url(r'^user/(?P<username>(?!signout|signup|signin)[\.\w-]+)/$', 'apps.userena.views.profile_detail', name='userena_profile_detail'),
     url(r'^user/', include('userena.urls')),
     url(r'^hub/', include('djpubsubhubbub.urls')),
     url(r'^explorer/(?P<entry_id>[\w-]+)/$', 'apps.frontend.views.explorer', name='explorer'),
@@ -19,6 +20,11 @@ urlpatterns = patterns('',
     url(r'^check_subscribe/', 'apps.frontend.views.check_subscribe', name='check_subscribe'),
     url(r'^get_entries_by_feed_id/', 'apps.frontend.views.get_entries_by_feed_id', name='get_entries_by_feed_id'),
     url(r'^render_timeline_standalone/', 'apps.frontend.views.render_timeline_standalone', name='render_timeline_standalone'),
+    url(r'^share_entry/', 'apps.frontend.views.share_entry', name='share_entry'),
+
+    # This is required for pubsubhubbub
+    #url(r'^subscriber/', include('django_push.subscriber.urls')),
+
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 

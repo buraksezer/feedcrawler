@@ -1,0 +1,38 @@
+            <div id="share-modal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="share-modalLabel" aria-hidden="true">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h3>Share this entry</h3>
+                </div>
+                <div class="modal-body">
+                    <ul id="shareTab" class="nav nav-tabs">
+                        <li class="active"><a href="#post-to-my-feed" data-toggle="tab">Post this to my feed</a></li>
+                        <li><a href="#get-link" data-toggle="tab">Get Link</a></li>
+                        <li><a href="#share-on-web" data-toggle="tab">Share on Web</a></li>
+                        <li><a href="#recommend-this-entry" data-toggle="tab">Recommend</a></li>
+                    </ul>
+                    <div id="shareTabContent" class="tab-content">
+                        <div id="post-to-my-feed" class="tab-pane fade active in">
+                            <div class="entry">
+                                <a href="/explorer/{{ shared_item.entry.id }}" class="entry-title">{{ entry.title }}</a>
+                                on
+                                <a href="#" class="feed">{{ entry.feed.title }}</a>
+                            </div>
+                            <div class="fake-textbox">Add a note...</div>
+                            <div class="make-textbox" contenteditable="true" aria-multiline="true" role="textbox" spellcheck="true"></div>
+                            <button class="btn btn-primary">Post this</button>
+                        </div>
+                        <div id="get-link" class="tab-pane fade">
+                            <input class="link" type="text"></input>
+                            <small class="open-new-tab"><i class="icon-share-alt"></i><a target="blank">Open this in a new tab</a></small>
+                        </div>
+                        <div id="share-on-web" class="tab-pane fade">
+                            <span>Share on Facebook, Twitter, G+ and so on</span>
+                        </div>
+                        <div id="recommend-this-entry" class="tab-pane fade">
+                            <p>Share this entry with your friends.</p>
+                            <input type="text" data-provide="typeahead" placeholder="Type your friend's user name">
+                            <button class="btn btn-primary">Share with my friend</button>
+                        </div>
+                    </div>
+                </div>
+            </div>

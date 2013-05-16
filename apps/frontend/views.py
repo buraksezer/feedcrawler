@@ -1,6 +1,8 @@
+import uuid
 import json
 from collections import OrderedDict
 from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.contrib.auth.models import User
@@ -48,6 +50,9 @@ def home(request):
     entries = []
     # FIXME: This method may have caused performance issues.
     if request.user.is_authenticated():
+        # This function must be called from Sign Up function
+        # This is a temporary stuation
+        cass.save_user(request.user.username)
         entries = get_user_timeline(request.user.id)
         profile = get_user_profile(request.user.username)
     return render_to_response('frontend/home.html', {"timeline": True, "entries": entries,
@@ -56,11 +61,6 @@ def home(request):
 
 
 def explorer(request, entry_id):
-    if not request.user.is_authenticated():
-        return HttpResponse("You must be login for using this.")
-    if request.method != "GET":
-        return HttpResponse("You must send a GET request.")
-
     return render_to_response('frontend/explorer.html', {
         'entry': get_object_or_404(Entry, id=entry_id),
     }, context_instance=RequestContext(request))
@@ -216,5 +216,22 @@ def check_subscribe(request):
     if not request.user.is_authenticated():
         return HttpResponse("You must be logged in for doing this.")
     if cass.check_subscription(request.POST["username"], request.user.username):
+        return HttpResponse(1)
+    return HttpResponse(0)
+
+
+def share_entry(request):
+    if not request.user.is_authenticated():
+        return HttpResponse("You must be logged in for doing this.")
+
+    if request.method == "POST":
+        peed = {"note": request.POST["note"],
+                "entry_id": request.POST["entry_id"],
+                "feed_id": request.POST["feed_id"],
+                "username": request.user.username
+                }
+        peed_id = uuid.uuid1()
+        print request.POST["note"]
+        cass.save_peed(peed_id, request.user.username, peed)
         return HttpResponse(1)
     return HttpResponse(0)

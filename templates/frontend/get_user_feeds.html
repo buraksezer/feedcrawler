@@ -2,7 +2,7 @@
     <div class="padding">
         {% for feed in feeds %}
         {% if feed.id == current_feed_id %}
-        <div class="feed-item active" data-feed-id="{{ feed.id }}">
+        <div class="feed-item active-feed" data-feed-id="{{ feed.id }}">
         {% else %}
         <div class="feed-item" data-feed-id="{{ feed.id }}">
         {% endif %}
