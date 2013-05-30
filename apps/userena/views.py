@@ -1,4 +1,4 @@
-import cass
+#import cass
 from userena.views import *
 from apps.storage.models import Entry
 
@@ -44,7 +44,7 @@ def profile_detail(request, username,
         extra_context = dict()
     extra_context['profile'] = profile
     extra_context['hide_email'] = userena_settings.USERENA_HIDE_EMAIL
-
+    """
     if request.user.username == username:
         timeline_items = cass.get_timeline(username)[0]
     else:
@@ -59,5 +59,6 @@ def profile_detail(request, username,
          "timestamp": datetime.fromtimestamp(timeline_item["timestamp"] / 1e6)
          })
     extra_context["shared_items"] = shared_items
+    """
     return ExtraContextTemplateView.as_view(template_name=template_name,
                                             extra_context=extra_context)(request)

@@ -204,9 +204,9 @@ $(document).ready(function() {
         }
     });
 
-    $(document).on('click', ".right-bar div.feed-item", function(evt) {
-        var feed_id = $(this).data("feed-id");
-        var my_feed_item = $(this);
+    $(document).on('click', ".right-bar div.feed-item .feed-title", function(evt) {
+        var my_feed_item = $(this).closest("div.feed-item");
+        var feed_id = my_feed_item.data("feed-id");
         $.post("/get_entries_by_feed_id/", {feed_id: feed_id, csrfmiddlewaretoken: $("#fc-csrf input").val()},
             function(result) {
                 $("#dashboard .timeline").empty();
@@ -215,7 +215,7 @@ $(document).ready(function() {
         );
     });
 
-    $(document).on('click', ".right-bar .feed-stream", function(evt) {
+    $(document).on('click', ".right-bar #live-stream", function(evt) {
         var my_feed_item = $(this);
         $.post("/render_timeline_standalone/", {csrfmiddlewaretoken: $("#fc-csrf input").val()},
             function(result) {
@@ -247,7 +247,7 @@ $(document).ready(function() {
         evt.preventDefault();
         if (!$("#subscribe-modal").length) {
             $.get("/subscribe/", function(result) {
-                $(".container").prepend(result);
+                $("#feedcraft-modal-container").prepend(result);
                 $('#subscribe-modal').modal();
             });
         }
@@ -259,11 +259,27 @@ $(document).ready(function() {
         $("#subscribe-modal .loading-gif").css("display", "block");
         $.post("/subscribe/", subs_form, function(result) {
             if (result.code == "1") {
-                $("#subscribe-modal span.warning").empty();
-                $("#subscribe-modal span.warning").text(result.text)
+                $(".right-bar-info-area").css("display", "block").delay(5000).fadeOut();
+                $(".right-bar-info-area").empty().append(result.text);
                 $("#subscribe-modal .loading-gif").css("display", "none");
+                $("#subscribe-modal").modal("hide");
             }
         });
+    });
+
+    $(".unsubscribe-feed").click(function(evt) {
+        evt.preventDefault();
+        var feed_id = $(this).closest(".feed-item").data("feed-id");
+        $.post("/unsubscribe/", {feed_id: feed_id, csrfmiddlewaretoken: $("#fc-csrf input").val()},
+            function(result) {
+                if (result.code == "1") {
+                    $(".right-bar-info-area").css("display", "block").delay(5000).fadeOut();
+                    $(".right-bar-info-area").empty().append(result.text);
+                    $(".feed-item[data-feed-id="+feed_id+"]").remove();
+                } else {
+                    $(".right-bar-info-area").append("An error occured, please try again later.");
+                }
+            });
     });
 
     $(document).on("click", ".new-entry-counter", function(evt) {
@@ -322,6 +338,10 @@ $(document).ready(function() {
     check_subscription();
     get_votes();
     get_previous_next_items();
+
     // Initialize tooltips
     $(".subscribe-user-icon").tooltip();
+    $('#live-stream').tooltip();
+    $('#search-feed').tooltip();
+    $('#create-feed-group').tooltip();
 });

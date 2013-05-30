@@ -1,21 +1,19 @@
-import uuid
 import json
 from collections import OrderedDict
-from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.contrib.auth.models import User
 from apps.frontend.forms import SubscribeForm
 from apps.storage.models import Feed, FeedTag, Entry, EntryLike, EntryDislike
-from userena.utils import signin_redirect, get_profile_model, get_user_model
+from userena.utils import get_profile_model, get_user_model
 
 # For doing realtime stuff
 from announce import AnnounceClient
 announce_client = AnnounceClient()
 
 # Cassandra related functions
-import cass
+#import cass
 
 # Utility functions
 def get_user_profile(username):
@@ -49,12 +47,13 @@ def home(request):
     profile = None
     entries = []
     # FIXME: This method may have caused performance issues.
-    if request.user.is_authenticated():
-        # This function must be called from Sign Up function
-        # This is a temporary stuation
-        cass.save_user(request.user.username)
-        entries = get_user_timeline(request.user.id)
-        profile = get_user_profile(request.user.username)
+    if not request.user.is_authenticated():
+        return HttpResponseRedirect("/user/signin/")
+    # This function must be called from Sign Up function
+    # This is a temporary stuation
+    #cass.save_user(request.user.username)
+    entries = get_user_timeline(request.user.id)
+    profile = get_user_profile(request.user.username)
     return render_to_response('frontend/home.html', {"timeline": True, "entries": entries,
         "feeds": Feed.objects.filter(users=request.user.id).order_by("id"),
         "profile": profile}, context_instance=RequestContext(request))
@@ -65,6 +64,12 @@ def explorer(request, entry_id):
         'entry': get_object_or_404(Entry, id=entry_id),
     }, context_instance=RequestContext(request))
 
+def available_feeds(request):
+    if not request.user.is_authenticated():
+        return HttpResponse("You must be login for using this.")
+    feeds = Feed.objects.all().order_by("-entries_last_month")
+    return render_to_response('frontend/available_feeds.html',
+        {"feeds": feeds}, context_instance=RequestContext(request))
 
 def get_user_feeds(request):
     if not request.user.is_authenticated():
@@ -118,6 +123,23 @@ def get_previous_and_next_items(request, feed_id, entry_id):
         "title": previous_items[0].title}
     return HttpResponse(json.dumps({"next": next, "previous": previous}), content_type='application/json')
 
+
+def unsubscribe(request):
+    if not request.user.is_authenticated():
+        return HttpResponse("You must be login for using this.")
+    if request.method != "POST":
+        return HttpResponse("You must send a POST request")
+    feed_id = request.POST.get("feed_id", None)
+    if feed_id is None:
+        return HttpResponse("You must send a feed_id as a parameter.")
+
+    try:
+        feed = Feed.objects.get(id=feed_id)
+    except Feed.DoesNotExist:
+        return HttpResponse("This feed does not exist: %s" % feed_id)
+    feed.users.remove(User.objects.get(id=request.user.id))
+    return HttpResponse(json.dumps({"code": 1, "text": "You have been unsubscribed successfully from %s." % feed.title }), \
+        content_type='application/json')
 
 def subscribe(request):
     def add_tags():
@@ -193,7 +215,7 @@ def vote(request):
     else:
         return HttpResponse("You must be logged in for using this.")
 
-
+"""
 def subscribe_user(request):
     if not request.user.is_authenticated():
         return HttpResponse("You must be logged in for doing this.")
@@ -219,7 +241,6 @@ def check_subscribe(request):
         return HttpResponse(1)
     return HttpResponse(0)
 
-
 def share_entry(request):
     if not request.user.is_authenticated():
         return HttpResponse("You must be logged in for doing this.")
@@ -235,3 +256,4 @@ def share_entry(request):
         cass.save_peed(peed_id, request.user.username, peed)
         return HttpResponse(1)
     return HttpResponse(0)
+"""

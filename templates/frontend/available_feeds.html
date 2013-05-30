@@ -1,0 +1,15 @@
+{% extends "feedcraft_base.html" %}
+{% block title %}FeedCraft | Available Feeds{% endblock %}
+{% block container %}
+<div class="container">
+<div class="row-fluid">
+    <div class="span6">
+        <div style="padding-top: 60px;" class="available-feeds">
+            {% for feed in feeds %}
+            <div class="feed-item">{{ feed.title }}</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}

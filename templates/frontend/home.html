@@ -1,7 +1,5 @@
 {% extends "feedcraft_base.html" %}
 {% block layout_id %}dashboard-layout{% endblock %}
-{% block container %}
-
 {% block navbar_content %}
 <div class="nav-collapse">
     <ul class="nav pull-right">
@@ -11,7 +9,7 @@
         <li class="dropdown">
             <a href="#" data-toggle="dropdown" role="button" id="drop4" class="dropdown-toggle"><i class="foundicon-settings"></i></a>
             <ul aria-labelledby="drop4" role="menu" class="dropdown-menu" id="menu1">
-                <li role="presentation"><a href="#" tabindex="-1" role="menuitem">Profile</a></li>
+                <li role="presentation"><a href="/user/{{ user.username }}" tabindex="-1" role="menuitem">Profile</a></li>
                 <li role="presentation"><a href="/user/signout" tabindex="-1" role="menuitem">Sign Out</a></li>
                 <!--<li class="divider" role="presentation"></li>-->
             </ul>
@@ -22,9 +20,8 @@
     </ul>
 </div>
 {% endblock %}
-
+{% block container %}
 <div id="dashboard" class="container">
-    {% if user.is_authenticated %}
     <div class="row-fluid">
         <div class="span3 userspace">
             {% include "frontend/partials/dashboard_userspace.html" %}
@@ -39,9 +36,5 @@
             <div class="full span9"></div>
         </div>-->
     </div>
-    {% else %}
-    <h1 style="text-align: center; margin-top: 300px">Welcome to FeedCraft <i>&alpha;</i></h1>
-    <p style="text-align: center;">Please <a href="/user/signin">sign in</a> to use</p>
-{% endif %}
 </div>
 {% endblock %}

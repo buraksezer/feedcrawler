@@ -15,11 +15,13 @@
                     <label for="id_feed_url">Website or RSS:</label>
                     {{ form.feed_url }}
                 </div>
+                <!--
                 <div class="fieldWrapper">
                     {{ form.subject.errors }}
                     <label for="id_tags">Select Tags:</label>
                     {{ form.tags }}
                 </div>
+            -->
                 <button class="btn btn-big btn-primary" type="submit">Add this site</button>
                 <span class="warning"></span>
                 <img class="loading-gif" src='/static/img/ajax-loader.gif'></img>
@@ -27,7 +29,5 @@
         </ul>
     </div>
 </div>
-{% else %}
-    <p>nyan-cat.gif</p>
 {% endif %}
 {% endblock %}

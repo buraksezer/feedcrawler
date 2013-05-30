@@ -7,6 +7,16 @@ body {
     font-family: 'Open Sans',Helvetica,sans-serif !important;
 }
 
+.welcome-box {
+    background-color: #FFFFFF;
+    border-top: 1px solid #E2E2E2;
+    border-left: 1px solid #E2E2E2;
+    border-right: 1px solid #E2E2E2;
+    border-bottom: 1px solid #E2E2E2;
+    text-align: center;
+    height: 400px;
+}
+
 #feed-source-list {
     border-right: 1px solid #E2E2E2;
 }
@@ -41,8 +51,7 @@ body {
     margin-top: 0;
 }
 
-.feed-stream img,
-.feed-item img {
+.feed-item i{
     margin-top: -5px;
 }
 
@@ -93,16 +102,10 @@ div.feed-item span.feed-title {
     font-weight: bold;
 }
 
-.right-bar .feed-stream:hover,
 div.feed-item:hover {
     cursor: pointer;
 }
 
-.right-bar .feed-stream:hover {
-
-}
-
-.right-bar .feed-stream:hover,
 div.feed-item span.feed-title:hover {
     color: #0CAEE3;
 }
@@ -138,7 +141,6 @@ div.feed-item span.badge {
     margin-left: 10px;
 }
 
-.right-bar .feed-stream,
 #feed-entry-list .entry a,
 .feed-item span.feed-title {
     -webkit-transition: color .5s;
@@ -352,11 +354,12 @@ html, body {
     border-bottom: 1px solid #E2E2E2;
     border-right: 1px solid #E2E2E2;
     border-left: 1px solid #E2E2E2;
-    padding: 13px;
     margin-left: 3px !important;
 }
 
-.feed-stream {
+.right-bar .feed-items {
+    max-height: 590px;
+    overflow-y: scroll;
 }
 
 .right-bar .feed-item {
@@ -369,6 +372,32 @@ html, body {
 
 .right-bar span.feed-title {
     font-size: 13px !important;
+}
+
+.right-bar .feed-item {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.right-bar .feed-item:hover {
+    background-color: #FBFBFB;
+}
+
+.right-bar-info-area {
+    font-size: 12px;
+    display: none;
+    background-color: #FBFBFB;
+    padding: 10px;
+}
+
+.right-bar .top-area {
+    background-color: #FAFAFA;
+    padding-left: 5px;
+}
+
+.top-area i {
+    margin-right: 5px;
+    cursor: pointer;
 }
 
 /* user area on dashboard */
@@ -587,4 +616,27 @@ html, body {
 
 #post-to-my-feed .entry {
     margin-bottom: 5px;
+}
+
+.form-signin {
+    max-width: 300px;
+    padding: 19px 29px 29px;
+    margin: 0 auto 20px;
+    margin-top: 60px;
+    background-color: #FFFFFF;
+    border: 1px solid #E2E2E2;
+    padding-top: 19px;
+}
+
+.form-signin .form-signin-heading,
+.form-signin .checkbox {
+    margin-bottom: 10px;
+}
+
+.form-signin input[type="text"],
+.form-signin input[type="password"] {
+    font-size: 16px;
+    height: auto;
+    margin-bottom: 15px;
+    padding: 7px 9px;
 }

@@ -4,6 +4,10 @@
 
 {% block container %}
 <div class="container">
+    <h1 style="padding-top: 120px; text-align: center;">Hey, How are you?</h1>
+</div>
+<!--
+<div class="container">
     <div id="user-profile">
         <div class="row-fluid">
             <div class="profile-box span4 profile-dashboard">
@@ -18,7 +22,6 @@
             </div>
             <div class="span8 profile-timeline">
                 <div class="header-inner">
-                    <!-- Code duplication -->
                     {% if user.username == profile.user.username %}
                     <h4>Your recent actions</h4>
                     {% else %}
@@ -64,7 +67,6 @@
                         {% if shared_item.entry.entrylike.user.count %}
                         <span style="float:right;" class="like-count">{{ shared_item.entry.entrylike.user.count }} likes</span>
                         {% endif %}
-                        <!--<span class="comment-count">43 comments</span>-->
                         <span class="like">Like</span>
                         <span class="dislike">Dislike</span>
                         <span class="Comment">Comment</span>
@@ -75,5 +77,5 @@
         </div>
     </div>
 </div>
-
+-->
 {% endblock %}

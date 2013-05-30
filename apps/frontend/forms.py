@@ -2,7 +2,8 @@ from django import forms
 
 
 class SubscribeForm(forms.Form):
-    feed_url = forms.CharField(max_length=256)
+    feed_url = forms.CharField(max_length=256, \
+        widget=forms.TextInput(attrs={'autocomplete':'off', 'data-provide':'typeahead'}))
     tags = forms.CharField(max_length=512, required=False)
 
 

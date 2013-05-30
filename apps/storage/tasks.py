@@ -1,185 +1,43 @@
-import time
-import feedparser
-
-from time import mktime
+import redis
 from datetime import datetime
 from celery.task import Task
-from announce import AnnounceClient
-from apps.storage.models import Feed, Entry, EntryTag
-from django.utils.timezone import utc
 from utils import log as logging
+from utils.feed_fetcher import DriveSync
 from django.conf import settings
+from apps.storage.models import Feed
 
-try:
-    import threadpool
-except ImportError:
-    threadpool = None
+class UpdateFeed(Task):
+    name = "update-feed"
 
-announce_client = AnnounceClient()
-
-class ProcessEntry(object):
-    def __init__(self, feed, entries):
-        self.feed = feed
-        self.entries = entries
-        for entry in self.entries:
-            self.process(entry)
-
-    def process(self, entry):
-        entry_id = entry.id if hasattr(entry, "id") else entry.link
-        if not Entry.objects.filter(entry_id=entry_id):
-            entry_item = Entry(title=entry.title, feed=self.feed)
-            # FIXME: What if entry object has not link variable?
-            entry_item.entry_id = entry.id if hasattr(entry, "id") else entry.link
-            if hasattr(entry, "content"):
-                entry_item.content = entry.content[0].value
-                if hasattr(entry.content[0], "language") and entry.content[0].language is not None:
-                    entry_item.language = entry.content[0]["language"]
-                if hasattr(entry.content[0], "type"):
-                    entry_item.content_type = entry.content[0].type
-            else:
-                entry_item.content = entry.summary
-                entry_item.content_type = entry.summary_detail.type
-                if hasattr(entry.summary_detail, "language") and entry.summary_detail.language is not None:
-                    entry_item.language = entry.summary_detail.language
-
-            if hasattr(entry, "published_parsed"):
-                entry_item.published_at = datetime.fromtimestamp(mktime(entry.published_parsed))
-
-            if hasattr(entry, "author") and entry.author is not None:
-                entry_item.author = entry.author
-
-            if hasattr(entry, "license") and entry.license is not None:
-                entry_item.license = entry.license
-
-            entry_item.link = entry.link
-            entry_item.save()
-
-            announce_client.broadcast_group(self.feed.id, 'new_entry', data={'id': entry_item.id,
-                'feed_id': self.feed.id,
-                'link': entry.link,
-                'published_at': entry_item.published_at.strftime("%B %d, %y") if isinstance(entry_item.published_at, datetime) else entry_item.published_at,
-                'feed_title': self.feed.title,
-                'title':entry.title}
-            )
+    def run(self, feed, **kwargs):
+        r = redis.Redis(connection_pool=settings.REDIS_FEED_POOL)
+        logging.info("%s:%s updating" %(feed.id, feed.title))
+        r.zrem("scheduled_updates", feed.id)
+        DriveSync(feed)
 
 
-class ProcessFeed(object):
-    def __init__(self, feed):
-        self.feed = feed
-        self.user_agent = "FeedCraft RSS Reader User Agent"
+class TaskFeed(Task):
+    name = 'task-feed'
 
-    def process(self):
-        self.parsed = feedparser.parse(self.feed.feed_url, agent=self.user_agent, \
-            etag=self.feed.etag)
-
-        if hasattr(self.parsed, 'status'):
-            # TODO: Other status codes, 200, 301 and etc...
-            if self.parsed.status == 304:
-                return True
-            elif self.parsed.status >= 400:
-                logging.error("HTTP ERROR %s: id:%s url:%s" % (self.parsed.status, \
-                    self.feed.id, self.feed.feed_url))
-                return False
-            if hasattr(self.parsed, 'bozo') and self.parsed.bozo:
-                logging.warn("!BOZO! Feed is not well formed: id:%s url:%s" % \
-                    (self.feed.id, self.feed.feed_url))
-
-        if 'links' in self.parsed.feed:
-            for link in self.parsed.feed.links:
-                if link.rel == 'hub':
-                    # Hub detected!
-                    self.feed.hub = link.href
-
-        self.feed.etag = self.parsed.get('etag', '')
-        # some times this is None (it never should) *sigh*
-        if self.feed.etag is None:
-            self.feed.etag = ''
-
-        self.feed.tagline = self.parsed.feed.get('tagline', '')
-
-        if hasattr(self.parsed.feed, "language"):
-            self.feed.language = self.parsed.feed.language
-
-        if hasattr(self.parsed.feed, "encoding"):
-            self.feed.encoding = self.parsed.feed.encoding
-
-        if hasattr(self.parsed.feed, "subtitle"):
-            self.feed.subtitle = self.parsed.feed.subtitle
-
-        if hasattr(self.parsed.feed, "image") and hasattr(self.parsed.feed.image, "href"):
-            self.feed.image = self.parsed.feed.image.href
-
-        if hasattr(self.parsed.feed, 'title'):
-            self.feed.title = self.parsed.feed.title
-
-        # TODO: UTC seems problematic
-        self.feed.last_sync = datetime.utcnow().replace(tzinfo=utc)
-
-        # Save this feed
-        self.feed.save()
-
-        self.entries = self.parsed.entries
-        self.entries.reverse()
-
-
-class DriveSync(object):
-    def __init__(self, feed):
-        sync_feed = ProcessFeed(feed)
-        retval = sync_feed.process()
-
-        if retval is None:
-            # Process Entries
-            ProcessEntry(feed, sync_feed.entries)
-
-
-class Dispatcher(object):
-    def __init__(self):
-        if threadpool:
-            self.tpool = threadpool.ThreadPool(settings.SYNC_THREAD_COUNT)
-        else:
-            self.tpool = None
-
-    def add_job(self, feed):
-        """ adds a feed processing job to the pool
-        """
-        if self.tpool:
-            req = threadpool.WorkRequest(DriveSync, (feed,))
-            self.tpool.putRequest(req)
-        else:
-            # no threadpool module, just run the job
-            DriveSync(feed)
-
-    def poll(self):
-        """ polls the active threads
-        """
-        if not self.tpool:
-            # no thread pool, nothing to poll
-            return
-        while True:
-            try:
-                time.sleep(0.2)
-                self.tpool.poll()
-            except KeyboardInterrupt:
-                print('! Cancelled by user')
-                break
-            except threadpool.NoResultsPending:
-                break
-
+    def run(self, **kwargs):
+        r = redis.Redis(connection_pool=settings.REDIS_FEED_POOL)
+        now = datetime.utcnow()
+        feed_ids = r.zrangebyscore("scheduled_updates", 0, now.strftime("%s"))
+        print feed_ids
+        for feed_id in feed_ids:
+            feed = Feed.objects.get(id=feed_id)
+            UpdateFeed.apply_async((feed,))
 
 class SyncFeed(Task):
     name = 'sync-feed'
 
-    def run(self, **kwargs):
-        dispatcher = Dispatcher()
-        for feed in Feed.objects.filter(is_active=True):
-            dispatcher.add_job(feed)
-        dispatcher.poll()
+    def run(self, feed, **kwargs):
+        DriveSync(feed)
 
 class FirstSync(Task):
     name = 'first-sync'
 
     def run(self, **kwargs):
-        dispatcher = Dispatcher()
         for feed in Feed.objects.filter(is_active=True, last_sync=None):
-            dispatcher.add_job(feed)
-        dispatcher.poll()
+            SyncFeed.apply_async((feed,))
+
