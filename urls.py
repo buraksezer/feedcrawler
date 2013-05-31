@@ -15,7 +15,7 @@ urlpatterns = patterns('',
     url(r'^getuserfeeds/', 'apps.frontend.views.get_user_feeds', name='getuserfeeds'),
     url(r'^getfeedentries/', 'apps.frontend.views.get_feed_entries', name='getfeed'),
     url(r'^get_previous_next/(?P<feed_id>[\w-]+)/(?P<entry_id>[\w-]+)/$', 'apps.frontend.views.get_previous_and_next_items', name='get_previous_next'),
-
+    url(r'^get_entries_by_feed_id/', 'apps.frontend.views.get_entries_by_feed_id', name='get_entries_by_feed_id'),
     url(r'^render_timeline_standalone/', 'apps.frontend.views.render_timeline_standalone', name='render_timeline_standalone'),
     url(r'^feedfinder/', 'apps.frontend.views.available_feeds', name='available_feeds'),
 
@@ -34,6 +34,5 @@ urlpatterns = patterns('',
     url(r'^subscribe_user/', 'apps.frontend.views.subscribe_user', name='subscribe_user'),
     url(r'^unsubscribe_user/', 'apps.frontend.views.unsubscribe_user', name='unsubscribe_user'),
     url(r'^check_subscribe/', 'apps.frontend.views.check_subscribe', name='check_subscribe'),
-    url(r'^get_entries_by_feed_id/', 'apps.frontend.views.get_entries_by_feed_id', name='get_entries_by_feed_id'),
     url(r'^share_entry/', 'apps.frontend.views.share_entry', name='share_entry'),
 """
