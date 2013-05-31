@@ -176,7 +176,7 @@ def subscribe(request):
                 feed_obj.save()
                 if tags:
                     add_tags()
-            announce_client.register_group(request.user.id, feed_obj.id)
+            announce_client.register_group(request.user.id, Feed.objects.get(feed_url=url).id)
             return HttpResponse(json.dumps({"code": 1, "text": 'New feed source has been added successfully.'}), content_type='application/json')
         else:
             return HttpResponse(json.dumps({"code": 0, "text": "Broken form"}), content_type='application/json')
