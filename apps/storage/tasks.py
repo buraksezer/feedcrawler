@@ -25,9 +25,11 @@ class TaskFeed(Task):
         feed_ids = r.zrangebyscore("scheduled_updates", 0, now.strftime("%s"))
         print feed_ids
         for feed_id in feed_ids:
-            feed = Feed.objects.get(id=feed_id)
-            if feed:
+            try:
+                feed = Feed.objects.get(id=feed_id)
                 UpdateFeed.apply_async((feed,))
+            except Feed.DoesNotExist:
+                r.zrem("scheduled_updates", feed.id)
 
 class SyncFeed(Task):
     name = 'sync-feed'
