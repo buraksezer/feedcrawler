@@ -29,7 +29,7 @@ class TaskFeed(Task):
                 feed = Feed.objects.get(id=feed_id)
                 UpdateFeed.apply_async((feed,))
             except Feed.DoesNotExist:
-                r.zrem("scheduled_updates", feed.id)
+                r.zrem("scheduled_updates", feed_id)
 
 class SyncFeed(Task):
     name = 'sync-feed'
