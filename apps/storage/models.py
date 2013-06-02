@@ -72,8 +72,8 @@ class Feed(models.Model):
                 total = 60 * 6
             else:
                 total = 60 * 24
-            last_entry_date = datetime.datetime.utcnow() if self.last_entry_date is None else self.last_entry_date
-            months_since_last_story = seconds_timesince(datetime.datetime.combine(last_entry_date, datetime.time())) * 60*60*24*30
+            #last_entry_date = datetime.datetime.utcnow() if self.last_entry_date is None else self.last_entry_date
+            months_since_last_story = seconds_timesince(datetime.datetime.combine(self.last_entry_date, datetime.time())) * 60*60*24*30
             total *= max(1, months_since_last_story)
 
         #if self.is_push:

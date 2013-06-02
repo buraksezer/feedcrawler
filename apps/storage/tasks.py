@@ -26,7 +26,8 @@ class TaskFeed(Task):
         print feed_ids
         for feed_id in feed_ids:
             feed = Feed.objects.get(id=feed_id)
-            UpdateFeed.apply_async((feed,))
+            if feed:
+                UpdateFeed.apply_async((feed,))
 
 class SyncFeed(Task):
     name = 'sync-feed'
