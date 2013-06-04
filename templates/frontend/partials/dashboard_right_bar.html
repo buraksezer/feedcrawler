@@ -4,8 +4,9 @@
     <i data-toggle="tooltip" title="Live Stream" id="live-stream" class="foundicon-globe"></i>
     <i data-toggle="tooltip" title="Search a feed" id="search-feed" class="foundicon-search"></i>
     <i data-toggle="tooltip" title="Create a feed group" id="create-feed-group" class="foundicon-plus"></i>
+    <div class="divider"></div>
+    <div id="scrollable-sections-top-shadow"></div>
 </div>
-<div class="divider"></div>
 <div class="feed-items">
 {% for feed in feeds %}
 <div class="feed-item" data-feed-id="{{ feed.id }}">
@@ -19,10 +20,11 @@
         </ul>
     </span>
     {% if feed.title %}
-    <span class="feed-title">{{ feed.title }}</span>
+    <div class="feed-title">{{ feed.title }}</div>
     {% else %}
-    <span class="feed-title">{{ feed.feed_url }}</span>
+    <div class="feed-title">{{ feed.feed_url }}</div>
     {% endif %}
 </div>
 {% endfor %}
 </div>
+<div id="scrollable-sections-bottom-shadow"></div>

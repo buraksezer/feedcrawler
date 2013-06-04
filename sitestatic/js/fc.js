@@ -200,11 +200,12 @@ $(document).ready(function() {
                             $("#feed-source-list").removeClass("auto-detect");
                         }
                     );
+                    $("#feed-source-list,#feed-entry-list").niceScroll({cursorcolor:"#555555", cursoropacitymax: "0.5"});
             });
         }
     });
 
-    $(document).on('click', ".right-bar div.feed-item .feed-title", function(evt) {
+    $(document).on('click', ".right-bar div.feed-items .feed-item", function(evt) {
         var my_feed_item = $(this).closest("div.feed-item");
         var feed_id = my_feed_item.data("feed-id");
         $.post("/get_entries_by_feed_id/", {feed_id: feed_id, csrfmiddlewaretoken: $("#fc-csrf input").val()},
@@ -263,6 +264,7 @@ $(document).ready(function() {
                 $(".right-bar-info-area").empty().append(result.text);
                 $("#subscribe-modal .loading-gif").css("display", "none");
                 $("#subscribe-modal").modal("hide");
+                $(".form-subscribe #id_feed_url").val("");
             }
         });
     });
@@ -335,6 +337,19 @@ $(document).ready(function() {
         $(".make-textbox").css("display", "block");
     });
 
+    $(".right-bar div.feed-items").scroll(function(evt) {
+        if ($(this).scrollTop() != 0) {
+            $("#scrollable-sections-top-shadow").css("opacity", 1);
+        } else {
+            $("#scrollable-sections-top-shadow").css("opacity", 0);
+        }
+        if($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight) {
+            $("#scrollable-sections-bottom-shadow").css("opacity", 1);
+        } else {
+            $("#scrollable-sections-bottom-shadow").css("opacity", 0);
+        }
+    });
+
     check_subscription();
     get_votes();
     get_previous_next_items();
@@ -344,4 +359,7 @@ $(document).ready(function() {
     $('#live-stream').tooltip();
     $('#search-feed').tooltip();
     $('#create-feed-group').tooltip();
+
+    // Initialize custom scrollbars
+    $(".right-bar .feed-items").niceScroll({cursorcolor:"#555555", cursoropacitymax: "0.5"});
 });

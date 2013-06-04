@@ -102,10 +102,18 @@ div.feed-item span.feed-title {
     font-weight: bold;
 }
 
+div.feed-item div.feed-title {
+    font-size: 10px;
+    font-weight: bold;
+    margin-top: -1.71em;
+    margin-left: 17px;
+}
+
 div.feed-item:hover {
     cursor: pointer;
 }
 
+div.feed-item div.feed-title:hover,
 div.feed-item span.feed-title:hover {
     color: #0CAEE3;
 }
@@ -141,6 +149,7 @@ div.feed-item span.badge {
     margin-left: 10px;
 }
 
+.feed-item div.feed-title,
 #feed-entry-list .entry a,
 .feed-item span.feed-title {
     -webkit-transition: color .5s;
@@ -151,6 +160,30 @@ div.feed-item span.badge {
 
 #home-navigator {
     text-align: center;
+}
+
+#scrollable-sections-top-shadow,
+#scrollable-sections-bottom-shadow {
+    height: 8px;
+    right: 0;
+    margin-left: 0;
+    width: 269px;
+    opacity: 0;
+}
+
+
+#scrollable-sections-bottom-shadow {
+    background-image: radial-gradient(ellipse farthest-side at center bottom , rgba(0, 0, 0, 0.3), transparent);
+    border-bottom-color: rgba(0, 0, 0, 0.4);
+    border-bottom-width: 1px;
+    bottom: 0;
+}
+
+#scrollable-sections-top-shadow {
+    background-image: radial-gradient(ellipse farthest-side at center top , rgba(0, 0, 0, 0.3), transparent);
+    border-top-color: rgba(0, 0, 0, 0.4);
+    border-top-width: 1px;
+    top: 0;
 }
 
 .footer {
@@ -358,8 +391,9 @@ html, body {
 }
 
 .right-bar .feed-items {
-    max-height: 590px;
+    max-height: 560px;
     overflow-y: scroll;
+    margin-top: -10px;
 }
 
 .right-bar .feed-item {
@@ -370,7 +404,7 @@ html, body {
     font-weight: normal !important;
 }
 
-.right-bar span.feed-title {
+.right-bar div.feed-title {
     font-size: 13px !important;
 }
 
@@ -390,14 +424,12 @@ html, body {
     padding: 10px;
 }
 
-.right-bar .top-area {
-    background-color: #FAFAFA;
+.right-bar .top-area i {
+    /*background-color: #FAFAFA;*/
     padding-left: 5px;
-}
-
-.top-area i {
     margin-right: 5px;
     cursor: pointer;
+
 }
 
 /* user area on dashboard */
