@@ -695,13 +695,17 @@ label[for="id_feed_search"] {
     max-width: 300px;
     padding: 19px 29px 29px;
     margin: 0 auto 20px;
-    margin-top: 60px;
     background-color: #FFFFFF;
     border: 1px solid #E2E2E2;
     padding-top: 19px;
 }
 
-.form-signin .form-signin-heading,
+.signin-heading {
+    text-align: center;
+    font-style: italic;
+    margin-top: 105px;
+}
+
 .form-signin .checkbox {
     margin-bottom: 10px;
 }
@@ -712,6 +716,14 @@ label[for="id_feed_search"] {
     height: auto;
     margin-bottom: 15px;
     padding: 7px 9px;
+}
+
+.form-signin .remember-me {
+    float: right;
+}
+
+#signin-button {
+    width: 100%;
 }
 
 /* jquery ui */

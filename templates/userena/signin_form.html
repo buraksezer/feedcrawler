@@ -1,42 +1,32 @@
 {% extends 'feedcraft_base.html' %}
 {% load i18n %}
 {% load url from future %}
-
-{% block title %}{% trans "Signin" %}{% endblock %}
-
-{% block custom_css %}
-
-    <style type="text/css">
-
-
-    </style>
-{% endblock %}
-
+{% block title %}{% trans "FeedCraft | Signin" %}{% endblock %}
 {% block container %}
 <div class="container">
+    <h2 class="signin-heading">FeedCraft &alpha;</h2>
     <form class="form-signin" action="" method="post">
-        <h2 class="form-signin-heading">Please sign in</h2>
-      {% csrf_token %}
-      <fieldset>
-        {{ form.non_field_errors }}
-        {% for field in form %}
-        {{ field.errors }}
-        {% comment %} Displaying checkboxes differently {% endcomment %}
-        {% if field.name == 'remember_me' %}
-        <p class="checkbox">
-        <label for="id_{{ field.name }}">{{ field }} {{ field.label }}</label>
-        </p>
-        {% else %}
-        <p>
-        {{ field.label_tag }}
-        {{ field }}
-        </p>
-        {% endif %}
-        {% endfor %}
-      </fieldset>
-      <button type="submit" class="btn btn-large btn-primary">Sign in</button>
-      <p class="forgot-password"><a href="{% url 'userena_password_reset' %}" title="{% trans 'Forgot your password?' %}">{% trans "Forgot your password?" %}</a></p>
-      {% if next %}<input type="hidden" name="next" value="{{ next }}" />{% endif %}
+        {% csrf_token %}
+        <fieldset>
+            {{ form.non_field_errors }}
+            {% for field in form %}
+            {{ field.errors }}
+            {% comment %} Displaying checkboxes differently {% endcomment %}
+            {% if field.name == 'remember_me' %}
+            <p class="checkbox remember-me">
+                <label for="id_{{ field.name }}">{{ field }} {{ field.label }}</label>
+            </p>
+            {% else %}
+            <p>
+                {{ field }}
+            </p>
+            {% endif %}
+            {% endfor %}
+            <button id="signin-button" type="submit" class="btn btn-large btn-primary">Sign in</button>
+        </fieldset>
+        <!-- <div class="forgot-password"><a href="{% url 'userena_password_reset' %}" title="{% trans 'Forgot your password?' %}">{% trans "Forgot your password?" %}</a></div>
+        {% if next %}<input type="hidden" name="next" value="{{ next }}" />{% endif %} -->
+
     </form>
 </div>
 {% endblock %}

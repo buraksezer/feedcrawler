@@ -7,6 +7,7 @@ admin.autodiscover()
 urlpatterns = patterns('',
     url(r'^$', 'apps.frontend.views.home', name='home'),
     url(r'^user/(?P<username>(?!signout|signup|signin)[\.\w-]+)/$', 'apps.userena.views.profile_detail', name='userena_profile_detail'),
+    url(r'^user/signin/', 'apps.userena.views.signin', name='userena_signin'),
     url(r'^user/', include('userena.urls')),
     url(r'^explorer/(?P<entry_id>[\w-]+)/$', 'apps.frontend.views.explorer', name='explorer'),
     url(r'^subscribe/', 'apps.frontend.views.subscribe', name='subscribe'),
