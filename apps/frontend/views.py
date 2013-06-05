@@ -4,7 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.contrib.auth.models import User
-from apps.frontend.forms import SubscribeForm
+from apps.frontend.forms import SubscribeForm, FeedSearchForm
 from apps.storage.models import Feed, FeedTag, Entry, EntryLike, EntryDislike
 from userena.utils import get_profile_model, get_user_model
 
@@ -56,7 +56,9 @@ def home(request):
     profile = get_user_profile(request.user.username)
     return render_to_response('frontend/home.html', {"timeline": True, "entries": entries,
         "feeds": Feed.objects.filter(users=request.user.id).order_by("id"),
-        "profile": profile}, context_instance=RequestContext(request))
+        "profile": profile,
+        "feed_search_form": FeedSearchForm(),
+        }, context_instance=RequestContext(request))
 
 
 def explorer(request, entry_id):
@@ -214,6 +216,16 @@ def vote(request):
             return HttpResponse(0)
     else:
         return HttpResponse("You must be logged in for using this.")
+
+
+def get_user_subscriptions(request):
+    if request.user.is_authenticated():
+        result = []
+        # What if title does not exist?
+        for feed in Feed.objects.filter(users=request.user, title__icontains=request.GET.get("term")):
+            item = feed.title[:32] if len(feed.title) >= 32 else feed.title
+            result.append({"id": feed.id, "label": item})
+        return HttpResponse(json.dumps(result), content_type='application/json')
 
 """
 def subscribe_user(request):

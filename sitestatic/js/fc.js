@@ -350,6 +350,42 @@ $(document).ready(function() {
         }
     });
 
+    $("#search-feed").click(function() {
+        $(".feed-search-box #id_feed_search").val('');
+        if($(".feed-search-box:hidden").length) {
+            $(".feed-search-box").css("display", "block")
+        } else {
+            $(".feed-search-box").css("display", "none");
+        }
+    });
+
+    var cache = {};
+    $("#id_feed_search").autocomplete({
+        minLength: 3,
+        delay: 1000,
+        source: function(request, response) {
+            var term = request.term;
+            if (term in cache) {
+                response(cache[term]);
+                return;
+            }
+            $.getJSON("/get_user_subscriptions/", request, function(data, status, xhr) {
+                cache[term] = data;
+                response(data);
+            });
+        },
+        select: function(event, ui) {
+            $.post("/get_entries_by_feed_id/", {feed_id: ui.item.id, csrfmiddlewaretoken: $("#fc-csrf input").val()},
+                function(result) {
+                    $("#dashboard .timeline").empty();
+                    $("#dashboard .timeline").append(result);
+                    $(this).val('');
+                    $(".feed-search-box").css("display", "none");
+                }
+            );
+        }
+    });
+
     check_subscription();
     get_votes();
     get_previous_next_items();
@@ -362,4 +398,11 @@ $(document).ready(function() {
 
     // Initialize custom scrollbars
     $(".right-bar .feed-items").niceScroll({cursorcolor:"#555555", cursoropacitymax: "0.5"});
+
+    $('.dropdown-toggle').dropdown();
+
+    // Fix input element click proble
+    $('.dropdown input, .dropdown label').click(function(e) {
+        e.stopPropagation();
+    });
 });

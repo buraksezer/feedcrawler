@@ -1,6 +1,7 @@
 {% extends "feedcraft_base.html" %}
 {% block layout_id %}dashboard-layout{% endblock %}
 {% block navbar_content %}
+<div style="display:none" id="feed_search" data="{{ feed_search }}"></div>
 <div class="nav-collapse">
     <ul class="nav pull-right">
         {% if user.is_authenticated %}

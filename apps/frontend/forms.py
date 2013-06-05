@@ -7,6 +7,10 @@ class SubscribeForm(forms.Form):
     tags = forms.CharField(max_length=512, required=False)
 
 
+class FeedSearchForm(forms.Form):
+    feed_search = forms.CharField(label="Search in your subscriptions", max_length=1024, \
+        widget=forms.TextInput(attrs={"type": "text", 'placeholder':'URL or title'}))
+
 #class AuthenticationForm(forms.Form):
 #    """
 #    Base class for authenticating users. Extend this to get a form that accepts
