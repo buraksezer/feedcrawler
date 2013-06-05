@@ -16,6 +16,29 @@
 
 })(window);
 
+$.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie != '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+        }
+        if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+            // Only send the token to relative URLs i.e. locally.
+            xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+        }
+    }
+});
 
 $(document).ready(function() {
     function get_previous_next_items() {
@@ -67,7 +90,7 @@ $(document).ready(function() {
 
     function common_vote(action_type) {
         if ($("#navigator .entry-"+action_type).attr("disabled") != "disabled") {
-            $.post("/vote/", {action_type: action_type, csrfmiddlewaretoken: $("#fc-csrf input").val(),
+            $.post("/vote/", {action_type: action_type,
                 entry_id: $("#iframe-container").data("entry-id")}, function(result) {
                 if (result == 1) {
                     var disabled_action = (action_type == "dislike") ? "like" : "dislike";
@@ -89,13 +112,13 @@ $(document).ready(function() {
     function check_subscription() {
         if (!$(".check-subscription").length) return;
         $.each($(".check-subscription"), function(idx, value) {
-            $.post("/check_subscribe/", {username: $(value).data("username"),
-                csrfmiddlewaretoken: $("#fc-csrf input").val()}, function(result) {
-                if (result == 1) {
-                    $(".subscribe-user-icon").css("display", "none");
-                    $(".unsubscribe-button").css("display", "block");
-                }
-            });
+            $.post("/check_subscribe/", {username: $(value).data("username")},
+                function(result) {
+                    if (result == 1) {
+                        $(".subscribe-user-icon").css("display", "none");
+                        $(".unsubscribe-button").css("display", "block");
+                    }
+                });
         });
     }
 
@@ -140,7 +163,7 @@ $(document).ready(function() {
         var feed_id = $(this).data("feed-id");
         var my_feed_item = $(this);
         var current_entry_id = $("#iframe-container").data("entry-id");
-        $.post("/getfeedentries/", {current_entry_id: current_entry_id, feed_id: feed_id, csrfmiddlewaretoken: $("#fc-csrf input").val()},
+        $.post("/getfeedentries/", {current_entry_id: current_entry_id, feed_id: feed_id},
             function(result) {
                 $.each($("#feed-source-list div.feed-item"), function(idx, item) {
                     if ($(item).hasClass("active")) {
@@ -177,14 +200,14 @@ $(document).ready(function() {
         }
 
         if ($("#feed-source-list").length == 0) {
-            $.post("/getuserfeeds/", {current_feed_id: feed_id,
-                csrfmiddlewaretoken: $("#fc-csrf input").val()}, function(result) {
+            $.post("/getuserfeeds/", {current_feed_id: feed_id},
+                function(result) {
                     $(".main .box .row-fluid").prepend(result);
                     $("#iframe-container").removeClass("span12").addClass("span6");
                     $("iframe").css("width", "54.7%");
                     $("iframe").css("margin-left", "6px");
                     $('.row-fluid [class*="span"]').css("margin-left", "-0.436%", "important");
-                    $.post("/getfeedentries/", {current_entry_id: entry_id, feed_id: feed_id, csrfmiddlewaretoken: $("#fc-csrf input").val()},
+                    $.post("/getfeedentries/", {current_entry_id: entry_id, feed_id: feed_id},
                         function(result) {
                             $.each($("#feed-entry-list .trigger-wrapper"), function(idx, item) {
                                 if ($(item).data("entry-id") == entry_id) {
@@ -208,7 +231,7 @@ $(document).ready(function() {
     $(document).on('click', ".right-bar div.feed-items .feed-item", function(evt) {
         var my_feed_item = $(this).closest("div.feed-item");
         var feed_id = my_feed_item.data("feed-id");
-        $.post("/get_entries_by_feed_id/", {feed_id: feed_id, csrfmiddlewaretoken: $("#fc-csrf input").val()},
+        $.post("/get_entries_by_feed_id/", {feed_id: feed_id},
             function(result) {
                 $("#dashboard .timeline").empty();
                 $("#dashboard .timeline").append(result);
@@ -218,7 +241,7 @@ $(document).ready(function() {
 
     $(document).on('click', ".right-bar #live-stream", function(evt) {
         var my_feed_item = $(this);
-        $.post("/render_timeline_standalone/", {csrfmiddlewaretoken: $("#fc-csrf input").val()},
+        $.post("/render_timeline_standalone/",
             function(result) {
                 $("#dashboard .timeline").empty();
                 $("#dashboard .timeline").append(result);
@@ -272,7 +295,7 @@ $(document).ready(function() {
     $(".unsubscribe-feed").click(function(evt) {
         evt.preventDefault();
         var feed_id = $(this).closest(".feed-item").data("feed-id");
-        $.post("/unsubscribe/", {feed_id: feed_id, csrfmiddlewaretoken: $("#fc-csrf input").val()},
+        $.post("/unsubscribe/", {feed_id: feed_id},
             function(result) {
                 if (result.code == "1") {
                     $(".right-bar-info-area").css("display", "block").delay(5000).fadeOut();
@@ -294,7 +317,7 @@ $(document).ready(function() {
 
     $(".subscribe-user-icon").click(function(evt) {
         evt.preventDefault();
-        $.post("/subscribe_user/", {username: $(this).data("username"), csrfmiddlewaretoken: $("#fc-csrf input").val()},
+        $.post("/subscribe_user/", {username: $(this).data("username")},
             function(result) {
                 // FIXME: Processing gif is required.
                 if (result == 1) {
@@ -310,7 +333,7 @@ $(document).ready(function() {
 
     $(".unsubscribe-button").click(function(evt) {
         evt.preventDefault();
-        $.post("/unsubscribe_user/", {username: $(this).data("username"), csrfmiddlewaretoken: $("#fc-csrf input").val()},
+        $.post("/unsubscribe_user/", {username: $(this).data("username")},
             // FIXME: Processing gif is required.
             function(result) {
                 if (result == 1) {
@@ -325,7 +348,7 @@ $(document).ready(function() {
         var feed_id = $("#iframe-container").data("feed-id");
         var entry_id = $("#iframe-container").data("entry-id");
         var note = $("#post-to-my-feed .make-textbox").html();
-        $.post("/share_entry/", {note: note, entry_id: entry_id, feed_id: feed_id, csrfmiddlewaretoken: $("#fc-csrf input").val()},
+        $.post("/share_entry/", {note: note, entry_id: entry_id, feed_id: feed_id},
             function(result){
                 console.log(result);
             }
@@ -375,7 +398,7 @@ $(document).ready(function() {
             });
         },
         select: function(event, ui) {
-            $.post("/get_entries_by_feed_id/", {feed_id: ui.item.id, csrfmiddlewaretoken: $("#fc-csrf input").val()},
+            $.post("/get_entries_by_feed_id/", {feed_id: ui.item.id},
                 function(result) {
                     $("#dashboard .timeline").empty();
                     $("#dashboard .timeline").append(result);
