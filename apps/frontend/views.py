@@ -7,6 +7,8 @@ from django.contrib.auth.models import User
 from apps.frontend.forms import SubscribeForm, FeedSearchForm
 from apps.storage.models import Feed, FeedTag, Entry, EntryLike, EntryDislike
 from userena.utils import get_profile_model, get_user_model
+from django.contrib.auth.decorators import login_required
+from utils import ajax_required
 
 # For doing realtime stuff
 from announce import AnnounceClient
@@ -36,19 +38,18 @@ def get_user_timeline(user_id):
     return entries
 
 
+@ajax_required
+@login_required
 def render_timeline_standalone(request):
-    if not request.user.is_authenticated():
-        return HttpResponse("You must be sign in to do this.")
     return render_to_response('frontend/partials/dashboard_timeline.html', {"timeline": True,
         'entries': get_user_timeline(request.user.id)}, context_instance=RequestContext(request))
 
 
+@login_required
 def home(request):
     profile = None
     entries = []
     # FIXME: This method may have caused performance issues.
-    if not request.user.is_authenticated():
-        return HttpResponseRedirect("/user/signin/")
     # This function must be called from Sign Up function
     # This is a temporary stuation
     #cass.save_user(request.user.username)
@@ -66,26 +67,28 @@ def explorer(request, entry_id):
         'entry': get_object_or_404(Entry, id=entry_id),
     }, context_instance=RequestContext(request))
 
+
+@ajax_required
+@login_required
 def available_feeds(request):
-    if not request.user.is_authenticated():
-        return HttpResponse("You must be login for using this.")
     feeds = Feed.objects.all().order_by("-entries_last_month")
     return render_to_response('frontend/available_feeds.html',
         {"feeds": feeds}, context_instance=RequestContext(request))
 
+
+@ajax_required
+@login_required
 def get_user_feeds(request):
-    if not request.user.is_authenticated():
-        return HttpResponse("You must be login for using this.")
     return render_to_response('frontend/get_user_feeds.html', {"current_feed_id": int(request.POST["current_feed_id"]),
         "feeds": Feed.objects.filter(users=request.user.id).order_by("id")},
         context_instance=RequestContext(request))
 
 
+@ajax_required
+@login_required
 def get_entries_by_feed_id(request):
     if request.method != "POST":
         return HttpResponse("You must send a POST request.")
-    if not request.user.is_authenticated():
-        return HttpResponse("You must be login for using this.")
     depth = 1 if request.POST.get("depth") is None else int(request.POST.get("depth"))
     entries = Entry.objects.filter(feed=request.POST["feed_id"])[:depth*10]
     feed_title = Feed.objects.get(id=request.POST["feed_id"]).title
@@ -94,11 +97,11 @@ def get_entries_by_feed_id(request):
         "entries": entries}, context_instance=RequestContext(request))
 
 
+@ajax_required
+@login_required
 def get_feed_entries(request):
     if request.method != "POST":
         return HttpResponse("You must send a POST request.")
-    if not request.user.is_authenticated():
-        return HttpResponse("You must be login for using this.")
     data = OrderedDict()
     for entry in Entry.objects.filter(feed=request.POST["feed_id"]):
         if not entry.published_at in data:
@@ -110,6 +113,7 @@ def get_feed_entries(request):
         "data": data}, context_instance=RequestContext(request))
 
 
+@ajax_required
 def get_previous_and_next_items(request, feed_id, entry_id):
     # Why do we use get_next/previous_by_foo methods for doing this?
     # Those methods are broken for our case?
@@ -126,9 +130,9 @@ def get_previous_and_next_items(request, feed_id, entry_id):
     return HttpResponse(json.dumps({"next": next, "previous": previous}), content_type='application/json')
 
 
+@ajax_required
+@login_required
 def unsubscribe(request):
-    if not request.user.is_authenticated():
-        return HttpResponse("You must be login for using this.")
     if request.method != "POST":
         return HttpResponse("You must send a POST request")
     feed_id = request.POST.get("feed_id", None)
@@ -143,6 +147,9 @@ def unsubscribe(request):
     return HttpResponse(json.dumps({"code": 1, "text": "You have been unsubscribed successfully from %s." % feed.title }), \
         content_type='application/json')
 
+
+@ajax_required
+@login_required
 def subscribe(request):
     def add_tags():
         for tag in tags:
@@ -187,45 +194,45 @@ def subscribe(request):
         return render_to_response('frontend/subscribe.html', {"form": form}, context_instance=RequestContext(request))
 
 
+@ajax_required
+@login_required
 def vote(request):
     '''Sets or removes user votes on entries.'''
     # FIXME: We must evaluate error cases
-    if request.user.is_authenticated():
-        if request.method == "POST":
-            db_object = EntryLike if request.POST["action_type"] == "like" else EntryDislike
-            entry = Entry.objects.get(id=request.POST["entry_id"])
-            try:
-                item = db_object.objects.get(entry=entry)
-                if not item.user.filter(username__contains=request.user.username):
-                    item.user.add(request.user)
-                    item.save()
-                else:
-                    item.user.remove(request.user)
-            except db_object.DoesNotExist:
-                item = db_object(entry=entry)
+    if request.method == "POST":
+        db_object = EntryLike if request.POST["action_type"] == "like" else EntryDislike
+        entry = Entry.objects.get(id=request.POST["entry_id"])
+        try:
+            item = db_object.objects.get(entry=entry)
+            if not item.user.filter(username__contains=request.user.username):
+                item.user.add(request.user)
                 item.save()
-                my_item = db_object.objects.get(id=item.id)
-                my_item.user.add(request.user)
-                my_item.save()
-            return HttpResponse(1)
-        else:
-            db_object = EntryLike if request.GET["action_type"] == "like" else EntryDislike
-            entry = Entry.objects.get(id=request.GET["entry_id"])
-            if db_object.objects.filter(entry=entry, user=request.user):
-                return HttpResponse(1)
-            return HttpResponse(0)
+            else:
+                item.user.remove(request.user)
+        except db_object.DoesNotExist:
+            item = db_object(entry=entry)
+            item.save()
+            my_item = db_object.objects.get(id=item.id)
+            my_item.user.add(request.user)
+            my_item.save()
+        return HttpResponse(1)
     else:
-        return HttpResponse("You must be logged in for using this.")
+        db_object = EntryLike if request.GET["action_type"] == "like" else EntryDislike
+        entry = Entry.objects.get(id=request.GET["entry_id"])
+        if db_object.objects.filter(entry=entry, user=request.user):
+            return HttpResponse(1)
+        return HttpResponse(0)
 
 
+@ajax_required
+@login_required
 def get_user_subscriptions(request):
-    if request.user.is_authenticated():
-        result = []
-        # What if title does not exist?
-        for feed in Feed.objects.filter(users=request.user, title__icontains=request.GET.get("term")):
-            item = feed.title[:32] if len(feed.title) >= 32 else feed.title
-            result.append({"id": feed.id, "label": item})
-        return HttpResponse(json.dumps(result), content_type='application/json')
+    result = []
+    # What if title does not exist?
+    for feed in Feed.objects.filter(users=request.user, title__icontains=request.GET.get("term")):
+        item = feed.title[:32] if len(feed.title) >= 32 else feed.title
+        result.append({"id": feed.id, "label": item})
+    return HttpResponse(json.dumps(result), content_type='application/json')
 
 """
 def subscribe_user(request):
