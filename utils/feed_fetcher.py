@@ -42,7 +42,7 @@ class ProcessEntry(object):
                 if hasattr(entry.summary_detail, "language") and entry.summary_detail.language is not None:
                     entry_item.language = entry.summary_detail.language
 
-            if hasattr(entry, "published_parsed"):
+            if hasattr(entry, "published_parsed") and entry.published_parsed is not None:
                 entry_item.published_at = datetime.fromtimestamp(mktime(entry.published_parsed))
             else:
                 entry_item.published_at = datetime.utcnow()
