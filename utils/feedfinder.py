@@ -10,8 +10,8 @@ Usage:
     'http://scripting.com/rss.xml'
     >>>
     >>> feedfinder.feeds('scripting.com')
-    ['http://delong.typepad.com/sdj/atom.xml', 
-     'http://delong.typepad.com/sdj/index.rdf', 
+    ['http://delong.typepad.com/sdj/atom.xml',
+     'http://delong.typepad.com/sdj/index.rdf',
      'http://delong.typepad.com/sdj/rss.xml']
     >>>
 
@@ -25,10 +25,10 @@ How it works:
   1. If the URI points to a feed, it is simply returned; otherwise
      the page is downloaded and the real fun begins.
   2. Feeds pointed to by LINK tags in the header of the page (autodiscovery)
-  3. <A> links to feeds on the same server ending in ".rss", ".rdf", ".xml", or 
+  3. <A> links to feeds on the same server ending in ".rss", ".rdf", ".xml", or
      ".atom"
   4. <A> links to feeds on the same server containing "rss", "rdf", "xml", or "atom"
-  5. <A> links to feeds on external servers ending in ".rss", ".rdf", ".xml", or 
+  5. <A> links to feeds on external servers ending in ".rss", ".rdf", ".xml", or
      ".atom"
   6. <A> links to feeds on external servers containing "rss", "rdf", "xml", or "atom"
   7. Try some guesses about common places for feeds (index.xml, atom.xml, etc.).
@@ -47,38 +47,11 @@ Also Jason Diamond, Brian Lalor for bug reporting and patches"""
 _debug = 0
 
 import sgmllib, urllib, urlparse, re, sys, robotparser
+import requests
+from StringIO import StringIO
+from lxml import etree
 
-import threading
-class TimeoutError(Exception): pass
-def timelimit(timeout):
-    """borrowed from web.py"""
-    def _1(function):
-        def _2(*args, **kw):
-            class Dispatch(threading.Thread):
-                def __init__(self):
-                    threading.Thread.__init__(self)
-                    self.result = None
-                    self.error = None
-                    
-                    self.setDaemon(True)
-                    self.start()
 
-                def run(self):
-                    try:
-                        self.result = function(*args, **kw)
-                    except:
-                        self.error = sys.exc_info()
-
-            c = Dispatch()
-            c.join(timeout)
-            if c.isAlive():
-                raise TimeoutError, 'took too long'
-            if c.error:
-                raise c.error[0], c.error[1]
-            return c.result
-        return _2
-    return _1
-    
 # XML-RPC support allows feedfinder to query Syndic8 for possible matches.
 # Python 2.3 now comes with this module by default, otherwise you can download it
 try:
@@ -92,21 +65,22 @@ if not dict:
         for k, v in aList:
             rc[k] = v
         return rc
-    
+
 def _debuglog(message):
     if _debug: print message
-    
+
 class URLGatekeeper:
     """a class to track robots.txt rules across multiple servers"""
     def __init__(self):
         self.rpcache = {} # a dictionary of RobotFileParser objects, by domain
         self.urlopener = urllib.FancyURLopener()
-        self.urlopener.version = "feedfinder/" + __version__ + " " + self.urlopener.version + " +http://www.aaronsw.com/2002/feedfinder/"
+        self.urlopener.version = "NewsBlur Feed Finder (Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_1) AppleWebKit/534.48.3 (KHTML, like Gecko) Version/5.1 Safari/534.48.3)"
         _debuglog(self.urlopener.version)
-        self.urlopener.addheaders = [('User-agent', self.urlopener.version)]
+        self.urlopener.addheaders = [('User-Agent', self.urlopener.version)]
+        # self.urlopener.addheaders = [('User-Agent', self.urlopener.version), ('Accept', '*')]
         robotparser.URLopener.version = self.urlopener.version
         robotparser.URLopener.addheaders = self.urlopener.addheaders
-        
+
     def _getrp(self, url):
         protocol, domain = urlparse.urlparse(url)[:2]
         if self.rpcache.has_key(domain):
@@ -121,18 +95,17 @@ class URLGatekeeper:
             pass
         self.rpcache[domain] = rp
         return rp
-        
+
     def can_fetch(self, url):
         rp = self._getrp(url)
         allow = rp.can_fetch(self.urlopener.version, url)
         _debuglog("gatekeeper of %s says %s" % (url, allow))
         return allow
 
-    @timelimit(10)
     def get(self, url, check=True):
         if check and not self.can_fetch(url): return ''
         try:
-            return self.urlopener.open(url).read()
+            return requests.get(url, headers=dict(self.urlopener.addheaders)).content
         except:
             return ''
 
@@ -143,24 +116,25 @@ class BaseParser(sgmllib.SGMLParser):
         sgmllib.SGMLParser.__init__(self)
         self.links = []
         self.baseuri = baseuri
-        
+
     def normalize_attrs(self, attrs):
         def cleanattr(v):
             v = sgmllib.charref.sub(lambda m: unichr(int(m.groups()[0])), v)
+            if not v: return
             v = v.strip()
             v = v.replace('&lt;', '<').replace('&gt;', '>').replace('&apos;', "'").replace('&quot;', '"').replace('&amp;', '&')
             return v
-        attrs = [(k.lower(), cleanattr(v)) for k, v in attrs]
-        attrs = [(k, k in ('rel','type') and v.lower() or v) for k, v in attrs]
+        attrs = [(k.lower(), cleanattr(v)) for k, v in attrs if cleanattr(v)]
+        attrs = [(k, k in ('rel','type') and v.lower() or v) for k, v in attrs if cleanattr(v)]
         return attrs
-        
+
     def do_base(self, attrs):
         attrsD = dict(self.normalize_attrs(attrs))
         if not attrsD.has_key('href'): return
         self.baseuri = attrsD['href']
-    
+
     def error(self, *a, **kw): pass # we're not picky
-        
+
 class LinkParser(BaseParser):
     FEED_TYPES = ('application/rss+xml',
                   'text/xml',
@@ -183,6 +157,7 @@ class ALinkParser(BaseParser):
         self.links.append(urlparse.urljoin(self.baseuri, attrsD['href']))
 
 def makeFullURI(uri):
+    if not uri: return
     uri = uri.strip()
     if uri.startswith('feed://'):
         uri = 'http://' + uri.split('feed://', 1).pop()
@@ -196,15 +171,32 @@ def getLinks(data, baseuri):
     p.feed(data)
     return p.links
 
+def getLinksLXML(data, baseuri):
+    parser = etree.HTMLParser(recover=True)
+    tree = etree.parse(StringIO(data), parser)
+    links = []
+    for link in tree.findall('.//link'):
+        if link.attrib.get('type') in LinkParser.FEED_TYPES:
+            href = link.attrib['href']
+            if href: links.append(href)
+    return links
+
 def getALinks(data, baseuri):
     p = ALinkParser(baseuri)
     p.feed(data)
     return p.links
 
 def getLocalLinks(links, baseuri):
+    found_links = []
+    if not baseuri: return found_links
     baseuri = baseuri.lower()
-    urilen = len(baseuri)
-    return [l for l in links if l.lower().startswith(baseuri)]
+    for l in links:
+        try:
+            if l.lower().startswith(baseuri):
+                found_links.append(l)
+        except (AttributeError, UnicodeDecodeError):
+            pass
+    return found_links
 
 def isFeedLink(link):
     return link[-4:].lower() in ('.rss', '.rdf', '.xml', '.atom')
@@ -217,7 +209,7 @@ r_brokenRedirect = re.compile('<newLocation[^>]*>(.*?)</newLocation>', re.S)
 def tryBrokenRedirect(data):
     if '<newLocation' in data:
         newuris = r_brokenRedirect.findall(data)
-        if newuris: return newuris[0].strip()
+        if newuris and newuris[0]: return newuris[0].strip()
 
 def couldBeFeedData(data):
     data = data.lower()
@@ -228,8 +220,12 @@ def isFeed(uri):
     _debuglog('seeing if %s is a feed' % uri)
     protocol = urlparse.urlparse(uri)
     if protocol[0] not in ('http', 'https'): return 0
-    data = _gatekeeper.get(uri)
-    return couldBeFeedData(data)
+    try:
+        data = _gatekeeper.get(uri, check=False)
+    except (KeyError, UnicodeDecodeError):
+        return False
+    count = couldBeFeedData(data)
+    return count
 
 def sortFeeds(feed1Info, feed2Info):
     return cmp(feed2Info['headlines_rank'], feed1Info['headlines_rank'])
@@ -246,7 +242,7 @@ def getFeedsFromSyndic8(uri):
     except:
         pass
     return feeds
-    
+
 def feeds(uri, all=False, querySyndic8=False, _recurs=None):
     if _recurs is None: _recurs = [uri]
     fulluri = makeFullURI(uri)
@@ -267,6 +263,12 @@ def feeds(uri, all=False, querySyndic8=False, _recurs=None):
         outfeeds = getLinks(data, fulluri)
     except:
         outfeeds = []
+    if not outfeeds:
+        _debuglog('using lxml to look for LINK tags')
+        try:
+            outfeeds = getLinksLXML(data, fulluri)
+        except:
+            outfeeds = []
     _debuglog('found %s feeds through LINK tags' % len(outfeeds))
     outfeeds = filter(isFeed, outfeeds)
     if all or not outfeeds:
@@ -276,6 +278,7 @@ def feeds(uri, all=False, querySyndic8=False, _recurs=None):
             links = getALinks(data, fulluri)
         except:
             links = []
+        _debuglog('no LINK tags, looking at local links')
         locallinks = getLocalLinks(links, fulluri)
         # look for obvious feed links on the same server
         outfeeds.extend(filter(isFeed, filter(isFeedLink, locallinks)))
@@ -291,6 +294,7 @@ def feeds(uri, all=False, querySyndic8=False, _recurs=None):
     if all or not outfeeds:
         _debuglog('no A tags, guessing')
         suffixes = [ # filenames used by popular software:
+          'feed/', # obvious
           'atom.xml', # blogger, TypePad
           'index.atom', # MT, apparently
           'index.rdf', # MT
@@ -313,6 +317,9 @@ def feed(uri):
     #todo: give preference to certain feed formats
     feedlist = feeds(uri)
     if feedlist:
+        feeds_no_comments = filter(lambda f: 'comments' not in f.lower(), feedlist)
+        if feeds_no_comments:
+            return feeds_no_comments[0]
         return feedlist[0]
     else:
         return None
@@ -350,7 +357,7 @@ def test():
         uri = urlparse.urljoin(uri, data.split('<link rel="next" href="').pop().split('"')[0])
     print
     print count, 'tests executed,', len(failed), 'failed'
-        
+
 if __name__ == '__main__':
     args = sys.argv[1:]
     if args and args[0] == '--debug':

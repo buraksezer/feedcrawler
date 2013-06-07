@@ -122,6 +122,42 @@ $(document).ready(function() {
         });
     }
 
+    function find_and_subscribe_feed() {
+        $.post("/subscribe/",  {feed_url: $("#id_feed_url").val()}, function(result) {
+            if ($(".subscribe-feed-dropdown").length == 0) {
+                $(".right-bar-info-area").css("display", "block").delay(3000).fadeOut();
+                $(".right-bar-info-area").empty().append(result.text);
+                if (result.code == "1") {
+                    $("#id_feed_url").val("");
+                    $(".subscribe-feed-box").css("display", "none");
+                }
+            } else {
+                var dropdown_content = $(".subscribe-feed-dropdown");
+                dropdown_content.closest("li.dropdown").addClass("open");
+                $(".subscribe-warning").css("display", "block").empty().append(result.text);
+                if (result.code == "1") {
+                    var delay = setTimeout(function() {
+                        dropdown_content.closest("li.dropdown").removeClass("open");
+                        $("#id_feed_url").val("");
+                        $(".subscribe-warning").css("display", "none").empty();
+                    }, 3000);
+                }
+            }
+        });
+    }
+
+    // obtain a reference to the original handler
+    var _clearMenus = $._data(document, "events").click.filter(function (el) {
+        return el.namespace === 'data-api.dropdown' && el.selector === undefined
+    })[0].handler;
+
+    // disable the old listener
+    $(document)
+        .off('click.data-api.dropdown', _clearMenus)
+        .on('click.data-api.dropdown', function (e) {
+            // call the handler only when not right-click
+            e.button === 2 || _clearMenus()
+        });
 
     $("div.feed").delegate("p", "click", function(evt) {
         var feed_item = $(this).closest(".feed").find("ul.entries")
@@ -267,31 +303,6 @@ $(document).ready(function() {
         $(this).select();
     });
 
-    $("a[href=#subscribe-modal]").click(function(evt) {
-        evt.preventDefault();
-        if (!$("#subscribe-modal").length) {
-            $.get("/subscribe/", function(result) {
-                $("#feedcraft-modal-container").prepend(result);
-                $('#subscribe-modal').modal();
-            });
-        }
-    });
-
-    $(document).on("click", "#subscribe-modal button[type=submit]", function(evt) {
-        evt.preventDefault();
-        var subs_form = $("#subscribe-modal form.form-subscribe").serialize();
-        $("#subscribe-modal .loading-gif").css("display", "block");
-        $.post("/subscribe/", subs_form, function(result) {
-            if (result.code == "1") {
-                $(".right-bar-info-area").css("display", "block").delay(5000).fadeOut();
-                $(".right-bar-info-area").empty().append(result.text);
-                $("#subscribe-modal .loading-gif").css("display", "none");
-                $("#subscribe-modal").modal("hide");
-                $(".form-subscribe #id_feed_url").val("");
-            }
-        });
-    });
-
     $(".unsubscribe-feed").click(function(evt) {
         evt.preventDefault();
         var feed_id = $(this).closest(".feed-item").data("feed-id");
@@ -374,11 +385,22 @@ $(document).ready(function() {
     });
 
     $("#search-feed").click(function() {
+        $(".subscribe-feed-box:visible").css("display", "none");
         $(".feed-search-box #id_feed_search").val('');
         if($(".feed-search-box:hidden").length) {
             $(".feed-search-box").css("display", "block")
         } else {
             $(".feed-search-box").css("display", "none");
+        }
+    });
+
+    $("#subscribe-feed").click(function() {
+        $(".feed-search-box:visible").css("display", "none");
+        $(".subscribe-feed-box #id_feed_url").val('');
+        if($(".subscribe-feed-box:hidden").length) {
+            $(".subscribe-feed-box").css("display", "block")
+        } else {
+            $(".subscribe-feed-box").css("display", "none");
         }
     });
 
@@ -394,6 +416,10 @@ $(document).ready(function() {
             }
             $.getJSON("/get_user_subscriptions/", request, function(data, status, xhr) {
                 cache[term] = data;
+                if (data.length == 0) {
+                    $(".right-bar-info-area").css("display", "block").delay(3000).fadeOut();
+                    $(".right-bar-info-area").empty().append("No result found for "+term);
+                }
                 response(data);
             });
         },
@@ -407,6 +433,17 @@ $(document).ready(function() {
                 }
             );
         }
+    });
+
+    $("#id_feed_url").keypress(function(evt) {
+        if (evt.keyCode == 13) {
+            $(this).closest("li.dropdown").removeClass("open");
+            find_and_subscribe_feed();
+        }
+    });
+
+    $(".subscribe-feed-box button,.subscribe-feed-dropdown button").click(function(evt) {
+        find_and_subscribe_feed();
     });
 
     check_subscription();

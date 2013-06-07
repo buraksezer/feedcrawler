@@ -1,19 +1,20 @@
 <div class="right-bar-info-area"></div>
-
 <ul class="top-area">
     <li><i data-toggle="tooltip" title="Live Stream" id="live-stream" class="foundicon-globe"></i></li>
-    <li class="dropdown"><i data-toggle="tooltip" title="Search" id="search-feed" class="foundicon-search"></i></li>
-    <li><i data-toggle="tooltip" title="Create a feed group" id="create-feed-group" class="foundicon-plus"></i></li>
+    <li><i data-toggle="tooltip" title="Search" id="search-feed" class="foundicon-search"></i></li>
+    <li><i data-toggle="tooltip" title="Subscribe a new feed" id="subscribe-feed" class="foundicon-plus"></i></li>
     <div class="divider"></div>
-
-<div class="feed-search-box">
-    {{ feed_search_form }}
-</div>
-
+    <div class="interaction-box">
+        <div class="feed-search-box">
+            {{ feed_search_form }}
+        </div>
+        <div class="subscribe-feed-box">
+            {{ subscribe_feed_form }}
+            <button class="btn btn-small btn-primary" type="submit">Add</button>
+        </div>
+    </div>
     <div id="scrollable-sections-top-shadow"></div>
-
 </ul>
-
 <div class="feed-items">
 {% for feed in feeds %}
 <div class="feed-item" data-feed-id="{{ feed.id }}">
@@ -21,7 +22,7 @@
         <span id="drop{{ feed.id }}" class="dropdown-toggle" role="button" data-toggle="dropdown">
             <i class="foundicon-settings"></i>
         </span>
-        <ul id="menu1{{ feed.id }}" class="dropdown-menu" role="menu" aria-labelledby="drop4">
+        <ul id="menu1{{ feed.id }}" class="dropdown-menu" role="menu">
             <li class="unsubscribe-feed" role="presentation"><a role="menuitem" tabindex="-1" href="/unsubscribe/">Unsubscribe</a></li>
             <li role="presentation"><a role="menuitem" tabindex="-1" href="/feed-detail/{{ feed.id }}">About this feed</a></li>
         </ul>

@@ -319,20 +319,6 @@ html, body {
     width: 93%;
 }
 
-#id_tags,
-#id_feed_url {
-    width: 97%;
-}
-
-#subscribe-modal .loading-gif {
-    float:right;
-    display:none;
-}
-
-#subscribe-modal span.warning {
-    float:right;
-}
-
 #dashboard-layout {
     background-attachment: scroll;
     background-clip: border-box;
@@ -440,6 +426,41 @@ html, body {
     padding: 10px;
 }
 
+.subscribe-feed-dropdown {
+    padding: 10px;
+    width: 300px;
+    height: 80px;
+    min-width: 0;
+    min-height: 0;
+}
+
+.subscribe-feed-dropdown button {
+    margin-top: 2px !important;
+}
+
+.subscribe-warning {
+    display:none;
+    margin-top: -29px;
+    padding-left: 10px;
+    padding-right: 10px;
+    font-size: 12px;
+}
+
+.subscribe-feed-dropdown input#id_feed_url {
+    width: 78%;
+}
+
+.subscribe-feed-box input#id_feed_url {
+    width: 80%;
+}
+
+.right-bar .subscribe-feed-box button {
+    margin-right: -15px;
+    margin-top: 0.1254em;
+}
+
+
+.right-bar .subscribe-feed-box,
 .right-bar .feed-search-box {
     display: none;
     padding-left: 6px;
@@ -452,6 +473,7 @@ html, body {
 
 ul.top-area {
     margin-left: 0;
+    margin: 4px 0 5px;
 }
 
 ul.top-area li {

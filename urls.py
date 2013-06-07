@@ -20,6 +20,7 @@ urlpatterns = patterns('',
     url(r'^render_timeline_standalone/', 'apps.frontend.views.render_timeline_standalone', name='render_timeline_standalone'),
     url(r'^feedfinder/', 'apps.frontend.views.available_feeds', name='available_feeds'),
     url(r'^get_user_subscriptions/', 'apps.frontend.views.get_user_subscriptions', name='get_user_subscriptions'),
+
     # This is required for pubsubhubbub
     #url(r'^subscriber/', include('django_push.subscriber.urls')),
 

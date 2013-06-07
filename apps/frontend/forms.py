@@ -2,9 +2,9 @@ from django import forms
 
 
 class SubscribeForm(forms.Form):
-    feed_url = forms.CharField(max_length=256, \
-        widget=forms.TextInput(attrs={'autocomplete':'off', 'data-provide':'typeahead'}))
-    tags = forms.CharField(max_length=512, required=False)
+    feed_url = forms.CharField(label="New subscription", max_length=256, \
+        widget=forms.TextInput(attrs={'type': "text", "placeholder": 'Give a valid URL'}))
+    #tags = forms.CharField(max_length=512, required=False)
 
 
 class FeedSearchForm(forms.Form):

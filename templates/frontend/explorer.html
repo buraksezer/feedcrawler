@@ -24,16 +24,23 @@
 </div>
 <ul class="nav pull-right">
     {% if user.is_authenticated %}
-    <li><a href="#subscribe-modal" data-toggle="modal">Subscribe</a></li>
+    <li class="dropdown">
+        <a href="#" data-toggle="dropdown" class="dropdown-toggle">Subscribe</a>
+        <div class="dropdown-menu">
+            <div class="subscribe-feed-dropdown">
+                {{ subscribe_feed_form }}
+                <button class="btn btn-small btn-primary" type="submit">Add</button>
+            </div>
+            <div class="subscribe-warning"></div>
+        </div>
+    </li>
     {% endif %}
-
     <li><a href="#share-modal" data-toggle="modal">Share</a></li>
     <li class="divider-vertical"></li>
-
     {% if user.is_authenticated %}
     <li class="dropdown">
-        <a href="#" data-toggle="dropdown" role="button" id="drop4" class="dropdown-toggle"><i class="foundicon-settings"></i></a>
-        <ul aria-labelledby="drop4" role="menu" class="dropdown-menu" id="menu1">
+        <a href="#" data-toggle="dropdown" role="button" class="dropdown-toggle"><i class="foundicon-settings"></i></a>
+        <ul role="menu" class="dropdown-menu">
             <li role="presentation"><a href="/user/{{ user.username }}/" tabindex="-1" role="menuitem">Profile</a></li>
             <li role="presentation"><a href="/user/signout" tabindex="-1" role="menuitem">Sign Out</a></li>
             <!--<li class="divider" role="presentation"></li>-->
@@ -47,23 +54,16 @@
 {% endblock %}
 
 {% block container %}
-    <div id="explorer" class="container">
-        <div class="main">
-            {% include "frontend/partials/explorer_share_modal.html" %}
-            <div class="box">
-                <div class="row-fluid">
-                    <div id="iframe-container" data-link="{{ entry.link }}" data-entry-id="{{ entry.id }}" data-feed-id="{{ entry.feed.id }}" class="container column span12">
-                        <iframe id="frame" frameborder="0" marginheight="0" marginwidth="0" src="{{ entry.link }}"></iframe>
-                    </div>
-                        <!-- <div class="padding">
-                            <div class="full span9">
-                            </div>
-                        </div>-->
-                </div>
+<div class="main">
+    {% include "frontend/partials/explorer_share_modal.html" %}
+    <div class="box">
+        <div class="row-fluid">
+            <div id="iframe-container" data-link="{{ entry.link }}" data-entry-id="{{ entry.id }}" data-feed-id="{{ entry.feed.id }}" class="container column span12">
+                <iframe id="frame" frameborder="0" marginheight="0" marginwidth="0" src="{{ entry.link }}"></iframe>
             </div>
         </div>
     </div>
-
+</div>
 <div class="footer">
     <div class="content">
         <p class="muted credit"><i>FeedCraft Developers &copy; 2013</i></p>
