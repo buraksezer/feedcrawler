@@ -123,7 +123,9 @@ $(document).ready(function() {
     }
 
     function find_and_subscribe_feed() {
+        $(".right-bar .ajax-spinner").css("display", "block");
         $.post("/subscribe/",  {feed_url: $("#id_feed_url").val()}, function(result) {
+            $(".right-bar .ajax-spinner").css("display", "none");
             if ($(".subscribe-feed-dropdown").length == 0) {
                 $(".right-bar-info-area").css("display", "block").delay(3000).fadeOut();
                 $(".right-bar-info-area").empty().append(result.text);
@@ -158,6 +160,11 @@ $(document).ready(function() {
             // call the handler only when not right-click
             e.button === 2 || _clearMenus()
         });
+
+    // Fix input element click problem at dropdown in navbar
+    $('.navbar-inner .dropdown-menu').click(function(e) {
+        e.stopPropagation();
+    });
 
     $("div.feed").delegate("p", "click", function(evt) {
         var feed_item = $(this).closest(".feed").find("ul.entries")
@@ -267,8 +274,10 @@ $(document).ready(function() {
     $(document).on('click', ".right-bar div.feed-items .feed-item", function(evt) {
         var my_feed_item = $(this).closest("div.feed-item");
         var feed_id = my_feed_item.data("feed-id");
+        $(".right-bar .ajax-spinner").css("display", "block");
         $.post("/get_entries_by_feed_id/", {feed_id: feed_id},
             function(result) {
+                $(".right-bar .ajax-spinner").css("display", "none");
                 $("#dashboard .timeline").empty();
                 $("#dashboard .timeline").append(result);
             }
@@ -277,8 +286,10 @@ $(document).ready(function() {
 
     $(document).on('click', ".right-bar #live-stream", function(evt) {
         var my_feed_item = $(this);
+        $(".right-bar .ajax-spinner").css("display", "block");
         $.post("/render_timeline_standalone/",
             function(result) {
+                $(".right-bar .ajax-spinner").css("display", "none");
                 $("#dashboard .timeline").empty();
                 $("#dashboard .timeline").append(result);
             }
@@ -414,7 +425,9 @@ $(document).ready(function() {
                 response(cache[term]);
                 return;
             }
+            $(".right-bar .ajax-spinner").css("display", "block");
             $.getJSON("/get_user_subscriptions/", request, function(data, status, xhr) {
+                $(".right-bar .ajax-spinner").css("display", "none");
                 cache[term] = data;
                 if (data.length == 0) {
                     $(".right-bar-info-area").css("display", "block").delay(3000).fadeOut();
@@ -424,8 +437,10 @@ $(document).ready(function() {
             });
         },
         select: function(event, ui) {
+            $(".right-bar .ajax-spinner").css("display", "block");
             $.post("/get_entries_by_feed_id/", {feed_id: ui.item.id},
                 function(result) {
+                    $(".right-bar .ajax-spinner").css("display", "none");
                     $("#dashboard .timeline").empty();
                     $("#dashboard .timeline").append(result);
                     $(this).val('');
@@ -454,15 +469,10 @@ $(document).ready(function() {
     $(".subscribe-user-icon").tooltip();
     $('#live-stream').tooltip();
     $('#search-feed').tooltip();
-    $('#create-feed-group').tooltip();
+    $('#subscribe-feed').tooltip();
 
     // Initialize custom scrollbars
     $(".right-bar .feed-items").niceScroll({cursorcolor:"#555555", cursoropacitymax: "0.5"});
 
     $('.dropdown-toggle').dropdown();
-
-    // Fix input element click proble
-    $('.dropdown input, .dropdown label').click(function(e) {
-        e.stopPropagation();
-    });
 });

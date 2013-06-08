@@ -471,6 +471,12 @@ html, body {
     width: 100%;
 }
 
+.right-bar .top-area .ajax-spinner {
+    display: none;
+    margin-top:2px;
+    margin-right: 5px;
+}
+
 ul.top-area {
     margin-left: 0;
     margin: 4px 0 5px;
