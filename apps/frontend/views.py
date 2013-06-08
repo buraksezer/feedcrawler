@@ -148,7 +148,10 @@ def unsubscribe(request):
     # Unsubcribe from the feed
     feed.users.remove(User.objects.get(id=request.user.id))
     # Unregister feed real time notification group
-    announce_client.unregister_group(request.user.id, feed.id)
+    try:
+        announce_client.unregister_group(request.user.id, feed.id)
+    except AttributeError:
+        pass
     return HttpResponse(json.dumps({"code": 1, "text": "You have been unsubscribed successfully from %s." % feed.title }), \
         content_type='application/json')
 
@@ -156,51 +159,26 @@ def unsubscribe(request):
 @ajax_required
 @login_required
 def subscribe(request):
-    #def add_tags():
-    #    for tag in tags:
-    #        try:
-    #            item = FeedTag.objects.get(tag=tag)
-    #        except FeedTag.DoesNotExist:
-    #            item = FeedTag(tag=tag)
-    #            item.save()
-    #            item = FeedTag.objects.get(tag=tag)
-    #        item.feed.add(feed_obj)
-    #        item.users.add(user)
-    #        item.save()
-
-    #if request.method == "POST":
-        #form = SubscribeForm(request.POST)
-        #if form.is_valid():
-        #url = form.cleaned_data["feed_url"]
-        url = feedfinder.feed(request.POST.get("feed_url"))
-        if url is None:
-            return HttpResponse(json.dumps({"code":0,
-                "text": "A valid feed could not be found for given URL."}), content_type='application/json')
-        #tags= [tag.strip() for tag in form.cleaned_data["tags"].split(",") if tag.strip()]
-        user = User.objects.get(username=request.user.username)
-        try:
-            feed_obj = Feed.objects.get(feed_url=url)
-            if not feed_obj.users.filter(username__contains=request.user.username):
-                feed_obj.users.add(user)
-                #if tags:
-                #    add_tags()
-            else:
-                return HttpResponse(json.dumps({"code": 1, "text": "You have already subscribed this feed."}), content_type='application/json')
-        except Feed.DoesNotExist:
-            new_feed = Feed(feed_url=url)
-            new_feed.save()
-            feed_obj = Feed.objects.get(feed_url=url)
+    url = feedfinder.feed(request.POST.get("feed_url"))
+    if url is None:
+        return HttpResponse(json.dumps({"code":0,
+            "text": "A valid feed could not be found for given URL."}), content_type='application/json')
+    user = User.objects.get(username=request.user.username)
+    try:
+        feed_obj = Feed.objects.get(feed_url=url)
+        if not feed_obj.users.filter(username__contains=request.user.username):
             feed_obj.users.add(user)
-            feed_obj.save()
-            #if tags:
-            #    add_tags()
-            announce_client.register_group(request.user.id, feed_obj.id)
-            return HttpResponse(json.dumps({"code": 1, "text": 'New feed source has been added successfully.'}), content_type='application/json')
-    #else:
-    #    return HttpResponse(json.dumps({"code": 0, "text": "Broken form"}), content_type='application/json')
-    #else:
-    #    form = SubscribeForm()
-    #    return render_to_response('frontend/subscribe.html', {"form": form}, context_instance=RequestContext(request))
+        else:
+            return HttpResponse(json.dumps({"code": 1, "text": "You have already subscribed this feed."}), content_type='application/json')
+    except Feed.DoesNotExist:
+        new_feed = Feed(feed_url=url)
+        new_feed.save()
+        feed_obj = Feed.objects.get(feed_url=url)
+        feed_obj.users.add(user)
+        feed_obj.save()
+    announce_client.register_group(request.user.id, feed_obj.id)
+    return HttpResponse(json.dumps({"code": 1, "text": 'New feed source has been added successfully.'}), content_type='application/json')
+
 
 
 @ajax_required

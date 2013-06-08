@@ -272,11 +272,13 @@ $(document).ready(function() {
     });
 
     $(document).on('click', ".right-bar div.feed-items .feed-item", function(evt) {
-        var my_feed_item = $(this).closest("div.feed-item");
-        var feed_id = my_feed_item.data("feed-id");
+        var feed_id = $(this).data("feed-id");
+        $(".right-bar div.feed-items").find(".active-feed").removeClass("active-feed");
+        $(this).addClass("active-feed");
         $(".right-bar .ajax-spinner").css("display", "block");
         $.post("/get_entries_by_feed_id/", {feed_id: feed_id},
             function(result) {
+                document.title = $("body").data("page-title");
                 $(".right-bar .ajax-spinner").css("display", "none");
                 $("#dashboard .timeline").empty();
                 $("#dashboard .timeline").append(result);
@@ -287,6 +289,7 @@ $(document).ready(function() {
     $(document).on('click', ".right-bar #live-stream", function(evt) {
         var my_feed_item = $(this);
         $(".right-bar .ajax-spinner").css("display", "block");
+        $(".right-bar div.feed-items").find(".active-feed").removeClass("active-feed");
         $.post("/render_timeline_standalone/",
             function(result) {
                 $(".right-bar .ajax-spinner").css("display", "none");

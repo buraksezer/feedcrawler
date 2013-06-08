@@ -46,4 +46,7 @@ $(document).ready(function () {
         }
     });
 
+    announce.on('newfeed_rightbar', function(data) {
+        $(".right-bar div.feed-items").append(data.dom);
+    });
 });

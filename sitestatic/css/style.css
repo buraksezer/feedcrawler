@@ -136,11 +136,9 @@ div.feed-item span.feed-title:hover {
 
 .active-feed {
     background-color: #FBFBFB;
-    font-style: italic;
 }
 
 .current-entry {
-    font-style: italic;
     color: #3D6FB4 !important;
 }
 

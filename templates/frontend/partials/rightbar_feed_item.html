@@ -1,0 +1,16 @@
+<div class="feed-item" data-feed-id="{{ feed.id }}">
+    <span class="dropdown">
+        <span id="drop{{ feed.id }}" class="dropdown-toggle" role="button" data-toggle="dropdown">
+            <i class="foundicon-settings"></i>
+        </span>
+        <ul id="menu1{{ feed.id }}" class="dropdown-menu" role="menu">
+            <li class="unsubscribe-feed" role="presentation"><a role="menuitem" tabindex="-1" href="/unsubscribe/">Unsubscribe</a></li>
+            <li role="presentation"><a role="menuitem" tabindex="-1" href="/feed-detail/{{ feed.id }}">About this feed</a></li>
+        </ul>
+    </span>
+    {% if feed.title %}
+    <div class="feed-title">{{ feed.title }}</div>
+    {% else %}
+    <div class="feed-title">{{ feed.feed_url }}</div>
+    {% endif %}
+</div>

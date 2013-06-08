@@ -5,6 +5,11 @@ from utils import log as logging
 from utils.feed_fetcher import DriveSync
 from django.conf import settings
 from apps.storage.models import Feed
+from django.template.loader import render_to_string
+
+# For doing realtime stuff
+from announce import AnnounceClient
+announce_client = AnnounceClient()
 
 class UpdateFeed(Task):
     name = "update-feed"
@@ -36,6 +41,15 @@ class SyncFeed(Task):
 
     def run(self, feed, **kwargs):
         DriveSync(feed)
+        # For doing realtime stuff
+        for user in feed.users.all():
+            dom = render_to_string("frontend/partials/rightbar_feed_item.html",
+                {"feed": feed})
+            announce_client.emit(
+                user.id,
+                'newfeed_rightbar',
+                data={'dom' : dom}
+            )
 
 class FirstSync(Task):
     name = 'first-sync'
