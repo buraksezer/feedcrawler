@@ -464,12 +464,13 @@ $(document).ready(function() {
         find_and_subscribe_feed();
     });
 
-    $(".dashboard-entry").hover(
-        function() {
+    $(document).on("mouseenter", ".dashboard-entry", function() {
             var entry_box = $(this);
             entry_box.find(".entry-topbar").css("display", "block");
-        },
-        function() {
+        }
+    );
+
+    $(document).on("mouseleave", ".dashboard-entry", function() {
             var entry_box = $(this);
             entry_box.find(".entry-topbar").css("display", "none");
         }
