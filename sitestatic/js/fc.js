@@ -464,16 +464,25 @@ $(document).ready(function() {
         find_and_subscribe_feed();
     });
 
+    $(".dashboard-entry").hover(
+        function() {
+            var entry_box = $(this);
+            entry_box.find(".entry-topbar").css("display", "block");
+        },
+        function() {
+            var entry_box = $(this);
+            entry_box.find(".entry-topbar").css("display", "none");
+        }
+    );
+
     check_subscription();
     get_votes();
     get_previous_next_items();
 
     // Initialize tooltips
     $(".subscribe-user-icon").tooltip();
-    $('#live-stream').tooltip();
-    $('#search-feed').tooltip();
-    $('#subscribe-feed').tooltip();
-
+    $('ul.top-area i').tooltip();
+    $('ul.entry-topbar i').tooltip();
     // Initialize custom scrollbars
     $(".right-bar .feed-items").niceScroll({cursorcolor:"#555555", cursoropacitymax: "0.5"});
 

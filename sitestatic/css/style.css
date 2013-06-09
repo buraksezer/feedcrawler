@@ -337,9 +337,12 @@ html, body {
 }
 
 .dashboard-entry {
-    padding: 13px;
     border-bottom: #E2E2E2 solid 1px;
     color: #555555;
+}
+
+.dashboard-entry .entry-content {
+    padding: 13px;
 }
 
 .dashboard-entry:hover {
@@ -353,6 +356,16 @@ html, body {
 
 .dashboard-entry .entry-title:hover {
     color: #0088CC;
+}
+
+ul.entry-topbar {
+    display: none;
+    margin: 0 0 -20px 533px;
+}
+
+ul.entry-topbar li {
+    list-style-type: none;
+    display: inline !important;
 }
 
 .timeline-entry-interaction {
