@@ -16,8 +16,8 @@
     {% for entry in entries %}
     <div class="dashboard-entry" data-feed-id="{{ entry.feed.id }}" data-entry-id="{{ entry.id }}">
         <ul class="entry-topbar">
-            <li><a href="{{ entry.link }}" target="blank"><i data-toggle="tooltip" title="Original Link" class="icon-share-alt"></i></li>
-            <li><a href="/explorer/{{ entry.id }}" target="blank"><i data-toggle="tooltip" title="Open new tab" class="icon-share"></i></li>
+            <li><a href="{{ entry.link }}" target="_blank"><i data-toggle="tooltip" title="Original Link" class="icon-share-alt"></i></li>
+            <li><a href="/explorer/{{ entry.id }}" target="_blank"><i data-toggle="tooltip" title="Open new tab" class="icon-share"></i></li>
         </ul>
         <div class="entry-content">
             <a href="/explorer/{{ entry.id }}" class="entry-title">{{ entry.title }}</a> on
