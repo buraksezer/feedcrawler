@@ -1,6 +1,7 @@
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 from userena import settings as userena_settings
+from django.contrib.auth import authenticate
 
 
 class AuthenticationForm(forms.Form):
@@ -28,3 +29,19 @@ class AuthenticationForm(forms.Form):
             identification = forms.CharField(widget=forms.TextInput(attrs={'class': 'required', 'placeholder': 'Email or username'}),
                 max_length=75,
                 error_messages={'required': _("%(error)s") % {'error': "Either supply us with your email or username."}})
+
+    def clean(self):
+        """
+        Checks for the identification and password.
+
+        If the combination can't be found will raise an invalid sign in error.
+
+        """
+        identification = self.cleaned_data.get('identification')
+        password = self.cleaned_data.get('password')
+
+        if identification and password:
+            user = authenticate(identification=identification, password=password)
+            if user is None:
+                raise forms.ValidationError(_(u"Please enter a correct username or email and password. Note that both fields are case-sensitive."))
+        return self.cleaned_data
