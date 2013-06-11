@@ -799,3 +799,8 @@ label[for="id_feed_search"] {
     border-bottom: 1px solid #E2E2E2 !important;
     border-right: 1px solid #E2E2E2 !important;
 }
+
+.404-page {
+    padding-top: 160px;
+    text-align: center;
+}
