@@ -53,6 +53,7 @@ $(document).ready(function() {
                 $("#nav-next").data("entry-id", result.next.id);
                 $("#nav-next").data("link", result.next.link);
                 $("#nav-next").attr("href", "/explorer/"+result.next.id);
+                $("#nav-next").data("available", result.next.available);
             } else {
                 $("#nav-next").attr("disabled", "disabled");
             }
@@ -64,6 +65,7 @@ $(document).ready(function() {
                 $("#nav-previous").data("title", "FeedCraft | "+result.previous.title);
                 $("#nav-previous").data("feed-id", result.previous.feed_id);
                 $("#nav-previous").attr("href", "/explorer/"+result.previous.id);
+                $("#nav-previous").data("available", result.previous.available);
             } else {
                 $("#nav-previous").attr("disabled", "disabled");
             }
@@ -178,13 +180,25 @@ $(document).ready(function() {
 
     $(document).on("click", "a.trigger-wrapper,#nav-previous,#nav-next", function(evt) {
         evt.preventDefault();
+        if ($(this).hasClass("popover-link") == true) return;
         var feed_id = $(this).data("feed-id");
         var entry_id = $(this).data("entry-id");
         var link = $(this).data("link");
         var title = $(this).data("title");
+        var available = $(this).data("available");
         var my_entry_item = $(this);
         History.pushState({id:entry_id}, title, "/explorer/"+entry_id);
-        $("#frame").attr("src", link);
+        if (available == 0) {
+            $(".clickjacking-warn-exp:hidden").css("display", "block");
+            $("iframe#frame:visible").css("display", "none");
+            $(".clickjacking-warn-exp h3").text(title);
+            $(".clickjacking-warn-exp a.external-link").attr("href", link);
+        } else {
+            $(".clickjacking-warn-exp:visible").css("display", "none");
+            $("iframe#frame:hidden").css("display", "block");
+            $("#frame").attr("src", link);
+        }
+
         $("#iframe-container").data("feed-id", feed_id);
         $("#iframe-container").data("entry-id", entry_id);
         $("#iframe-container").data("link", link);
@@ -476,6 +490,35 @@ $(document).ready(function() {
         }
     );
 
+    $(document).on("click", ".dashboard-entry a.entry-title", function(evt) {
+        evt.preventDefault();
+        var available = $(this).data("available");
+        if (available == 0) {
+            $(this).closest(".dashboard-entry").find(".clickjacking-warn").css("display", "block").delay(3000).fadeOut();
+        } else {
+            window.location.href = $(this).attr("href");
+        }
+    });
+
+    $(document).on("click", ".popover-link", function(evt) {
+        evt.preventDefault();
+        if ($(this).hasClass("poped") != true) {
+            $(this).popover('show');
+            $(this).addClass("poped");
+        }
+    });
+
+    $(document).on('click', function (e) {
+        $('.popover-link').each(function () {
+            //the 'is' for buttons that triggers popups
+            //the 'has' for icons within a button that triggers a popup
+            if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
+                $(this).popover('hide');
+                $(this).removeClass("poped")
+            }
+        });
+    });
+
     check_subscription();
     get_votes();
     get_previous_next_items();
@@ -488,4 +531,5 @@ $(document).ready(function() {
     $(".right-bar .feed-items").niceScroll({cursorcolor:"#555555", cursoropacitymax: "0.5"});
 
     $('.dropdown-toggle').dropdown();
+
 });

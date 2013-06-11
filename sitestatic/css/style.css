@@ -8,11 +8,18 @@ body {
 }
 
 /* Override some bootstrap rules */
+.popover-title,
+.popover,
 input,
 .modal,
 .btn,
 .dropdown-menu {
     border-radius: 0 !important;
+}
+
+.popover-title {
+    background-color: #f2dede;
+    color: #b94a48;
 }
 
 .btn {
@@ -49,8 +56,25 @@ button[type="submit"] {
     font-size: 12px !important;
 }
 
+.exp-hide {
+    display: none;
+}
+
+.clickjacking-warn-exp {
+    padding: 97px;
+    text-align: center;
+}
+
 #explorer {
     width: 100%;
+}
+
+.clickjacking-warn {
+    display: none;
+    padding: 13px;
+    font-size: 12px;
+    margin-top: -15px;
+    background-color: #fcf8e3;
 }
 
 #dashboard {

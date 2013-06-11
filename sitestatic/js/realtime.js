@@ -22,19 +22,28 @@ $(document).ready(function () {
 
         if ($("#dashboard .timeline .new-entry-counter").length) {
             // Update dashboard for new entries
+            var clickjacking_warn = '';
+            if (data.available == 0) {
+                var clickjacking_warn = '<div class="clickjacking-warn">'+
+                    '<span>Unfortunately, viewing in an external site is disabled by publisher.</span>'+
+                    '<a class="external-link" href="'+data.link+'" target="_blank">Open in a new tab.</a>'+
+                    '</div>'
+            }
             var entry = '<div style="display:none;" class="dashboard-entry" data-entry-id="'+data.id+'" data-feed-id="'+data.feed_id+'">'+
             '<ul class="entry-topbar">'+
             '<li><a href="'+data.link+'"'+'target="_blank"><i data-toggle="tooltip" title="Original Link" class="icon-share-alt"></i></li>'+
             '<li><a href="/explorer/'+data.id+'" target="_blank"><i data-toggle="tooltip" title="Open new tab" class="icon-share"></i></li>'+
             '</ul>'+
             '<div class="entry-content">'+
-            '<a class="entry-title" href="/explorer/'+data.id+'">'+data.title+'</a> on '+
+            '<a data-available="'+data.available+'" class="entry-title" href="/explorer/'+data.id+'">'+data.title+'</a> on '+
             '<a class="feed" href="#">'+data.feed_title+'</a>'+
             '<div class="timeline-entry-interaction">'+
             '<span class="like">Like </span>'+
             '<span class="dislike">Dislike </span>'+
             '<span class="Comment">Comment </span>'+
-            '</div></div></div>';
+            '</div></div>'+
+            clickjacking_warn+
+            '</div>';
             var item_count = $(".timeline .new-entry-counter").data("item-count");
             $(".timeline .new-entry-counter").data("item-count", item_count + 1);
             $(".timeline .new-entry-counter a").empty();

@@ -37,7 +37,6 @@ def get_user_timeline(user_id):
                 break
     return entries
 
-
 @ajax_required
 @login_required
 def render_timeline_standalone(request):
@@ -123,12 +122,19 @@ def get_previous_and_next_items(request, feed_id, entry_id):
     next_items = Entry.objects.filter(feed=feed_id, id__gt=entry_id)
     next = {}
     if next_items and len(next_items)-1 >= 0:
+        n_available = next_items[len(next_items)-1].available_in_frame
+        if n_available is None:
+            n_available = 1
         next = {"feed_id": feed_id, "link": next_items[len(next_items)-1].link,
-        "id": next_items[len(next_items)-1].id, "title": next_items[len(next_items)-1].title}
+        "id": next_items[len(next_items)-1].id, "title": next_items[len(next_items)-1].title,
+        "available": n_available}
     # The previous item
     previous_items = Entry.objects.filter(feed=feed_id, id__lt=entry_id)
+    p_available = previous_items[0].available_in_frame
+    if p_available is None:
+        p_available = 1
     previous = {} if not previous_items else {"feed_id": feed_id, "link": previous_items[0].link, "id": previous_items[0].id,
-        "title": previous_items[0].title}
+        "title": previous_items[0].title, "available": p_available}
     return HttpResponse(json.dumps({"next": next, "previous": previous}), content_type='application/json')
 
 

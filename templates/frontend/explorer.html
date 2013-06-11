@@ -7,7 +7,7 @@
         <a href="#" class="btn entry-dislike" data-value="-1"><i class="icon-thumbs-down"></i></a>
         {% endif %}
 
-        <a class="btn" id="nav-previous" data-link="" data-feed-id="" data-placement="bottom" data-toggle="tooltip"
+        <a class="btn" id="nav-previous" data-link="" data-available="{{ entry.available_in_frame }}" data-feed-id="" data-placement="bottom" data-toggle="tooltip"
         data-title="" data-entry-id=""><i class="icon-arrow-left"></i></a>
 
         {% if user.is_authenticated %}
@@ -15,7 +15,7 @@
         href="#"><i class="icon-th-list"></i></a>
         {% endif %}
 
-        <a class="btn" id="nav-next" data-link="" data-placement="bottom" data-feed-id="" data-entry-id="" data-title=""><i class="icon-arrow-right"></i></a>
+        <a class="btn" id="nav-next" data-link="" data-available="{{ entry.available_in_frame }}" data-placement="bottom" data-feed-id="" data-entry-id="" data-title=""><i class="icon-arrow-right"></i></a>
 
         {% if user.is_authenticated %}
         <a href="#" class="btn entry-like" data-value="1"><i class="icon-thumbs-up"></i></a>
@@ -59,7 +59,21 @@
     <div class="box">
         <div class="row-fluid">
             <div id="iframe-container" data-link="{{ entry.link }}" data-entry-id="{{ entry.id }}" data-feed-id="{{ entry.feed.id }}" class="container column span12">
+                {% if entry.available_in_frame  == 0 %}
+                <iframe class="exp-hide" id="frame" frameborder="0" marginheight="0" marginwidth="0" src=""></iframe>
+                <div class="clickjacking-warn-exp">
+                {% else %}
                 <iframe id="frame" frameborder="0" marginheight="0" marginwidth="0" src="{{ entry.link }}"></iframe>
+                <div class="clickjacking-warn-exp exp-hide">
+                {% endif %}
+                    <h3>{{ entry.title }}</h3>
+                    <h1>Unfortunately, viewing in an external site is disabled by publisher.</h1>
+                    <a class="external-link" href="{{ entry.link }}" target="_blank">
+                        You can open the site in a new tab, please click.
+                    </a>
+                    <br/><br/>
+                    <h1>:'(</h1>
+                </div>
             </div>
         </div>
     </div>

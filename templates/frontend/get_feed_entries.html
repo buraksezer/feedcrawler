@@ -3,11 +3,41 @@
         <div class="day">{{ day }}</div>
         {% for entry in entries %}
             <div class="entry">
-                {% if entry.id == current_entry_id %}
-                    <a href="/exporer/{{ entry.id }}" data-title="FeedCraft | {{ entry.title|safe }}" data-feed-id="{{ feed_id }}" data-entry-id="{{ entry.id }}" data-link="{{ entry.link }}" class="title trigger-wrapper current-entry">{{ entry|safe }}</a>
+                {% if entry.available_in_frame == 1 or entry.available_in_frame == None %}
+                    {% if entry.id == current_entry_id %}
+                        <a href="/exporer/{{ entry.id }}" data-title="FeedCraft | {{ entry.title|safe }}" data-feed-id="{{ feed_id }}" data-entry-id="{{ entry.id }}" data-link="{{ entry.link }}" class="title trigger-wrapper current-entry">{{ entry|safe }}</a>
+                    {% else %}
+                        <a href="/exporer/{{ entry.id }}" data-title="FeedCraft | {{ entry.title|safe }}" data-feed-id="{{ feed_id }}" data-entry-id="{{ entry.id }}" data-link="{{ entry.link }}" class="title trigger-wrapper">{{ entry|safe }}</a>
+                    {% endif %}
                 {% else %}
-                    <a href="/exporer/{{ entry.id }}" data-title="FeedCraft | {{ entry.title|safe }}" data-feed-id="{{ feed_id }}" data-entry-id="{{ entry.id }}" data-link="{{ entry.link }}" class="title trigger-wrapper">{{ entry|safe }}</a>
-                {% endif %}
+                    {% if entry.id == current_entry_id %}
+                        <a
+                            data-toggle="popover" data-placement="right"
+                            data-content="Unfortunately, viewing in an external site is disabled by publisher. <a href='{{ entry.link }}' target='_blank'>Open in a new tab.</a>"
+                            data-original-title="{{ entry.title }}"
+                            href="#"
+                            data-title="FeedCraft | {{ entry.title|safe }}"
+                            data-feed-id="{{ feed_id }}"
+                            data-entry-id="{{ entry.id }}"
+                            data-link="{{ entry.link }}"
+                            data-html="true"
+                            class="title trigger-wrapper current-entry popover-link">{{ entry|safe }}
+                        </a>
+                    {% else %}
+                        <a
+                            data-toggle="popover" data-placement="right"
+                            data-content="Unfortunately, viewing in an external site is disabled by publisher. <a href='{{ entry.link }}' target='_blank'>Open in a new tab.</a>"
+                            data-original-title="{{ entry.title }}"
+                            href="#"
+                            data-title="FeedCraft | {{ entry.title|safe }}"
+                            data-feed-id="{{ feed_id }}"
+                            data-entry-id="{{ entry.id }}"
+                            data-link="{{ entry.link }}"
+                            data-html="true"
+                            class="title trigger-wrapper popover-link">{{ entry|safe }}
+                        </a>
+                    {% endif %}
+                {% endif%}
             </div>
         {% endfor %}
     {% endfor %}

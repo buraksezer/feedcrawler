@@ -199,6 +199,8 @@ class Entry(models.Model):
     # Unique slug for every entry
     #slug = models.SlugField(blank=True)
 
+    available_in_frame = models.IntegerField(null=True, blank=True)
+
 
     feed = models.ForeignKey(Feed)
 

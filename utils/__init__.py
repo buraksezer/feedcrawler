@@ -1,4 +1,5 @@
 import datetime
+import requests
 from django.http import HttpResponseForbidden
 
 def seconds_timesince(value):
@@ -27,3 +28,12 @@ def ajax_required(function=None):
         return _dec
     else:
         return _dec(function)
+
+def check_xfo_header(link):
+    r = requests.get(link)
+    xfo = r.headers.get("x-frame-options", None)
+    if xfo is not None:
+        # Check for ALLOWALL
+        if xfo != "ALLOWALL":
+            return False
+    return True

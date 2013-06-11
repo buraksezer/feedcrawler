@@ -9,15 +9,17 @@ from apps.storage.models import Feed, Entry, EntryTag
 from django.utils.timezone import utc
 from utils import log as logging
 from django.conf import settings
+from urlparse import urlparse
 
 from django.db import connection
 
 announce_client = AnnounceClient()
 
 class ProcessEntry(object):
-    def __init__(self, feed, entries):
+    def __init__(self, feed, entries, available=1):
         self.feed = feed
         self.entries = entries
+        self.available = available
         for entry in self.entries:
             self.process(entry)
         self.feed.calculate_last_entry_date()
@@ -53,7 +55,17 @@ class ProcessEntry(object):
             if hasattr(entry, "license") and entry.license is not None:
                 entry_item.license = entry.license
 
-            entry_item.link = entry.link
+            if hasattr(entry, "feedburner_origlink"):
+                entry_item.link = entry.feedburner_origlink
+            else:
+                entry_item.link = entry.link
+
+            feed_hostname = urlparse(self.feed.link).hostname
+            if urlparse(entry_item.link).hostname == urlparse(self.feed.link).hostname:
+                entry_item.available_in_frame = self.available
+            else:
+                entry_item.available_in_frame = 1
+
             entry_item.save()
 
             announce_client.broadcast_group(self.feed.id, 'new_entry', data={'id': entry_item.id,
@@ -61,7 +73,8 @@ class ProcessEntry(object):
                 'link': entry.link,
                 'published_at': entry_item.published_at.strftime("%B %d, %y") if isinstance(entry_item.published_at, datetime) else entry_item.published_at,
                 'feed_title': self.feed.title,
-                'title':entry.title}
+                'title':entry.title,
+                'available': entry_item.available_in_frame}
             )
 
 class ProcessFeed(object):
@@ -113,6 +126,9 @@ class ProcessFeed(object):
         if hasattr(self.parsed.feed, 'title'):
             self.feed.title = self.parsed.feed.title
 
+        if hasattr(self.parsed.feed, 'link'):
+            self.feed.link = self.parsed.feed.link
+
         # TODO: UTC seems problematic
         self.feed.last_sync = datetime.utcnow()#.replace(tzinfo=utc)
 
@@ -122,6 +138,8 @@ class ProcessFeed(object):
         self.entries = self.parsed.entries
         self.entries.reverse()
 
+        self.available = 0 if self.parsed.headers.has_key("x-frame-options") else 1
+
 
 class DriveSync(object):
     def __init__(self, feed):
@@ -129,6 +147,6 @@ class DriveSync(object):
         retval = sync_feed.process()
         if retval is None:
             # Process Entries
-            ProcessEntry(feed, sync_feed.entries)
+            ProcessEntry(feed, sync_feed.entries, available=sync_feed.available)
         feed.set_next_scheduled_update()
         connection.close()
