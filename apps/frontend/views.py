@@ -186,6 +186,10 @@ def subscribe(request):
     return HttpResponse(json.dumps({"code": 1, "text": 'New feed source has been added successfully.'}), content_type='application/json')
 
 
+@login_required
+def subs(request):
+    return HttpResponse(render_to_response("frontend/subscribe.html", {"url": request.GET.get("url")}))
+
 
 @ajax_required
 @login_required

@@ -1,33 +1,14 @@
+{% extends "feedcraft_base.html" %}
+{% block title %}FeedCraft &alpha; | Subscribing {{ url }}{% endblock %}
 {% block container %}
-{% if user.is_authenticated %}
-<!-- Modal -->
-<div id="subscribe-modal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="subscribeModalLabel" aria-hidden="true">
-    <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <h3 id="subscribeModalLabel">Subscribe a new feed</h3>
-    </div>
-    <div class="modal-body">
-        <ul class="nav nav-stacked">
-            <form class="form-subscribe" action="{% url "subscribe" %}" method="POST">{% csrf_token %}
-                {{ form.non_field_errors }}
-                <div class="fieldWrapper">
-                    {{ form.subject.errors }}
-                    <label for="id_feed_url">Website or RSS:</label>
-                    {{ form.feed_url }}
-                </div>
-                <!--
-                <div class="fieldWrapper">
-                    {{ form.subject.errors }}
-                    <label for="id_tags">Select Tags:</label>
-                    {{ form.tags }}
-                </div>
-            -->
-                <button class="btn btn-big btn-primary" type="submit">Add this site</button>
-                <span class="warning"></span>
-                <img class="loading-gif" src='/static/img/ajax-loader.gif'></img>
-            </form>
-        </ul>
+<div id="subscribe-in-url" data-url="{{ url }}">
+    <div class="container">
+        <h2>Please wait...</h2>
+        <p>{{ url }}</p>
+        <div class="result">
+            <a class="btn btn-middle btn-success" target="_blank" href="{% url 'home' %}">Go to home page</a>
+            <a id="close" class="btn btn-middle btn-inverse" href="#">Close</a>
+        </div>
     </div>
 </div>
-{% endif %}
 {% endblock %}

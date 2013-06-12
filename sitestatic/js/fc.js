@@ -178,6 +178,18 @@ $(document).ready(function() {
         }
     });
 
+    if ($("#subscribe-in-url").length != 0) {
+        console.log($("#subscribe-in-url").data("url"));
+        $.post("/subscribe/", {feed_url: $("#subscribe-in-url").data("url")}, function(result) {
+            $("#subscribe-in-url h2").empty().append(result.text);
+            $("#subscribe-in-url .result").css("display", "block");
+        });
+    }
+
+    $("#subscribe-in-url #close").click(function() {
+        open(location, '_self').close();
+    })
+
     $(document).on("click", "a.trigger-wrapper,#nav-previous,#nav-next", function(evt) {
         evt.preventDefault();
         if ($(this).hasClass("popover-link") == true) return;
@@ -519,6 +531,8 @@ $(document).ready(function() {
         });
     });
 
+
+
     check_subscription();
     get_votes();
     get_previous_next_items();
@@ -531,5 +545,6 @@ $(document).ready(function() {
     $(".right-bar .feed-items").niceScroll({cursorcolor:"#555555", cursoropacitymax: "0.5"});
 
     $('.dropdown-toggle').dropdown();
+
 
 });

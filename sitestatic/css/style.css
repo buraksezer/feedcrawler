@@ -804,3 +804,25 @@ label[for="id_feed_search"] {
     padding-top: 160px;
     text-align: center;
 }
+
+#subscribe-in-url {
+    padding-top: 50px;
+}
+
+#subscribe-in-url .container {
+    border-top: 1px solid #E2E2E2;
+    border-left: 1px solid #E2E2E2;
+    border-right: 1px solid #E2E2E2;
+    border-bottom: 1px solid #E2E2E2;
+    text-align: center;
+    height: 150px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+#subscribe-in-url p {
+    font-size: 16px;
+}
+
+#subscribe-in-url .result {
+    display: none;
+}
