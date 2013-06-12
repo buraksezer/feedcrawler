@@ -28,14 +28,10 @@ def get_user_profile(username):
     return profile
 
 
-def get_user_timeline(user_id):
-    entries = []
-    for entry in Entry.objects.all():
-        if entry.feed.users.filter(id=user_id):
-            entries.append(entry)
-            if len(entries) == 15:
-                break
-    return entries
+def get_user_timeline(user_id, offset=0, limit=15):
+    feeds = Feed.objects.filter(users=user_id)
+    return Entry.objects.filter(feed_id__in=feeds)[offset:limit]
+
 
 @ajax_required
 @login_required

@@ -816,7 +816,7 @@ label[for="id_feed_search"] {
     border-bottom: 1px solid #E2E2E2;
     text-align: center;
     height: 150px;
-    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    box-shadow: 1px 1px 2px 0 #D0D0D0;
 }
 
 #subscribe-in-url p {
