@@ -18,7 +18,7 @@ urlpatterns = patterns('',
     url(r'^getfeedentries/', 'apps.frontend.views.get_feed_entries', name='getfeed'),
     url(r'^get_previous_next/(?P<feed_id>[\w-]+)/(?P<entry_id>[\w-]+)/$', 'apps.frontend.views.get_previous_and_next_items', name='get_previous_next'),
     url(r'^get_entries_by_feed_id/', 'apps.frontend.views.get_entries_by_feed_id', name='get_entries_by_feed_id'),
-    url(r'^render_timeline_standalone/', 'apps.frontend.views.render_timeline_standalone', name='render_timeline_standalone'),
+    url(r'^timeline/', 'apps.frontend.views.timeline', name='timeline'),
     url(r'^feedfinder/', 'apps.frontend.views.available_feeds', name='available_feeds'),
     url(r'^get_user_subscriptions/', 'apps.frontend.views.get_user_subscriptions', name='get_user_subscriptions'),
 

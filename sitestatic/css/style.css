@@ -826,3 +826,18 @@ label[for="id_feed_search"] {
 #subscribe-in-url .result {
     display: none;
 }
+
+#timeline-endless-loading p {
+    margin: 0;
+    display: none;
+    text-align: center;
+    font-style: italic;
+}
+
+#timeline-endless-loading img {
+    margin-left: auto;
+    margin-right: auto;
+    display: none;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}

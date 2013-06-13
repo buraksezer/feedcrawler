@@ -35,9 +35,19 @@ def get_user_timeline(user_id, offset=0, limit=15):
 
 @ajax_required
 @login_required
-def render_timeline_standalone(request):
-    return render_to_response('frontend/partials/dashboard_timeline.html', {"timeline": True,
-        'entries': get_user_timeline(request.user.id)}, context_instance=RequestContext(request))
+def timeline(request):
+    offset = request.GET.get("offset", 0)
+    limit = request.GET.get("limit", 15)
+    template = "frontend/partials/dashboard_timeline.html"
+    if offset != 0:
+        template = "frontend/partials/dashboard_entries.html"
+    return render_to_response(template,
+        {
+            "timeline": True,
+            'entries': get_user_timeline(request.user.id, offset=offset, limit=limit)
+        },
+        context_instance=RequestContext(request)
+    )
 
 
 @login_required
@@ -84,13 +94,16 @@ def get_user_feeds(request):
 @ajax_required
 @login_required
 def get_entries_by_feed_id(request):
-    if request.method != "POST":
-        return HttpResponse("You must send a POST request.")
-    depth = 1 if request.POST.get("depth") is None else int(request.POST.get("depth"))
-    entries = Entry.objects.filter(feed=request.POST["feed_id"])[:depth*10]
-    feed_title = Feed.objects.get(id=request.POST["feed_id"]).title
-    return render_to_response('frontend/partials/dashboard_timeline.html', {"feed_title": feed_title,
-        'depth': depth+1,
+    offset = request.GET.get("offset", 0)
+    limit = request.GET.get("limit", 15)
+    template = "frontend/partials/dashboard_entries.html"
+    if offset == 0:
+        template = "frontend/partials/dashboard_timeline.html"
+    entries = Entry.objects.filter(feed=request.GET.get("feed_id"))[offset:limit]
+    feed_title = Feed.objects.get(id=request.GET.get("feed_id")).title
+    if not entries:
+        return HttpResponse(0)
+    return render_to_response(template, {"feed_title": feed_title,
         "entries": entries}, context_instance=RequestContext(request))
 
 

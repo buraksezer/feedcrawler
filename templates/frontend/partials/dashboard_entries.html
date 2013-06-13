@@ -1,0 +1,32 @@
+{% for entry in entries %}
+<div class="dashboard-entry" data-feed-id="{{ entry.feed.id }}" data-entry-id="{{ entry.id }}">
+    <ul class="entry-topbar">
+        <li><a href="{{ entry.link }}" target="_blank"><i data-toggle="tooltip" title="Original Link" class="icon-share-alt"></i></li>
+        <li><a href="/explorer/{{ entry.id }}" target="_blank"><i data-toggle="tooltip" title="Open new tab" class="icon-share"></i></li>
+    </ul>
+    <div class="entry-content">
+        <a href="/explorer/{{ entry.id }}" data-available="{{ entry.available_in_frame }}" class="entry-title">{{ entry.title }}</a> on
+        <a href="/explorer/{{ entry.id }}" class="feed">{{ entry.feed.title }}</a>
+        <div class="timeline-entry-interaction">
+            {% if entry.entrydislike.user.count %}
+            <span style="float:right;" class="dislike-count">{{ entry.entrydislike.user.count }} dislike</span>
+            {% endif %}
+            {% if entry.entrylike.user.count %}
+            <span style="float:right;" class="like-count">{{ entry.entrylike.user.count }} likes</span>
+            {% endif %}
+            <!--<span class="comment-count">43 comments</span>-->
+            <span class="like">Like</span>
+            <span class="dislike">Dislike</span>
+            <span class="Comment">Comment</span>
+        </div>
+    </div>
+    {% if entry.available_in_frame == 0  %}
+    <div class="clickjacking-warn">
+        <span>Unfortunately, viewing in an external site is disabled by publisher.</span>
+        <a class="external-link" href="{{ entry.link }}" target="_blank">
+            Open in a new tab.
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endfor %}

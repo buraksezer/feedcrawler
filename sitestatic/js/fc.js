@@ -302,12 +302,13 @@ $(document).ready(function() {
         $(".right-bar div.feed-items").find(".active-feed").removeClass("active-feed");
         $(this).addClass("active-feed");
         $(".right-bar .ajax-spinner").css("display", "block");
-        $.post("/get_entries_by_feed_id/", {feed_id: feed_id},
+        $.get("/get_entries_by_feed_id/", {feed_id: feed_id},
             function(result) {
                 document.title = $("body").data("page-title");
                 $(".right-bar .ajax-spinner").css("display", "none");
                 $("#dashboard .timeline").empty();
                 $("#dashboard .timeline").append(result);
+                $(".timeline-feed-entries-title").data("feed-id", feed_id);
             }
         );
     });
@@ -316,7 +317,7 @@ $(document).ready(function() {
         var my_feed_item = $(this);
         $(".right-bar .ajax-spinner").css("display", "block");
         $(".right-bar div.feed-items").find(".active-feed").removeClass("active-feed");
-        $.post("/render_timeline_standalone/",
+        $.post("/timeline/",
             function(result) {
                 $(".right-bar .ajax-spinner").css("display", "none");
                 $("#dashboard .timeline").empty();
@@ -531,7 +532,37 @@ $(document).ready(function() {
         });
     });
 
+    // endless scroll for dashboard timeline
+    $(window).scroll(function() {
+        if($(window).scrollTop() + $(window).height() == $(document).height()) {
+            if ($("div#dashboard").length == 0
+                || $("#timeline-endless-loading p").css("display") == "block") return;
+            var url = "/timeline/"
+            var source = $("#dashboard");
+            var offset = source.data("offset");
+            var limit = source.data("limit");
+            var params = {offset: offset+15, limit: limit+15};
+            if ($(".timeline-feed-entries-title").length != 0) {
+                url = "/get_entries_by_feed_id/";
+                params.feed_id = $(".timeline-feed-entries-title").data("feed-id");
+            }
+            $("#timeline-endless-loading img").css("display", "block");
+            $.get(url, params,
+                function(result) {
+                    if (result == 0) {
+                        $("#timeline-endless-loading p").css("display", "block");
+                        $("#timeline-endless-loading img").css("display", "none");
+                    } else {
+                        $("#dashboard .dashboard-entries").append(result);
+                        source.data("limit", limit+15);
+                        source.data("offset", offset+15);
+                        $("#timeline-endless-loading img").css("display", "none");
+                    }
+                }
+            );
 
+        }
+    });
 
     check_subscription();
     get_votes();
@@ -545,6 +576,4 @@ $(document).ready(function() {
     $(".right-bar .feed-items").niceScroll({cursorcolor:"#555555", cursoropacitymax: "0.5"});
 
     $('.dropdown-toggle').dropdown();
-
-
 });
