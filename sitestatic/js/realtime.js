@@ -22,12 +22,8 @@ $(document).ready(function () {
 
         if ($("#dashboard .timeline .new-entry-counter").length) {
             var detail_page = $(".feed-detail-header");
-            console.log("basladi");
-            if (detail_page.length != 0 && data.id != detail_page.data("feed-id")) {
-                console.log("detay sayfasiyla ayni degil, buraya kadar");
-                return;
-            }
-            console.log("ekleniyor");
+            if (detail_page.length != 0 && data.feed_id != detail_page.data("feed-id")) return;
+
             // Update dashboard for new entries
             var clickjacking_warn = '';
             if (data.available == 0) {
