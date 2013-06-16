@@ -1,6 +1,13 @@
 {% extends "feedcraft_base.html" %}
 {% block layout_id %}dashboard-layout{% endblock %}
+{% block title %}{{ site_title }}{% endblock %}
+{% block custom_css %}
+<style type="text/css">
+body { padding-top: 60px; padding-bottom: 40px; }
+</style>
+{% endblock %}
 {% block navbar_content %}
+<img id="navbar-loading" src="/static/img/ajax-loader.gif"></img>
 <div class="nav-collapse">
     <ul class="nav pull-right">
         {% if user.is_authenticated %}
@@ -11,7 +18,6 @@
             <ul role="menu" class="dropdown-menu" id="menu1">
                 <li role="presentation"><a href="/user/{{ user.username }}" tabindex="-1" role="menuitem">Profile</a></li>
                 <li role="presentation"><a href="/user/signout" tabindex="-1" role="menuitem">Sign Out</a></li>
-                <!--<li class="divider" role="presentation"></li>-->
             </ul>
         </li>
         {% else %}
@@ -23,15 +29,15 @@
 {% block container %}
 <div id="dashboard" class="container" data-offset="0" data-limit="15">
     <div class="row-fluid">
-        <div class="span3 userspace">
+        <div class="span4 userspace">
             {% include "frontend/partials/dashboard_userspace.html" %}
         </div>
-        <div class="span6 timeline">
+        <div class="span8 timeline">
             {% include "frontend/partials/dashboard_timeline.html" %}
         </div>
-        <div class="span3 right-bar">
+        <!--<div class="span3 right-bar">
             {% include "frontend/partials/dashboard_right_bar.html" %}
-        </div>
+        </div>-->
         <!-- <div class="padding">
             <div class="full span9"></div>
         </div>-->

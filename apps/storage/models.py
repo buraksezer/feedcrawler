@@ -183,7 +183,7 @@ class Entry(models.Model):
 
     # The date this entry was first published,
     # as a string in the same format as it was published in the original feed.
-    published_at = models.DateField(null=True, blank=True)
+    published_at = models.DateTimeField()
 
     # The date this entry was last updated,
     # as a string in the same format as it was published in the original feed.

@@ -41,6 +41,20 @@ $.ajaxSetup({
 });
 
 $(document).ready(function() {
+    function calculate_subscription_count() {
+        if ($(".feed-detail-header").length == 0) return;
+
+        var subs = $(".feed-detail-header").data("subs");
+        if (subs == 0) {
+            new_dom = "No subscriber";
+        } else if (subs == 1) {
+            new_dom = "1 subscriber";
+        } else {
+            new_dom = subs+" subscriber";
+        }
+        $(".feed-detail-header span.subs-count").empty().append(new_dom);
+    }
+
     function get_previous_next_items() {
         var entry_id = $("#iframe-container").data("entry-id");
         var feed_id = $("#iframe-container").data("feed-id");
@@ -125,9 +139,9 @@ $(document).ready(function() {
     }
 
     function find_and_subscribe_feed() {
-        $(".right-bar .ajax-spinner").css("display", "block");
+        $("#navbar-loading").css("display", "block");
         $.post("/subscribe/",  {feed_url: $("#id_feed_url").val()}, function(result) {
-            $(".right-bar .ajax-spinner").css("display", "none");
+            $("#navbar-loading").css("display", "none");
             if ($(".subscribe-feed-dropdown").length == 0) {
                 $(".right-bar-info-area").css("display", "block").delay(3000).fadeOut();
                 $(".right-bar-info-area").empty().append(result.text);
@@ -164,7 +178,7 @@ $(document).ready(function() {
         });
 
     // Fix input element click problem at dropdown in navbar
-    $('.navbar-inner .dropdown-menu').click(function(e) {
+    $('.dropdown-menu').click(function(e) {
         e.stopPropagation();
     });
 
@@ -297,29 +311,13 @@ $(document).ready(function() {
         }
     });
 
-    $(document).on('click', ".right-bar div.feed-items .feed-item", function(evt) {
-        var feed_id = $(this).data("feed-id");
-        $(".right-bar div.feed-items").find(".active-feed").removeClass("active-feed");
-        $(this).addClass("active-feed");
-        $(".right-bar .ajax-spinner").css("display", "block");
-        $.get("/get_entries_by_feed_id/", {feed_id: feed_id},
-            function(result) {
-                document.title = $("body").data("page-title");
-                $(".right-bar .ajax-spinner").css("display", "none");
-                $("#dashboard .timeline").empty();
-                $("#dashboard .timeline").append(result);
-                $(".timeline-feed-entries-title").data("feed-id", feed_id);
-            }
-        );
-    });
-
-    $(document).on('click', ".right-bar #live-stream", function(evt) {
+    $(document).on('click', "#live-stream", function(evt) {
         var my_feed_item = $(this);
-        $(".right-bar .ajax-spinner").css("display", "block");
-        $(".right-bar div.feed-items").find(".active-feed").removeClass("active-feed");
+        $("#navbar-loading").css("display", "block");
         $.post("/timeline/",
             function(result) {
-                $(".right-bar .ajax-spinner").css("display", "none");
+                History.pushState(null, $("body").data("page-title") , "/");
+                $("#navbar-loading").css("display", "none");
                 $("#dashboard .timeline").empty();
                 $("#dashboard .timeline").append(result);
             }
@@ -344,140 +342,12 @@ $(document).ready(function() {
         $(this).select();
     });
 
-    $(".unsubscribe-feed").click(function(evt) {
-        evt.preventDefault();
-        var feed_id = $(this).closest(".feed-item").data("feed-id");
-        $.post("/unsubscribe/", {feed_id: feed_id},
-            function(result) {
-                if (result.code == "1") {
-                    $(".right-bar-info-area").css("display", "block").delay(5000).fadeOut();
-                    $(".right-bar-info-area").empty().append(result.text);
-                    $(".feed-item[data-feed-id="+feed_id+"]").remove();
-                } else {
-                    $(".right-bar-info-area").append("An error occured, please try again later.");
-                }
-            });
-    });
-
     $(document).on("click", ".new-entry-counter", function(evt) {
         $(".timeline .new-entry-counter").data("item-count", 0);
         $("p.empty-timeline").remove();
         $(".dashboard-entry:hidden").css("display", "block");
         $(".timeline .new-entry-counter").css("display", "none");
         document.title = $("body").data("page-title");
-    });
-
-    $(".subscribe-user-icon").click(function(evt) {
-        evt.preventDefault();
-        $.post("/subscribe_user/", {username: $(this).data("username")},
-            function(result) {
-                // FIXME: Processing gif is required.
-                if (result == 1) {
-                    $(".subscribe-user-icon").css("display", "none");
-                    $(".unsubscribe-button").css("display", "block");
-                } else {
-                    // FIXME: Warning area is required.
-                    console.log("hatalar oldu");
-                }
-            }
-        );
-    });
-
-    $(".unsubscribe-button").click(function(evt) {
-        evt.preventDefault();
-        $.post("/unsubscribe_user/", {username: $(this).data("username")},
-            // FIXME: Processing gif is required.
-            function(result) {
-                if (result == 1) {
-                    $(".subscribe-user-icon").css("display", "block");
-                    $(".unsubscribe-button").css("display", "none");
-                }
-            }
-        );
-    });
-
-    $("#post-to-my-feed button").click(function(evt) {
-        var feed_id = $("#iframe-container").data("feed-id");
-        var entry_id = $("#iframe-container").data("entry-id");
-        var note = $("#post-to-my-feed .make-textbox").html();
-        $.post("/share_entry/", {note: note, entry_id: entry_id, feed_id: feed_id},
-            function(result){
-                console.log(result);
-            }
-        );
-    });
-
-    $(".fake-textbox").click(function(evt) {
-        $(this).css("display", "none");
-        $(".make-textbox").css("display", "block");
-    });
-
-    $(".right-bar div.feed-items").scroll(function(evt) {
-        if ($(this).scrollTop() != 0) {
-            $("#scrollable-sections-top-shadow").css("opacity", 1);
-        } else {
-            $("#scrollable-sections-top-shadow").css("opacity", 0);
-        }
-        if($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight) {
-            $("#scrollable-sections-bottom-shadow").css("opacity", 1);
-        } else {
-            $("#scrollable-sections-bottom-shadow").css("opacity", 0);
-        }
-    });
-
-    $("#search-feed").click(function() {
-        $(".subscribe-feed-box:visible").css("display", "none");
-        $(".feed-search-box #id_feed_search").val('');
-        if($(".feed-search-box:hidden").length) {
-            $(".feed-search-box").css("display", "block")
-        } else {
-            $(".feed-search-box").css("display", "none");
-        }
-    });
-
-    $("#subscribe-feed").click(function() {
-        $(".feed-search-box:visible").css("display", "none");
-        $(".subscribe-feed-box #id_feed_url").val('');
-        if($(".subscribe-feed-box:hidden").length) {
-            $(".subscribe-feed-box").css("display", "block")
-        } else {
-            $(".subscribe-feed-box").css("display", "none");
-        }
-    });
-
-    var cache = {};
-    $("#id_feed_search").autocomplete({
-        minLength: 3,
-        delay: 1000,
-        source: function(request, response) {
-            var term = request.term;
-            if (term in cache) {
-                response(cache[term]);
-                return;
-            }
-            $(".right-bar .ajax-spinner").css("display", "block");
-            $.getJSON("/get_user_subscriptions/", request, function(data, status, xhr) {
-                $(".right-bar .ajax-spinner").css("display", "none");
-                cache[term] = data;
-                if (data.length == 0) {
-                    $(".right-bar-info-area").css("display", "block").delay(3000).fadeOut();
-                    $(".right-bar-info-area").empty().append("No result found for "+term);
-                }
-                response(data);
-            });
-        },
-        select: function(event, ui) {
-            $(".right-bar .ajax-spinner").css("display", "block");
-            $.post("/get_entries_by_feed_id/", {feed_id: ui.item.id},
-                function(result) {
-                    $(".right-bar .ajax-spinner").css("display", "none");
-                    $("#dashboard .timeline").empty();
-                    $("#dashboard .timeline").append(result);
-                    $(this).val('');
-                    $(".feed-search-box").css("display", "none");
-                }
-            );
-        }
     });
 
     $("#id_feed_url").keypress(function(evt) {
@@ -487,7 +357,7 @@ $(document).ready(function() {
         }
     });
 
-    $(".subscribe-feed-box button,.subscribe-feed-dropdown button").click(function(evt) {
+    $(".subscribe-feed-dropdown button").click(function(evt) {
         find_and_subscribe_feed();
     });
 
@@ -532,22 +402,50 @@ $(document).ready(function() {
         });
     });
 
+    $(document).on('click', "#unsubscribe-feed-detail", function(evt) {
+        my_action = $(this);
+        var feed_id = $(this).closest(".feed-detail-header").data("feed-id");
+        $("#navbar-loading").css("display", "block");
+        $.post("/unsubscribe/", {feed_id: feed_id}, function(result) {
+            if (result.code == 1) {
+                my_action.attr("id", "subscribe-feed-detail")
+                .removeClass("btn-danger").addClass("btn-primary").text("Subscribe");
+                $(".feed-detail-header").data("subs", $(".feed-detail-header").data("subs")-1);
+                calculate_subscription_count();
+                $("#navbar-loading").css("display", "none");
+            }
+        });
+    });
+
+    $(document).on('click', "#subscribe-feed-detail", function(evt) {
+        my_action = $(this);
+        var feed_id = $(this).closest(".feed-detail-header").data("feed-id");
+        $("#navbar-loading").css("display", "block");
+        $.post("/subscribe_by_id/", {feed_id: feed_id}, function(result) {
+            if (result.code == 1) {
+                my_action.attr("id", "unsubscribe-feed-detail")
+                .removeClass("btn-primary").addClass("btn-danger").text("Unsubscribe");
+                $(".feed-detail-header").data("subs", $(".feed-detail-header").data("subs")+1);
+                calculate_subscription_count();
+                $("#navbar-loading").css("display", "none");
+            }
+        });
+    });
+
     // endless scroll for dashboard timeline
     $(window).scroll(function() {
         if($(window).scrollTop() + $(window).height() == $(document).height()) {
             if ($("div#dashboard").length == 0
                 || $("#timeline-endless-loading p").css("display") == "block") return;
-            var url = "/timeline/"
             var source = $("#dashboard");
             var offset = source.data("offset");
             var limit = source.data("limit");
             var params = {offset: offset+15, limit: limit+15};
-            if ($(".timeline-feed-entries-title").length != 0) {
-                url = "/get_entries_by_feed_id/";
-                params.feed_id = $(".timeline-feed-entries-title").data("feed-id");
+            if ($(".feed-detail-header").length != 0) {
+                params.by_id = $(".feed-detail-header").data("feed-id");
             }
             $("#timeline-endless-loading img").css("display", "block");
-            $.get(url, params,
+            $.get("/timeline/", params,
                 function(result) {
                     if (result == 0) {
                         $("#timeline-endless-loading p").css("display", "block");
@@ -567,6 +465,7 @@ $(document).ready(function() {
     check_subscription();
     get_votes();
     get_previous_next_items();
+    calculate_subscription_count();
 
     // Initialize tooltips
     $(".subscribe-user-icon").tooltip();

@@ -35,8 +35,9 @@ $(document).ready(function () {
             '<li><a href="/explorer/'+data.id+'" target="_blank"><i data-toggle="tooltip" title="Open new tab" class="icon-share"></i></li>'+
             '</ul>'+
             '<div class="entry-content">'+
-            '<a data-available="'+data.available+'" class="entry-title" href="/explorer/'+data.id+'">'+data.title+'</a> on '+
-            '<a class="feed" href="#">'+data.feed_title+'</a>'+
+            '<a data-available="'+data.available+'" class="entry-title" href="/explorer/'+data.id+'">'+data.title+'</a>'+
+            '<br/>'+
+            '<a class="feed" href="/feed/'+data.feed_id+'">'+data.feed_title+'</a>'+
             '<div class="timeline-entry-interaction">'+
             '<span class="like">Like </span>'+
             '<span class="dislike">Dislike </span>'+

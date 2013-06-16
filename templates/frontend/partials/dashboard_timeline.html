@@ -1,11 +1,21 @@
-{% if timeline %}
-<div class="new-entry-counter" data-item-count="0"><a href="#"></a></div>
-{% else %}
-<div class="timeline-feed-entries-title">
-    <h4>Latest entries of {{ feed_title }}</h4>
+{% if not timeline %}
+<div class="feed-detail-header" data-feed-id="{{ feed.id }}" data-subs="{{ feed.users.count }}">
+    <h4>Latest entries of <a href="{{ feed.link }}" target="_blank">{{ feed.title }}</a>
+        <span class="subs-count"></span>
+        {% if is_subscribed %}
+            <a id="unsubscribe-feed-detail" class="btn btn-danger pull-right">Unsubscribe</a>
+        {% else %}
+            <a id="subscribe-feed-detail" class="btn btn-primary pull-right">Subscribe</a>
+        {% endif %}
+    </h4>
+    <div class="feed-info">
+        <span class="tagline">{{ feed.tagline }}</span><br/>
+        <span>Last sync at {{ feed.last_sync }}</span>
+    </div>
     <div class="divider"></div>
 </div>
 {% endif %}
+<div class="new-entry-counter" data-item-count="0"><a href="#"></a></div>
 <div class="dashboard-entries">
     {% if not entries %}
         {% if timeline %}

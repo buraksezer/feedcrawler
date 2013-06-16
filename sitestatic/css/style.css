@@ -77,11 +77,6 @@ button[type="submit"] {
     background-color: #fcf8e3;
 }
 
-#dashboard {
-    padding-top: 60px;
-    padding-bottom: 20px;
-}
-
 .navbar-inner,
 .btn {
     background-image: none;
@@ -264,9 +259,8 @@ div.feed-item span.badge {
 }
 
  article, aside, figure, footer, header, hgroup,
-  menu, nav, section { display: block; }
-html, body {
-    height: 100%;
+  menu, nav, section {
+    display: block;
 }
 
 .main, .row-fluid {
@@ -308,10 +302,6 @@ html, body {
     top: 40px;
 }
 
-.span9.full {
-    width: 100%;
-}
-
 .footer {
     height: 40px;
     width: 100%;
@@ -326,10 +316,6 @@ html, body {
 .credit {
     margin-left: 10px;
     margin-top: 10px;
-}
-
-.row-fluid [class*="span"] {
-    margin-left: 0; /*-0.436% !important; */
 }
 
 #share-modal input.link {
@@ -367,6 +353,7 @@ html, body {
 
 .dashboard-entry .entry-content {
     padding: 13px;
+    margin-right: 30px;
 }
 
 .dashboard-entry:hover {
@@ -378,13 +365,17 @@ html, body {
     color: #555555;
 }
 
+.dashboard-entry .entry-content .feed {
+    font-size: 12px;
+}
+
 .dashboard-entry .entry-title:hover {
     color: #0088CC;
 }
 
 ul.entry-topbar {
     display: none;
-    margin: 0 0 -20px 533px;
+    float: right;
 }
 
 ul.entry-topbar li {
@@ -424,7 +415,6 @@ ul.entry-topbar li {
     border-bottom: 1px solid #E2E2E2;
     border-right: 1px solid #E2E2E2;
     border-left: 1px solid #E2E2E2;
-    margin-left: 3px !important;
 }
 
 .right-bar .feed-items {
@@ -489,24 +479,7 @@ ul.entry-topbar li {
     width: 80%;
 }
 
-.right-bar .subscribe-feed-box button {
-    margin-right: -15px;
-    margin-top: 0.1254em;
-}
-
-
-.right-bar .subscribe-feed-box,
-.right-bar .feed-search-box {
-    display: none;
-    padding-left: 6px;
-    padding-right: 21px;
-}
-
-.right-bar .feed-search-box input#id_feed_search {
-    width: 100%;
-}
-
-.right-bar .top-area .ajax-spinner {
+.userspace .top-area .ajax-spinner {
     display: none;
     margin-top:2px;
     margin-right: 5px;
@@ -514,19 +487,15 @@ ul.entry-topbar li {
 
 ul.top-area {
     margin-left: 0;
-    margin: 4px 0 5px;
+    margin-top: -18px;
 }
 
 ul.top-area li {
     display: inline;
     list-style-type: none;
-    padding-right: 20px;
 }
 
-.right-bar .top-area i {
-    /*background-color: #FAFAFA;*/
-    padding-left: 5px;
-    margin-right: -22px;
+.userspace .top-area i {
     cursor: pointer;
 }
 
@@ -534,6 +503,10 @@ label[for="id_feed_url"],
 label[for="id_feed_search"] {
     font-size: 12px !important;
     color: #777777;
+}
+
+.container {
+    max-width: 1000px;
 }
 
 /* user area on dashboard */
@@ -544,11 +517,16 @@ label[for="id_feed_search"] {
     border-left: 1px solid #E2E2E2;
     border-bottom: 1px solid #E2E2E2;
     border-right: 1px solid #E2E2E2;
-    padding: 13px;
-    margin-right: 2.5px;
 }
 
-.userspace .username{
+.userspace .user,
+.userspace .bookmarks,
+.userspace .read-later,
+.userspace .favorites {
+    padding: 13px;
+}
+
+.userspace .username {
     margin-left: 50px;
     margin-top: -41px;
 }
@@ -566,19 +544,20 @@ label[for="id_feed_search"] {
     weight: 40px;
 }
 
+.userspace .user small a {
+    color: #555555;
+    margin-left: 50px;
+    font-size: 80%;
+}
+
 /* bookmarks */
 
-.bookmarks {
-    margin-top :35px;
-    height: 20px;
+.favorites {
+    margin-top :15px;
 }
 
-.history {
-    margin-top :70px;
-}
-
-.history-header,
-.bookmark-header {
+.favorites-header,
+.bookmarks-header {
     font-weight: bold;
     font-size: 15px;
 }
@@ -661,10 +640,6 @@ label[for="id_feed_search"] {
     border-radius: 0 !important;
     display: none;
     float: right;
-}
-
-.timeline-feed-entries-title h4 {
-    padding-left: 5px;
 }
 
 #recommend-this-entry {
@@ -840,4 +815,31 @@ label[for="id_feed_search"] {
     display: none;
     margin-top: 5px;
     margin-bottom: 5px;
+}
+
+#navbar-loading {
+    margin-top: 10px;
+    margin-bottom: -47px;
+    margin-left: auto;
+    margin-right: auto;
+    display: none;
+}
+
+.feed-detail-header {
+    background-color: rgb(240, 240, 240);
+}
+
+.feed-detail-header h4 span {
+    font-size: 13px;
+    font-weight: normal;
+}
+
+.feed-detail-header h4 {
+    padding: 5px;
+    margin: 0;
+}
+
+.feed-info {
+    padding-left: 5px;
+    font-size: 13px;
 }
