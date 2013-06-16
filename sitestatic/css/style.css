@@ -376,6 +376,7 @@ div.feed-item span.badge {
 ul.entry-topbar {
     display: none;
     float: right;
+    margin: 0 0 10px -12px;
 }
 
 ul.entry-topbar li {
