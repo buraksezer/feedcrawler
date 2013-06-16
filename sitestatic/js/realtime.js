@@ -21,6 +21,12 @@ $(document).ready(function () {
         }
 
         if ($("#dashboard .timeline .new-entry-counter").length) {
+            var detail_page = $(".feed-detail-header");
+            if (detail_page.length != 0) {
+                if (data.id != detail_page.data("feed-id")) {
+                    return;
+                }
+            }
             // Update dashboard for new entries
             var clickjacking_warn = '';
             if (data.available == 0) {
