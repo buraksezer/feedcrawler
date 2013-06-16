@@ -182,6 +182,7 @@ def subscribe_by_id(request):
     user = User.objects.get(username=request.user.username)
     if not feed_obj.users.filter(username__contains=request.user.username):
         feed_obj.users.add(user)
+        announce_client.register_group(request.user.id, feed_obj.id)
         return HttpResponse(json.dumps({"code": 1, "text":
             "New feed source has been added successfully."}), content_type='application/json')
     else:
