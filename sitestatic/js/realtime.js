@@ -22,10 +22,9 @@ $(document).ready(function () {
 
         if ($("#dashboard .timeline .new-entry-counter").length) {
             var detail_page = $(".feed-detail-header");
-            if (detail_page.length != 0) {
-                if (data.id != detail_page.data("feed-id")) {
-                    return;
-                }
+            console.log(typeof data.id);
+            if (detail_page.length != 0 && data.id != detail_page.data("feed-id")) {
+                console.log("burda");
             }
             // Update dashboard for new entries
             var clickjacking_warn = '';
