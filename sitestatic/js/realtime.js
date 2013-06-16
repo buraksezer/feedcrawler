@@ -22,10 +22,12 @@ $(document).ready(function () {
 
         if ($("#dashboard .timeline .new-entry-counter").length) {
             var detail_page = $(".feed-detail-header");
-            console.log(typeof data.id);
+            console.log("basladi");
             if (detail_page.length != 0 && data.id != detail_page.data("feed-id")) {
-                console.log("burda");
+                console.log("detay sayfasiyla ayni degil, buraya kadar");
+                return;
             }
+            console.log("ekleniyor");
             // Update dashboard for new entries
             var clickjacking_warn = '';
             if (data.available == 0) {
