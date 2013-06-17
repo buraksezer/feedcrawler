@@ -17,6 +17,10 @@ input,
     border-radius: 0 !important;
 }
 
+.navbar-inner {
+    background-color: #FFFFFF;
+}
+
 .popover-title {
     background-color: #f2dede;
     color: #b94a48;
@@ -28,16 +32,6 @@ input,
 
 button[type="submit"] {
     float: right;
-}
-
-.welcome-box {
-    background-color: #FFFFFF;
-    border-top: 1px solid #E2E2E2;
-    border-left: 1px solid #E2E2E2;
-    border-right: 1px solid #E2E2E2;
-    border-bottom: 1px solid #E2E2E2;
-    text-align: center;
-    height: 400px;
 }
 
 #feed-source-list {
@@ -409,49 +403,6 @@ ul.entry-topbar li {
     font-size: 17px;
 }
 
-/* Feed Sources */
-.right-bar {
-    background-color: #FFFFFF;
-    border-top: 1px solid #E2E2E2;
-    border-bottom: 1px solid #E2E2E2;
-    border-right: 1px solid #E2E2E2;
-    border-left: 1px solid #E2E2E2;
-}
-
-.right-bar .feed-items {
-    max-height: 560px;
-    overflow-y: scroll;
-    margin-top: -10px;
-}
-
-.right-bar .feed-item {
-    padding-left: 0;
-}
-
-.right-bar .feed-item .feed-title {
-    font-weight: normal !important;
-}
-
-.right-bar div.feed-title {
-    font-size: 13px !important;
-}
-
-.right-bar .feed-item {
-    padding-left: 5px;
-    padding-right: 5px;
-}
-
-.right-bar .feed-item:hover {
-    background-color: #FBFBFB;
-}
-
-.right-bar-info-area {
-    font-size: 12px;
-    display: none;
-    background-color: #FBFBFB;
-    padding: 10px;
-}
-
 .subscribe-feed-dropdown {
     padding: 10px;
     width: 300px;
@@ -476,16 +427,6 @@ ul.entry-topbar li {
     width: 78%;
 }
 
-.subscribe-feed-box input#id_feed_url {
-    width: 80%;
-}
-
-.userspace .top-area .ajax-spinner {
-    display: none;
-    margin-top:2px;
-    margin-right: 5px;
-}
-
 ul.top-area {
     margin-left: 0;
     margin-top: -18px;
@@ -494,10 +435,6 @@ ul.top-area {
 ul.top-area li {
     display: inline;
     list-style-type: none;
-}
-
-.userspace .top-area i {
-    cursor: pointer;
 }
 
 label[for="id_feed_url"],
@@ -511,7 +448,6 @@ label[for="id_feed_search"] {
 }
 
 /* user area on dashboard */
-
 .userspace {
     background-color: #FFFFFF;
     border-top: 1px solid #E2E2E2;
@@ -549,6 +485,16 @@ label[for="id_feed_search"] {
     color: #555555;
     margin-left: 50px;
     font-size: 80%;
+}
+
+.userspace .top-area i {
+    cursor: pointer;
+}
+
+.userspace .top-area .ajax-spinner {
+    display: none;
+    margin-top:2px;
+    margin-right: 5px;
 }
 
 /* bookmarks */
