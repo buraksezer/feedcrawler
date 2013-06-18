@@ -5,9 +5,11 @@
         <li><a href="/explorer/{{ entry.id }}" target="_blank"><i data-toggle="tooltip" title="Open new tab" class="icon-share"></i></li>
     </ul>
     <div class="entry-content">
-        <a href="/explorer/{{ entry.id }}" data-available="{{ entry.available_in_frame }}" class="entry-title">{{ entry.title }}</>
+        <a href="/explorer/{{ entry.id }}" data-available="{{ entry.available_in_frame }}" class="entry-title">{{ entry.title }}</a>
         <br/>
+        {% if not feed %}
         <a href="/feed/{{ entry.feed.id }}" class="feed">{{ entry.feed.title }}</a>
+        {% endif %}
         <div class="timeline-entry-interaction">
             {% if entry.entrydislike.user.count %}
             <span style="float:right;" class="dislike-count">{{ entry.entrydislike.user.count }} dislike</span>
