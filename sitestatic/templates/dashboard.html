@@ -1,0 +1,12 @@
+    <div id="dashboard" class="container">
+        <div class="row-fluid">
+            <!-- user space -->
+            <div ng-controller="UserspaceCtrl" class="span4 userspace">
+                <div ng-include="'/static/templates/userspace.html'"></div>
+            </div>
+            <!-- Timeline -->
+            <div class="span8 timeline">
+                <div ng-include="'/static/templates/timeline.html'"></div>
+            </div>
+        </div>
+    </div>

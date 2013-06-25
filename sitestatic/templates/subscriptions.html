@@ -1,0 +1,15 @@
+<div infinite-scroll='loadSubscriptions()' infinite-scroll-disabled='busy' class="subscriptions">
+    <div class="subscription" ng-repeat="subscription in subscriptions">
+        <div ng-mouseenter="myClass='show'" ng-mouseleave="myClass=''" class="subscription-content">
+            <a class="subscription-title" href="/feed/{{ subscription.id }}">{{ subscription.title }}</a>
+            <a ng-show="subscription.link" class="subscription-link" href="{{ subscription.link }}" target="_blank">Open a new tab</a>
+            <div class="subscription-summary">
+                {{ subscription.summary }}
+            </div>
+        </div>
+    </div>
+</div>
+<div id="timeline-endless-loading">
+    <img ng-show="busy" src="/static/img/ajax-loader.gif"/>
+    <p ng-show="endOfData">~ No more entry ~</p>
+</div>

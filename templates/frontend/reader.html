@@ -1,0 +1,110 @@
+{% extends "chapstream_base.html" %}
+{% block reader_requirements %}
+<link rel="stylesheet" href="/static/css/reader.css"></link>
+<script type="application/javascript" src="/static/js/angular/ChapStreamReader.js"></script>
+<script type="application/javascript" src="/static/js/reader.js"></script>
+{% endblock %}
+
+{% block body %}
+<body ng-app="ChapStreamReader">
+    {% verbatim %}
+    <div ng-controller="ReaderNavbarCtrl" class="header">
+        <div class="container">
+            <section class="brand">
+                <a  ng-click="goToHome()" class="brand transition" href="{% url 'home' %}" prevent-default>
+                    <i>Chap<strong>Stream</strong><small> &alpha;</small></i>
+                </a>
+            </section>
+            <!-- left side of the navbar -->
+            <ul class="menu">
+                <li class="hint--bottom" data-hint="Read later">
+                    <i class="general foundicon-clock"></i>
+                </li>
+                <li class="hint--bottom" data-hint="Bookmark this">
+                    <i class="general foundicon-star"></i>
+                </li>
+                <li class="hint--bottom" data-hint="Comments">
+                    <i class="social foundicon-chat"></i>
+                </li>
+                <li class="dropdown">
+                    <i class="dropdown-menu general foundicon-settings"></i>
+                    <div class="submenu">
+                        <ul class="root">
+                            <li ><a href="#Dashboard" >Dashboard</a></li>
+                                <li ><a href="#Profile" >Profile</a></li>
+                                <li ><a href="#settings">Settings</a></li>
+                                <li ><a href="#feedback">Send Feedback</a></li>
+                        </ul>
+                    </div>
+                </li>
+            </ul>
+            <!-- Middle section of the navbar -->
+            <ul class="navigation">
+                <li class="hint--bottom" data-hint="Like this">
+                    <i class="cursor-pointer social foundicon-thumb-up"></i>
+                </li>
+
+                <li ng-show="!empty(entry.previous)" class="hint--bottom" data-hint="Previous: {{ entry.previous.title }}">
+                    <a href="/reader/{{ entry.previous.id }}">
+                        <i class="general foundicon-left-arrow"></i>
+                    </a>
+                </li>
+                <li ng-show="empty(entry.previous)" class="hint--bottom" data-hint="No more entry">
+                    <i class="cursor-pointer general foundicon-left-arrow"></i>
+                </li>
+
+                <li class="show-other-entries dropdown">
+                    <i ng-click="loadEntries(entry.feed_id)" class="cursor-pointer dropdown-menu general foundicon-website"></i>
+                    <div class="dropdown-entries submenu">
+                        <section class="entries-header">
+                            <!-- <ul class="action">
+                                <li ng-repeat="section in sections" ng-class="{active : isSelected(section)}" ng-click="setMaster(section)">{{section.name}}</li>
+                            </ul>-->
+                            <p class="feed-title">{{ entry.feed_title }}</p>
+                            <input type="text" name="search" ng-model="keyword" placeholder="Give a keyword">
+                            <small>Press enter to search in the remote source otherwise searching will be local.</small>
+                        </section>
+                        <div when-scrolled="loadEntries(entry.feed_id)" class="entries">
+                            <div class="entry" ng-repeat="item in other_entries | filter:keyword">
+                                <a href="/reader/{{item.id}}">{{ item.title }}</a>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+
+                <li ng-show="!empty(entry.next)" class="hint--bottom" data-hint="Next: {{ entry.next.title }}">
+                    <a href="/reader/{{ entry.next.id }}">
+                        <i class="general foundicon-right-arrow"></i>
+                    </a>
+                </li>
+                <li ng-show="empty(entry.next)" class="hint--bottom" data-hint="No more entry">
+                    <i class="cursor-pointer general foundicon-right-arrow"></i>
+                </li>
+
+                <li class="hint--bottom" data-hint="Dislike this">
+                    <i class="cursor-pointer social foundicon-thumb-down"></i>
+                </li>
+            </ul>
+
+        </div>
+    </div>
+    <div ng-view></div>
+    {% endverbatim %}
+</body>
+{% endblock %}
+
+
+            <!-- <div class="dropdown">
+<a class="account" >My Account</a>
+
+<div class="submenu">
+<ul class="root">
+<li ><a href="#Dashboard" >Dashboard</a></li>
+<li ><a href="#Profile" >Profile</a></li>
+<li ><a href="#settings">Settings</a></li>
+<li ><a href="#feedback">Send Feedback</a></li>
+</ul>
+</div>
+
+</div>
+-->

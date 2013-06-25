@@ -17,6 +17,7 @@ input,
     border-radius: 0 !important;
 }
 
+
 .navbar-inner {
     background-color: #FFFFFF;
 }
@@ -34,33 +35,9 @@ button[type="submit"] {
     float: right;
 }
 
-#feed-source-list {
-    border-right: 1px solid #E2E2E2;
-}
-
-#feed-source-list .feed-item {
-    border-bottom: 1px solid #E2E2E2;
-}
-
-#feed-source-list .feed-item:hover {
-    background-color: #FBFBFB;
-}
-
-#feed-entry-list {
-    font-size: 12px !important;
-}
-
-.exp-hide {
-    display: none;
-}
-
 .clickjacking-warn-exp {
     padding: 97px;
     text-align: center;
-}
-
-#explorer {
-    width: 100%;
 }
 
 .clickjacking-warn {
@@ -84,10 +61,10 @@ button[type="submit"] {
     margin-top: -5px;
 }
 
-iframe {
+#iframe-container {
+    position: absolute;
     width:100%;
     height:100%;
-    position: absolute;
 }
 
 [class*="foundicon-"],
@@ -166,12 +143,6 @@ div.feed-item span.badge {
     padding-left: 5px;
 }
 
-/* like related styles */
-
-.like-voted {
-    background-color: #333333;
-}
-
 .page-header h1 {
     margin-left: 10px;
 }
@@ -213,12 +184,6 @@ div.feed-item span.badge {
     top: 0;
 }
 
-.footer {
-    -webkit-box-shadow: 0px 1px 15px #D4D4D4;
-    -moz-box-shadow: 0px 1px 15px #D4D4D4;
-    box-shadow: 0px 1px 15px #D4D4D4;
-}
-
 #feed-entry-list .day {
     margin-left: 6px;
     padding-left: 2px;
@@ -252,64 +217,10 @@ div.feed-item span.badge {
     border-right: 1px solid #E2E2E2;
 }
 
- article, aside, figure, footer, header, hgroup,
-  menu, nav, section {
-    display: block;
-}
-
-.main, .row-fluid {
-    height: 100%;
-}
-
-.main:before, .main:after,
-.column:before, .column:after {
-    content: "";
-    display: table;
-}
-
-.main:after,
-.column:after {
-    clear: both;
-}
-
-.column {
-    height: 100%;
-    overflow: auto;
-}
-
-
-.column .padding {
-    padding-bottom: 2px;
-    padding-top: 2px;
-}
 
 #feed-entry-list .entry-padding {
     padding-bottom: 2px;
     padding-top: 2px;
-}
-
-.box {
-    bottom: 40px;
-    left: 0;
-    position: absolute;
-    right: 0;
-    top: 40px;
-}
-
-.footer {
-    height: 40px;
-    width: 100%;
-    z-index: 100;
-    background-color: #F5F5F5;
-    bottom: 0;
-    left:0;
-    right:0;
-    position: fixed;
-}
-
-.credit {
-    margin-left: 10px;
-    margin-top: 10px;
 }
 
 #share-modal input.link {
@@ -405,8 +316,8 @@ ul.entry-topbar li {
 
 .subscribe-feed-dropdown {
     padding: 10px;
+    height: 61px;
     width: 300px;
-    height: 80px;
     min-width: 0;
     min-height: 0;
 }
@@ -416,10 +327,6 @@ ul.entry-topbar li {
 }
 
 .subscribe-warning {
-    display:none;
-    margin-top: -29px;
-    padding-left: 10px;
-    padding-right: 10px;
     font-size: 12px;
 }
 
@@ -435,6 +342,11 @@ ul.top-area {
 ul.top-area li {
     display: inline;
     list-style-type: none;
+}
+
+ul.top-area li a {
+    color: #555555;
+    text-decoration: none;
 }
 
 label[for="id_feed_url"],
@@ -460,7 +372,7 @@ label[for="id_feed_search"] {
 .userspace .bookmarks,
 .userspace .read-later,
 .userspace .favorites {
-    padding: 13px;
+    padding: 8px;
 }
 
 .userspace .username {
@@ -489,12 +401,6 @@ label[for="id_feed_search"] {
 
 .userspace .top-area i {
     cursor: pointer;
-}
-
-.userspace .top-area .ajax-spinner {
-    display: none;
-    margin-top:2px;
-    margin-right: 5px;
 }
 
 /* bookmarks */
@@ -549,11 +455,6 @@ label[for="id_feed_search"] {
     margin-left: 100px;
     margin-top: -80px;
     font-size: 20px;
-}
-
-
-.divider {
-    border-bottom: 1px solid #E2E2E2;
 }
 
 .profile-dashboard .divider {
@@ -751,15 +652,14 @@ label[for="id_feed_search"] {
 
 #timeline-endless-loading p {
     margin: 0;
-    display: none;
     text-align: center;
     font-style: italic;
 }
 
 #timeline-endless-loading img {
+    display: block;
     margin-left: auto;
     margin-right: auto;
-    display: none;
     margin-top: 5px;
     margin-bottom: 5px;
 }
@@ -777,7 +677,7 @@ label[for="id_feed_search"] {
 }
 
 .feed-detail-header h4 span {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: normal;
 }
 
@@ -787,6 +687,127 @@ label[for="id_feed_search"] {
 }
 
 .feed-info {
-    padding-left: 5px;
+    padding: 8px;
     font-size: 13px;
+    /*margin-top: 5px;*/
+    text-align: justify;
+}
+
+.show {
+    display: block !important;
+}
+
+.navbar-search {
+    margin-left: 197px;
+}
+
+/* scaffolding */
+/* ----------- */
+
+
+.tt-dropdown-menu,
+{
+  text-align: left;
+}
+
+.typeahead,
+.tt-query,
+.tt-hint {
+  width: 396px;
+  height: 30px;
+  padding: 8px 12px;
+  font-size: 24px;
+  line-height: 30px;
+  border: 2px solid #ccc;
+  -webkit-border-radius: 8px;
+     -moz-border-radius: 8px;
+          border-radius: 8px;
+  outline: none;
+}
+
+.typeahead {
+  background-color: #fff;
+}
+
+.typeahead:focus {
+  border: 2px solid #0097cf;
+}
+
+.tt-query {
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+     -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+}
+
+input.tt-hint {
+    display: none;
+}
+
+.tt-hint {
+    color: #999
+}
+
+.tt-dropdown-menu {
+  width: 384px;
+  /*margin-top: 12px;*/
+  padding: 8px 0;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-top: 0;
+  /*-webkit-border-radius: 8px;
+     -moz-border-radius: 8px;
+          border-radius: 8px;*/
+  -webkit-box-shadow: 0 5px 10px rgba(0,0,0,.2);
+     -moz-box-shadow: 0 5px 10px rgba(0,0,0,.2);
+          box-shadow: 0 5px 10px rgba(0,0,0,.2);
+}
+
+.tt-suggestion {
+  padding: 3px 20px;
+  font-size: 12px;
+  line-height: 24px;
+}
+
+.tt-suggestion.tt-is-under-cursor {
+  color: #fff;
+  background-color: #0097cf;
+
+}
+
+.tt-suggestion p {
+  margin: 0;
+}
+
+/* Subscription page */
+.subscription .subscription-link {
+    font-size: 11px;
+}
+
+.subscription {
+    border-bottom: #E2E2E2 solid 1px;
+    color: #555555;
+}
+
+.subscription .subscription-content {
+    padding: 13px;
+    margin-right: 30px;
+}
+
+.subscription .subscription-content .subscription-summary {
+    font-size: 13px;
+}
+
+.subscription:hover {
+    background-color: #FBFBFB;
+}
+
+.subscription .subscription-title {
+    font-weight: bold;
+    color: #555555;
+    text-decoration: none;
+}
+
+.subscription .subscription-title:hover {
+    color: #0088CC;
 }

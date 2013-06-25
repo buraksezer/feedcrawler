@@ -1,0 +1,27 @@
+<div class="user">
+    <div class="user">
+        <img class="mugshot img-rounded" src="{{ profile.mugshot_url }}"/>
+        <dd class="username"><a href="/user/{{ user.username }}/">{{ profile.display_name }}</a></dd>
+        <small class="hint--bottom" data-hint="Show your subscriptions" ng-show="profile.subs_count == 0"><a href="/subscriptions">No subscription</a></small>
+        <small class="hint--bottom" data-hint="Show your subscriptions" ng-show="profile.subs_count == 1 "><a href="/subscriptions">{{ profile.subs_count }} subscription</a></small>
+        <small class="hint--bottom" data-hint="Show your subscriptions" ng-show="profile.subs_count > 1 "><a href="/subscriptions">{{ profile.subs_count }} subscriptions</a></small>
+        <ul class="top-area pull-right">
+            <li data-hint="Subscribe" class="hint--top dropdown">
+                <i data-toggle="dropdown" title="Subscribe" id="subscribe-feed" class="dropdown-toggle foundicon-plus"></i>
+                <div class="dropdown-menu">
+                    <form class="subscribe-feed-dropdown">
+                        <label for="id_feed_url">New subscription:</label>
+                        <input id="id_feed_url" maxlength="256" ng-model="feed_url" placeholder="Give a valid URL" type="text">
+                        <button ng-click="subscribe(feed_url)" class="btn btn-small btn-primary" type="submit">Add</button>
+                        <span class="subscribe-warning">{{subscribe_warning}}</span>
+                    </form>
+                </div>
+            </li>
+            <li class="hint--top" data-hint="Stream">
+                <a href="/">
+                    <i id="live-stream" class="foundicon-globe"></i>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>

@@ -1,0 +1,48 @@
+<div class="feed-detail-header">
+    <h4>
+        <a href="{{ feed_detail.feed.link }}" target="_blank">{{ feed_detail.feed.title }}</a>
+        <span ng-show='feed_detail.feed.subs_count == 0' class="subs-count">No subscriber</span>
+        <span ng-show='feed_detail.feed.subs_count == 1' class="subs-count">1 subscriber</span>
+        <span ng-show='feed_detail.feed.subs_count > 1' class="subs-count">{{ feed_detail.feed.subs_count }} subscribers</span>
+        <a ng-click="unsubscribeFeed(feed_detail.feed.id)" ng-show="feed_detail.feed.is_subscribed == true" id="unsubscribe-feed-detail" class="btn btn-danger pull-right">Unsubscribe</a>
+        <a ng-click="subscribeFeed(feed_detail.feed.id)" ng-show="feed_detail.feed.is_subscribed == false" id="subscribe-feed-detail" class="btn btn-primary pull-right">Subscribe</a>
+    </h4>
+    <div class="feed-info">
+        <span class="tagline">{{ feed_detail.feed.tagline }}</span><br/>
+        <span>Last sync at {{ feed_detail.feed.last_sync }}</span>
+    </div>
+    <div class="divider"></div>
+</div>
+
+<div class="new-entry-counter" data-item-count="0"><a href="#"></a></div>
+    <div infinite-scroll='loadFeedDetail()' infinite-scroll-disabled='busy' class="dashboard-entries">
+        <div ng-mouseenter="myClass='show'" ng-mouseleave="myClass=''" class="dashboard-entry" ng-repeat="entry in feed_detail.entries">
+            <ul ng-class="myClass" class="entry-topbar">
+                <li>
+                    <a href="{{ entry.link }}" target="_blank">
+                        <i data-toggle="tooltip" title="Original Link" class="icon-share-alt"></i>
+                    </a>
+                </li>
+                <li>
+                    <a href="/reader/{{ entry.id }}" target="_blank">
+                        <i data-toggle="tooltip" title="Open new tab" class="icon-share"></i>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="entry-content">
+                <a ng-click="renderToReader(entry.id)" class="entry-title" href="/reader/{{ entry.id }}" prevent-default>
+                    {{ entry.title }}
+                </a>
+                <div class="timeline-entry-interaction">
+                    <span class="like">Like </span>
+                    <span class="dislike">Dislike </span>
+                    <span class="Comment">Comment </span>
+                </div>
+            </div>
+        </div>
+    </div>
+<div id="timeline-endless-loading">
+    <img ng-show="busy" src="/static/img/ajax-loader.gif"/>
+    <p ng-show="endOfData">~ No more entry ~</p>
+</div>

@@ -9,21 +9,25 @@ urlpatterns = patterns('',
     url(r'^user/(?P<username>(?!signout|signup|signin)[\.\w-]+)/$', 'apps.userena.views.profile_detail', name='userena_profile_detail'),
     url(r'^user/signin/', 'apps.userena.views.signin', name='userena_signin'),
     url(r'^user/', include('userena.urls')),
-    url(r'^explorer/(?P<entry_id>[\w-]+)/$', 'apps.frontend.views.explorer', name='explorer'),
 
-    url(r'^subscribe/', 'apps.frontend.views.subscribe', name='subscribe'),
-    url(r'^subs$', 'apps.frontend.views.subs', name='subs'),
-    url(r'^subscribe_by_id/', 'apps.frontend.views.subscribe_by_id', name='subscribe_by_id'),
-    url(r'^unsubscribe/', 'apps.frontend.views.unsubscribe', name='unsubscribe'),
-
-    url(r'^vote/', 'apps.frontend.views.vote', name='vote'),
-    url(r'^getuserfeeds/', 'apps.frontend.views.get_user_feeds', name='getuserfeeds'),
-    url(r'^getfeedentries/', 'apps.frontend.views.get_feed_entries', name='getfeed'),
-    url(r'^get_previous_next/(?P<feed_id>[\w-]+)/(?P<entry_id>[\w-]+)/$', 'apps.frontend.views.get_previous_and_next_items', name='get_previous_next'),
     url(r'^feed/(?P<feed_id>[\w-]+)/$', 'apps.frontend.views.feed_detail', name='feed_detail'),
-    url(r'^timeline/', 'apps.frontend.views.timeline', name='timeline'),
-    url(r'^feedfinder/', 'apps.frontend.views.available_feeds', name='available_feeds'),
-    url(r'^get_user_subscriptions/', 'apps.frontend.views.get_user_subscriptions', name='get_user_subscriptions'),
+    url(r'^subscriptions/', 'apps.frontend.views.subscriptions', name='subscriptions'),
+    url(r'^reader/(?P<entry_id>[\w-]+)/$', 'apps.frontend.views.reader', name='reader'),
+
+    # API requests
+    url(r'^api/reader/(?P<entry_id>[\w-]+)/$', 'apps.api.views.reader'),
+    url(r'^api/subs-search/(?P<keyword>[\w-]+)/$', 'apps.api.views.subs_search'),
+    url(r'^api/user_profile/', 'apps.api.views.user_profile'),
+    url(r'^api/timeline/', 'apps.api.views.timeline'),
+    url(r'^api/feed_detail/(?P<feed_id>[\w-]+)/$', 'apps.api.views.feed_detail'),
+    url(r'^api/subscribe_by_id/(?P<feed_id>[\w-]+)/$', 'apps.api.views.subscribe_by_id', name='subscribe_by_id'),
+    url(r'^api/unsubscribe/(?P<feed_id>[\w-]+)/$', 'apps.api.views.unsubscribe', name='unsubscribe'),
+    url(r'^api/subscribe/(?P<url>[\.\w-]+)/$', 'apps.api.views.subscribe'),
+    url(r'^api/subscriptions/', 'apps.api.views.subscriptions'),
+    url(r'^api/entries_by_feed/(?P<feed_id>[\w-]+)/$', 'apps.api.views.entries_by_feed'),
+
+    #url(r'^subs$', 'apps.frontend.views.subs', name='subs'),
+
 
     # This is required for pubsubhubbub
     #url(r'^subscriber/', include('django_push.subscriber.urls')),
