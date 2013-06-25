@@ -811,3 +811,11 @@ input.tt-hint {
 .subscription .subscription-title:hover {
     color: #0088CC;
 }
+
+#profile-loading {
+    padding-top: 3px;
+    padding-bottom: 3px;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}

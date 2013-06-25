@@ -61,10 +61,13 @@ function FeedDetailCtrl($scope, $http, $routeParams) {
     $scope.feed_detail = {feed: {}, entries: []}
     $scope.offset = 0;
     $scope.limit = increment;
+    $scope.loading = true;
+
     $scope.loadFeedDetail = function() {
         if (typeof $scope.endOfData != 'undefined') return;
         if ($scope.busy) return;
         $scope.busy = true;
+        console.log($scope.feed_detail.entries)
         $http.get("/api/feed_detail/"+$routeParams.feedId+"/?&offset="+$scope.offset+"&limit="+$scope.limit).success(function(data) {
             if (!data.entries.length) {
                 $scope.endOfData = true;
@@ -78,6 +81,7 @@ function FeedDetailCtrl($scope, $http, $routeParams) {
                     $scope.feed_detail.entries.push(data.entries[i]);
                 }
 
+                $scope.loading = false;
                 $scope.offset += increment;
                 $scope.limit += increment;
                 $scope.busy = false;

@@ -1,4 +1,4 @@
-<div class="feed-detail-header">
+<div ng-show="!loading" class="feed-detail-header">
     <h4>
         <a href="{{ feed_detail.feed.link }}" target="_blank">{{ feed_detail.feed.title }}</a>
         <span ng-show='feed_detail.feed.subs_count == 0' class="subs-count">No subscriber</span>
@@ -44,5 +44,6 @@
     </div>
 <div id="timeline-endless-loading">
     <img ng-show="busy" src="/static/img/ajax-loader.gif"/>
+    <p ng-show="busy">Please wait...</p>
     <p ng-show="endOfData">~ No more entry ~</p>
 </div>
