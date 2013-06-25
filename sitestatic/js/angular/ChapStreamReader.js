@@ -42,6 +42,11 @@ ChapStreamReader.directive('whenScrolled', function() {
 });
 
 function ReaderMainCtrl($scope, $http, $routeParams) {
+    // Remove old entry.link value to prevent reloading
+    if (typeof $scope.entry != 'undefined') {
+        $scope.entry.link = '';
+    }
+
     $http.get("/api/reader/"+$routeParams.entryId).success(function(data) {
         if (data.code == 1) {
             $scope.getEntry(data.result);

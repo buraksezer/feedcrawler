@@ -60,6 +60,7 @@
                             <!-- <ul class="action">
                                 <li ng-repeat="section in sections" ng-class="{active : isSelected(section)}" ng-click="setMaster(section)">{{section.name}}</li>
                             </ul>-->
+                            <img ng-show="busy" src="/static/img/realtime_spinner.gif"/>
                             <p class="feed-title">{{ entry.feed_title }}</p>
                             <input type="text" name="search" ng-model="keyword" placeholder="Give a keyword">
                             <small>Press enter to search in the remote source otherwise searching will be local.</small>
