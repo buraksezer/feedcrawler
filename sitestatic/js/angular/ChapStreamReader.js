@@ -47,13 +47,15 @@ function ReaderMainCtrl($scope, $http, $routeParams) {
         $scope.entry.link = '';
     }
 
+    $scope.showLoading = true;
     $http.get("/api/reader/"+$routeParams.entryId).success(function(data) {
+        $scope.showLoading = false;
         if (data.code == 1) {
             $scope.getEntry(data.result);
         } else {
             $scope.msg  = data.msg;
         }
-        document.title = $scope.entry.title+" | "+SiteTitle
+        document.title = $scope.entry.title+" | "+SiteTitle;
     });
 }
 
@@ -68,7 +70,6 @@ function ReaderNavbarCtrl($scope, $http, $location) {
     $scope.other_entries= [];
     $scope.offset = 0;
     $scope.limit = increment;
-
 
     $scope.loadEntries = function(feed_id) {
         $scope.showLoading = true;

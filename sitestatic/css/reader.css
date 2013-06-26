@@ -167,10 +167,22 @@ section.brand {
 .entry-doesnot-exist {
     color: #DD4B39;
     height: 100%;
-    padding: 250px;
+    padding: 200px;
     font-size: 30px;
     font-weight: bold;
     text-align: center;
+}
+
+.loading-iframe {
+    position: absolute;
+    top: 45%;
+    left: 49%;
+    height: 30%;
+    width: 50%;
+}
+
+.entry-doesnot-exist a {
+    color: #555555;
 }
 
 .show-other-entries .submenu{
