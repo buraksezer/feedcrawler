@@ -69,10 +69,13 @@ function ReaderNavbarCtrl($scope, $http, $location) {
     $scope.offset = 0;
     $scope.limit = increment;
 
+
     $scope.loadEntries = function(feed_id) {
+        $scope.showLoading = true;
         $scope.busy = false;
         if (typeof feed_id == 'undefined') return;
         $http.get("/api/entries_by_feed/"+feed_id+"/?&offset="+$scope.offset+"&limit="+$scope.limit).success(function(data) {
+            $scope.showLoading = false;
             if (typeof $scope.endOfData != 'undefined') return;
             if ($scope.busy) return;
             $scope.busy = true;

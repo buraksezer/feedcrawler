@@ -190,7 +190,9 @@ def reader(request, entry_id):
 
 @ajax_required
 @login_required
-def subscribe(request, url):
+def subscribe(request):
+    url = request.GET.get("url", None)
+    print url
     # TODO: URL validation needed!
     #if url is None:
     #    return HttpResponse(json.dumps({"code":0,

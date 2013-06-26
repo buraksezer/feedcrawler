@@ -8,11 +8,13 @@
         <ul class="top-area pull-right">
             <li data-hint="Subscribe" class="hint--top dropdown">
                 <i data-toggle="dropdown" title="Subscribe" id="subscribe-feed" class="dropdown-toggle foundicon-plus"></i>
-                <div class="dropdown-menu">
-                    <form class="subscribe-feed-dropdown">
-                        <label for="id_feed_url">New subscription:</label>
-                        <input id="id_feed_url" maxlength="256" ng-model="feed_url" placeholder="Give a valid URL" type="text">
-                        <button ng-click="subscribe(feed_url)" class="btn btn-small btn-primary" type="submit">Add</button>
+                <div ng-controller="SubscribeController" class="dropdown-menu">
+                    <form name="subscribe-form" class="subscribe-feed-dropdown">
+                        <label for="id_feed_url">New subscription:
+                            <img ng-show="showLoading" style="float: right" src="/static/img/realtime_spinner.gif"/>
+                        </label>
+                        <input id="id_feed_url" maxlength="256" ng-model="form.feed_url" placeholder="Give a valid URL" type="text">
+                        <button ng-click="subs_feed()" class="btn btn-small btn-primary" type="submit">Add</button>
                         <span class="subscribe-warning">{{subscribe_warning}}</span>
                     </form>
                 </div>

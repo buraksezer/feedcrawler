@@ -139,20 +139,31 @@ function TimelineCtrl($scope, $http) {
 function ReaderCtrl($scope, $http) {
 }
 
+function SubscribeController($scope, $http, $timeout) {
+    var defaultForm = {
+        feed_url : ""
+    }
+    $scope.form = angular.copy(defaultForm);
+    $scope.subs_feed = function() {
+        if (typeof $scope.form.feed_url != "string" || $scope.form.feed_url.length < 3) {
+            $scope.subscribe_warning = "Please give a valid URL.";
+            return;
+        }
+        $scope.showLoading = true;
+        $http.get("/api/subscribe?url="+$scope.form.feed_url).success(function(data) {
+            $scope.showLoading = false;
+            $scope.subscribe_warning = data.text;
+            var delay = $timeout(function() {
+                $("form.subscribe-feed-dropdown").closest("li.dropdown").removeClass("open")
+                $scope.subscribe_warning = "";
+                $scope.form = angular.copy(defaultForm);
+            }, 1500);
+        });
+    }
+}
+
 function UserspaceCtrl($scope, $http, $timeout) {
     $http.get("/api/user_profile/").success(function(data) {
         $scope.profile = data;
     });
-
-    $scope.subscribe = function(feed_url) {
-        $http.get("/api/subscribe/"+feed_url).success(function(data) {
-            $scope.subscribe_warning = data.text;
-            var delay = $timeout(function() {
-                $("form.subscribe-feed-dropdown").closest("li.dropdown").removeClass("open")
-                $("#id_feed_url").val("");
-                $scope.subscribe_warning = "";
-            }, 2000);
-        });
-    }
-
 }

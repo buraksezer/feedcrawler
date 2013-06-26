@@ -22,7 +22,7 @@ urlpatterns = patterns('',
     url(r'^api/feed_detail/(?P<feed_id>[\w-]+)/$', 'apps.api.views.feed_detail'),
     url(r'^api/subscribe_by_id/(?P<feed_id>[\w-]+)/$', 'apps.api.views.subscribe_by_id', name='subscribe_by_id'),
     url(r'^api/unsubscribe/(?P<feed_id>[\w-]+)/$', 'apps.api.views.unsubscribe', name='unsubscribe'),
-    url(r'^api/subscribe/(?P<url>[\.\w-]+)/$', 'apps.api.views.subscribe'),
+    url(r'^api/subscribe$', 'apps.api.views.subscribe'),
     url(r'^api/subscriptions/', 'apps.api.views.subscriptions'),
     url(r'^api/entries_by_feed/(?P<feed_id>[\w-]+)/$', 'apps.api.views.entries_by_feed'),
 
