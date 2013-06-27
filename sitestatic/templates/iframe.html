@@ -8,5 +8,14 @@
     <div class="loading-iframe" ng-show="showLoading">
         <img src="/static/img/ajax-loader.gif"/>
     </div>
+
+    <div ng-show="entry.available == 0" class="clickjacking-warn-reader">
+        <p>{{ entry.title }}</p>
+        <span>Unfortunately, viewing in an external site is disabled by publisher.</span>
+        <br/>
+        <a class="external-link" href="{{ entry.link }}" target="_blank">
+            Open in a new tab.
+        </a>
+    </div>
     <iframe ng-show="!showLoading" border="0" frameborder="0" hspace="0" vspace="0" marginheight="0" marginwidth="0" src="{{ entry.link }}"></iframe>
 </div>

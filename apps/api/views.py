@@ -54,6 +54,7 @@ def timeline(request):
             'feed_id': entry.feed.id,
             'feed_title': entry.feed.title,
             'link': entry.link,
+            'available': 1 if entry.available_in_frame is None else entry.available_in_frame
         }
         result.append(item)
     return HttpResponse(json.dumps(result), content_type='application/json')
@@ -80,6 +81,7 @@ def feed_detail(request, feed_id):
             'id': entry.id,
             'title': entry.title,
             'link': entry.link,
+            'available': 1 if entry.available_in_frame is None else entry.available_in_frame,
         }
         items.append(item)
     result.update({"entries": items})
@@ -153,34 +155,36 @@ def reader(request, entry_id):
         "title": entry.title,
         "link": entry.link,
         "id": entry.id,
-        "feed_title": entry.feed.title
+        "feed_title": entry.feed.title,
+        "available": 1 if entry.available_in_frame is None else entry.available_in_frame
+
     }
 
     try:
         next_item = Entry.objects.filter(feed=feed_id, id__gt=entry_id).order_by("id")[0]
-        n_available = next_item.available_in_frame
-        if n_available is None:
-            n_available = 1
+        #n_available = next_item.available_in_frame
+        #if n_available is None:
+        #    n_available = 1
         next = {
             "feed_id": feed_id,
             "link": next_item.link,
             "id": next_item.id,
             "title": next_item.title,
-            "available": n_available
+        #    "available": n_available
         }
     except IndexError:
         pass
     try:
         previous_item = Entry.objects.filter(feed=feed_id, id__lt=entry_id)[0]
-        p_available = previous_item.available_in_frame
-        if p_available is None:
-            p_available = 1
+        #p_available = previous_item.available_in_frame
+        #if p_available is None:
+        #    p_available = 1
         previous = {
             "feed_id": feed_id,
             "link": previous_item.link,
             "id": previous_item.id,
             "title": previous_item.title,
-            "available": p_available
+        #    "available": p_available
         }
     except IndexError:
         pass
@@ -192,7 +196,6 @@ def reader(request, entry_id):
 @login_required
 def subscribe(request):
     url = request.GET.get("url", None)
-    print url
     # TODO: URL validation needed!
     #if url is None:
     #    return HttpResponse(json.dumps({"code":0,
@@ -242,7 +245,6 @@ def entries_by_feed(request, feed_id):
         item = {
             "id": entry.id,
             "title": entry.title,
-            "available":  1 if entry.available_in_frame is None else entry.available_in_frame,
         }
         results.append(item)
     return HttpResponse(json.dumps(results), content_type="application/json")

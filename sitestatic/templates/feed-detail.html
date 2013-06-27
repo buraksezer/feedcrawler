@@ -31,7 +31,10 @@
             </ul>
 
             <div class="entry-content">
-                <a ng-click="renderToReader(entry.id)" class="entry-title" href="/reader/{{ entry.id }}" prevent-default>
+                <a ng-show="entry.available == 1" ng-click="renderToReader(entry.id)" class="entry-title" href="/reader/{{entry.id}}" prevent-default>
+                    {{ entry.title }}
+                </a>
+                <a ng-show="entry.available != 1" class="entry-title" href="#" clickjacking-warn>
                     {{ entry.title }}
                 </a>
                 <div class="timeline-entry-interaction">
@@ -39,6 +42,12 @@
                     <span class="dislike">Dislike </span>
                     <span class="Comment">Comment </span>
                 </div>
+            </div>
+            <div class="clickjacking-warn">
+                <span>Unfortunately, viewing in an external site is disabled by publisher.</span>
+                <a class="external-link" href="{{ entry.link }}" target="_blank">
+                        Open in a new tab.
+                </a>
             </div>
         </div>
     </div>

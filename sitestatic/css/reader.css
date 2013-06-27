@@ -164,6 +164,7 @@ section.brand {
     display: inline;
 }
 
+.clickjacking-warn-reader,
 .entry-doesnot-exist {
     color: #DD4B39;
     height: 100%;

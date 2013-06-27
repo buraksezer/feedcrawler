@@ -18,20 +18,30 @@ ChapStream.directive('preventDefault', function() {
             event.preventDefault();
             event.stopPropagation();
         });
-    }
+    };
 });
 
 ChapStream.run(function($rootScope) {
     $rootScope.renderToReader = function(id) {
         document.location.href = "/reader/"+id;
-    }
+    };
 });
+
+ChapStream.directive('clickjackingWarn', function () {
+    return function (scope, element, attrs) {
+        $(element).click(function(event) {
+            var myElement = $(this).closest(".dashboard-entry").find(".clickjacking-warn");
+            myElement.css("display", "block").delay(3000).fadeOut();
+        });
+    };
+});
+
 
 function SubscriptionsCtrl($scope, $http, $routeParams) {
     document.title = "Your subscriptions"+" | "+SiteTitle;
     var increment = 10;
     $scope.busy = false;
-    $scope.subscriptions= []
+    $scope.subscriptions= [];
     $scope.offset = 0;
     $scope.limit = increment;
 
@@ -52,13 +62,13 @@ function SubscriptionsCtrl($scope, $http, $routeParams) {
                 $scope.busy = false;
             }
         });
-    }
+    };
 }
 
 function FeedDetailCtrl($scope, $http, $routeParams) {
     $scope.busy = false;
     var increment = 15;
-    $scope.feed_detail = {feed: {}, entries: []}
+    $scope.feed_detail = {feed: {}, entries: []};
     $scope.offset = 0;
     $scope.limit = increment;
     $scope.loading = true;
@@ -87,7 +97,7 @@ function FeedDetailCtrl($scope, $http, $routeParams) {
                 document.title = data.feed.title+" | "+SiteTitle;
             }
         });
-    }
+    };
 
     $scope.unsubscribeFeed = function(id) {
         $http.post("/api/unsubscribe/"+id+"/").success(function(data) {
@@ -95,8 +105,8 @@ function FeedDetailCtrl($scope, $http, $routeParams) {
                 $scope.feed_detail.feed.is_subscribed = false;
                 $scope.feed_detail.feed.subs_count -= 1;
             }
-        })
-    }
+        });
+    };
 
     $scope.subscribeFeed = function(id) {
         $http.post("/api/subscribe_by_id/"+id+"/").success(function(data) {
@@ -105,14 +115,14 @@ function FeedDetailCtrl($scope, $http, $routeParams) {
                 $scope.feed_detail.feed.subs_count += 1;
             }
         });
-    }
+    };
 }
 
 function TimelineCtrl($scope, $http) {
     document.title = SiteTitle;
     $scope.busy = false;
     var increment = 15;
-    $scope.entries = []
+    $scope.entries = [];
     $scope.offset = 0;
     $scope.limit = increment;
     $scope.loadTimelineEntries = function() {
@@ -132,7 +142,11 @@ function TimelineCtrl($scope, $http) {
                 $scope.busy = false;
             }
         });
-    }
+    };
+
+    $scope.showClickjackingWarn = function() {
+        $scope.clickjacking = true;
+    };
 }
 
 function ReaderCtrl($scope, $http) {
@@ -141,7 +155,7 @@ function ReaderCtrl($scope, $http) {
 function SubscribeController($scope, $http, $timeout) {
     var defaultForm = {
         feed_url : ""
-    }
+    };
     $scope.form = angular.copy(defaultForm);
     $scope.subs_feed = function() {
         if (typeof $scope.form.feed_url != "string" || $scope.form.feed_url.length < 3) {
@@ -153,12 +167,12 @@ function SubscribeController($scope, $http, $timeout) {
             $scope.showLoading = false;
             $scope.subscribe_warning = data.text;
             var delay = $timeout(function() {
-                $("form.subscribe-feed-dropdown").closest("li.dropdown").removeClass("open")
+                $("form.subscribe-feed-dropdown").closest("li.dropdown").removeClass("open");
                 $scope.subscribe_warning = "";
                 $scope.form = angular.copy(defaultForm);
             }, 1500);
         });
-    }
+    };
 }
 
 function UserspaceCtrl($scope, $http, $timeout) {
