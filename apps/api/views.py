@@ -51,7 +51,7 @@ def timeline(request):
         # FIXME: Move this blocks to model as a method
         try:
             EntryLike.objects.get(entry__id=entry.id, user=request.user)
-            like_msg = "You liked"
+            like_msg = "Unlike"
         except EntryLike.DoesNotExist:
             like_msg = "Like"
 
@@ -94,7 +94,7 @@ def feed_detail(request, feed_id):
     for entry in entries:
         try:
             EntryLike.objects.get(entry__id=entry.id, user=request.user)
-            like_msg = "You liked"
+            like_msg = "Unlike"
         except EntryLike.DoesNotExist:
             like_msg = "Like"
 
@@ -304,4 +304,4 @@ def like(request, entry_id):
             my_item.user.add(request.user)
             my_item.save()
         # TODO:Error cases
-        return HttpResponse(json.dumps({"code": 1, "msg": "You liked"}), content_type="application/json")
+        return HttpResponse(json.dumps({"code": 1, "msg": "Unlike"}), content_type="application/json")
