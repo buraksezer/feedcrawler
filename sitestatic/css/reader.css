@@ -58,18 +58,11 @@ a.brand {
     font-weight: lighter;
 }
 
+.liked,
 .enable-hover:hover,
 [class*="foundicon-"]:hover,
 a.brand:hover {
     color: #DD4B39;
-}
-
-[class*="foundicon-"],
-.transition {
-    -webkit-transition: color .5s;
-    -moz-transition: color .5s;
-    -o-transition: color .5s;
-    transition: color .5s;
 }
 
 .dropdown {
@@ -134,7 +127,7 @@ a.dropdown-menu {
 
 section.brand {
     float: left;
-    width: 328px;
+    width: 345px;
     text-align: left;
 }
 
@@ -270,4 +263,8 @@ section.brand {
 
 .submenu .entries .entry a:hover {
     color: #0CAEE3;
+}
+
+.liked {
+    color: ;
 }

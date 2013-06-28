@@ -5,3 +5,11 @@
 .divider {
     border-bottom: 1px solid #E2E2E2;
 }
+
+[class*="foundicon-"],
+.transition {
+    -webkit-transition: color .5s;
+    -moz-transition: color .5s;
+    -o-transition: color .5s;
+    transition: color .5s;
+}

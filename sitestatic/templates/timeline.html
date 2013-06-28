@@ -24,9 +24,12 @@
                 <br>
                 <a class="feed" href="/feed/{{ entry.feed_id }}">{{ entry.feed_title }}</a>
                 <div class="timeline-entry-interaction">
-                    <span class="like">Like </span>
-                    <span class="dislike">Dislike </span>
-                    <span class="Comment">Comment </span>
+                    <a href="#" class="like transition" entry-like>{{ entry.like_msg }}</a>
+                    <span>&sdot;</span>
+                    <span class="Comment">Comment</span>
+                    <span ng-show="entry.like_count > 0">&sdot;</span>
+                    <span ng-show="entry.like_count == 1">{{ entry.like_count }} like</span>
+                    <span ng-show="entry.like_count > 1">{{ entry.like_count }} likes</span>
                 </div>
             </div>
             <div class="clickjacking-warn">

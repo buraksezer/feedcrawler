@@ -17,6 +17,12 @@
             </section>
             <!-- left side of the navbar -->
             <ul class="menu">
+                <li ng-show="entry.liked" class="hint--bottom liked" data-hint="You liked">
+                    <i class="cursor-pointer social foundicon-thumb-up" entry-like></i>
+                </li>
+                <li ng-show="!entry.liked" class="hint--bottom" data-hint="Like">
+                    <i class="cursor-pointer social foundicon-thumb-up" entry-like></i>
+                </li>
                 <li class="hint--bottom" data-hint="Read later">
                     <i class="general foundicon-clock"></i>
                 </li>
@@ -40,10 +46,6 @@
             </ul>
             <!-- Middle section of the navbar -->
             <ul class="navigation">
-                <li class="hint--bottom" data-hint="Like this">
-                    <i class="cursor-pointer social foundicon-thumb-up"></i>
-                </li>
-
                 <li ng-show="!empty(entry.previous)" class="hint--bottom" data-hint="Previous: {{ entry.previous.title }}">
                     <a href="/reader/{{ entry.previous.id }}">
                         <i class="general foundicon-left-arrow"></i>
@@ -80,10 +82,6 @@
                 </li>
                 <li ng-show="empty(entry.next)" class="hint--bottom" data-hint="No more entry">
                     <i class="cursor-pointer general foundicon-right-arrow"></i>
-                </li>
-
-                <li class="hint--bottom" data-hint="Dislike this">
-                    <i class="cursor-pointer social foundicon-thumb-down"></i>
                 </li>
             </ul>
 

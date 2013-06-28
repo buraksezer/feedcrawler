@@ -21,12 +21,6 @@ ChapStream.directive('preventDefault', function() {
     };
 });
 
-ChapStream.run(function($rootScope) {
-    $rootScope.renderToReader = function(id) {
-        document.location.href = "/reader/"+id;
-    };
-});
-
 ChapStream.directive('clickjackingWarn', function () {
     return function (scope, element, attrs) {
         $(element).click(function(event) {
@@ -36,6 +30,27 @@ ChapStream.directive('clickjackingWarn', function () {
     };
 });
 
+ChapStream.directive('entryLike', function($http) {
+    return function (scope, element, attrs) {
+        $(element).click(function(event) {
+            $http.post("/api/like/"+scope.entry.id+"/").success(function(data) {
+                if (data.code == 1) {
+                    scope.entry.like_count += 1;
+                    $(element).text(data.msg)
+                } else if (data.code == -1) {
+                    scope.entry.like_count -= 1;
+                    $(element).text(data.msg);
+                } // error cases
+            });
+        });
+    }
+});
+
+ChapStream.run(function($rootScope) {
+    $rootScope.renderToReader = function(id) {
+        document.location.href = "/reader/"+id;
+    };
+});
 
 function SubscriptionsCtrl($scope, $http, $routeParams) {
     document.title = "Your subscriptions"+" | "+SiteTitle;
@@ -120,11 +135,13 @@ function FeedDetailCtrl($scope, $http, $routeParams) {
 
 function TimelineCtrl($scope, $http) {
     document.title = SiteTitle;
+
     $scope.busy = false;
     var increment = 15;
     $scope.entries = [];
     $scope.offset = 0;
     $scope.limit = increment;
+
     $scope.loadTimelineEntries = function() {
         if (typeof $scope.endOfData != 'undefined') return;
         if ($scope.busy) return;

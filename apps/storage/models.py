@@ -226,8 +226,3 @@ class Comment(models.Model):
 class EntryLike(models.Model):
     entry = models.OneToOneField(Entry)
     user = models.ManyToManyField(User)
-
-
-class EntryDislike(models.Model):
-    entry = models.OneToOneField(Entry)
-    user = models.ManyToManyField(User)

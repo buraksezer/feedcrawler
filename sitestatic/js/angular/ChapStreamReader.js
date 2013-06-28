@@ -6,6 +6,10 @@ var ChapStreamReader = angular.module("ChapStreamReader", [],
     }
 );
 
+ChapStreamReader.config(function($httpProvider) {
+    $httpProvider.defaults.headers.post['X-CSRFToken'] = $('input[name=csrfmiddlewaretoken]').val();
+});
+
 ChapStreamReader.directive('preventDefault', function() {
     return function(scope, element, attrs) {
         $(element).click(function(event) {
@@ -27,6 +31,20 @@ ChapStreamReader.run(function($rootScope) {
     $rootScope.empty = function(value) {
         return $.isEmptyObject(value);
     };
+});
+
+ChapStreamReader.directive('entryLike', function($http) {
+    return function (scope, element, attrs) {
+        $(element).click(function(event) {
+            $http.post("/api/like/"+scope.entry.id+"/").success(function(data) {
+                if (data.code == 1) {
+                    scope.entry.liked = true;
+                } else if (data.code == -1) {
+                    scope.entry.liked = false;
+                } // error cases
+            });
+        });
+    }
 });
 
 ChapStreamReader.directive('whenScrolled', function() {

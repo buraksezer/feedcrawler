@@ -2,7 +2,7 @@ import json
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
-from apps.storage.models import Feed, Entry
+from apps.storage.models import Feed, Entry, EntryLike
 from userena.utils import get_profile_model, get_user_model
 from django.contrib.auth.decorators import login_required
 from utils import ajax_required
@@ -48,13 +48,27 @@ def timeline(request):
     entries = get_user_timeline(request.user.id, offset=offset, limit=limit)
     result = []
     for entry in entries:
+        # FIXME: Move this blocks to model as a method
+        try:
+            EntryLike.objects.get(entry__id=entry.id, user=request.user)
+            like_msg = "You liked"
+        except EntryLike.DoesNotExist:
+            like_msg = "Like"
+
+        try:
+            like_count = EntryLike.objects.get(entry__id=entry.id).user.count()
+        except EntryLike.DoesNotExist:
+            like_count = 0
+
         item = {
             'id': entry.id,
             'title': entry.title,
             'feed_id': entry.feed.id,
             'feed_title': entry.feed.title,
             'link': entry.link,
-            'available': 1 if entry.available_in_frame is None else entry.available_in_frame
+            'available': 1 if entry.available_in_frame is None else entry.available_in_frame,
+            'like_msg': like_msg,
+            'like_count': like_count
         }
         result.append(item)
     return HttpResponse(json.dumps(result), content_type='application/json')
@@ -65,6 +79,7 @@ def feed_detail(request, feed_id):
     limit = request.GET.get("limit", 15)
     entries = Entry.objects.filter(feed_id=feed_id)[offset:limit]
     feed = entries[0].feed if entries else Feed.objects.get(id=feed_id)
+    # FIXME: Move this blocks to model as a method
     result = {
         'feed': {
             'id': feed.id,
@@ -72,16 +87,29 @@ def feed_detail(request, feed_id):
             'tagline': feed.tagline,
             'link': feed.link,
             'is_subscribed': True if feed.users.filter(username=request.user.username) else False,
-            'subs_count': feed.users.count()
+            'subs_count': feed.users.count(),
         }
     }
     items = []
     for entry in entries:
+        try:
+            EntryLike.objects.get(entry__id=entry.id, user=request.user)
+            like_msg = "You liked"
+        except EntryLike.DoesNotExist:
+            like_msg = "Like"
+
+        try:
+            like_count = EntryLike.objects.get(entry__id=entry.id).user.count()
+        except EntryLike.DoesNotExist:
+            like_count = 0
+
         item = {
             'id': entry.id,
             'title': entry.title,
             'link': entry.link,
             'available': 1 if entry.available_in_frame is None else entry.available_in_frame,
+            'like_msg': like_msg,
+            'like_count': like_count
         }
         items.append(item)
     result.update({"entries": items})
@@ -150,14 +178,20 @@ def reader(request, entry_id):
         return HttpResponse(json.dumps({"code": 0, "msg": "Sorry, that page doesn't exist!"}),
             content_type='application/json')
 
+    try:
+        EntryLike.objects.get(entry__id=entry.id, user=request.user)
+        liked = True
+    except EntryLike.DoesNotExist:
+        liked = False
+
     feed_id = entry.feed.id
     result = {
         "title": entry.title,
         "link": entry.link,
         "id": entry.id,
         "feed_title": entry.feed.title,
-        "available": 1 if entry.available_in_frame is None else entry.available_in_frame
-
+        "available": 1 if entry.available_in_frame is None else entry.available_in_frame,
+        "liked": liked,
     }
 
     try:
@@ -248,3 +282,26 @@ def entries_by_feed(request, feed_id):
         }
         results.append(item)
     return HttpResponse(json.dumps(results), content_type="application/json")
+
+@ajax_required
+@login_required
+def like(request, entry_id):
+    '''Sets or removes user votes on entries.'''
+    if request.method == "POST":
+        entry = Entry.objects.get(id=entry_id)
+        try:
+            item = EntryLike.objects.get(entry=entry)
+            if not item.user.filter(username__contains=request.user.username):
+                item.user.add(request.user)
+                item.save()
+            else:
+                item.user.remove(request.user)
+                return HttpResponse(json.dumps({"code": -1, "msg": "Like"}), content_type="application/json")
+        except EntryLike.DoesNotExist:
+            item = EntryLike(entry=entry)
+            item.save()
+            my_item = EntryLike.objects.get(id=item.id)
+            my_item.user.add(request.user)
+            my_item.save()
+        # TODO:Error cases
+        return HttpResponse(json.dumps({"code": 1, "msg": "You liked"}), content_type="application/json")

@@ -819,3 +819,12 @@ input.tt-hint {
     margin-right: auto;
     display: block;
 }
+
+.timeline-entry-interaction a {
+    text-decoration: none;
+    color: #555555;
+}
+
+.timeline-entry-interaction a:hover {
+    color: #0088CC;
+}
