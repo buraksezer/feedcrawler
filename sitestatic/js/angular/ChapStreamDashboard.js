@@ -125,6 +125,7 @@ ChapStream.directive('countChar', function($http) {
 ChapStream.directive('calcFromNow', function() {
     return function(scope, element, attrs) {
         attrs.$observe('ts', function(ts) {
+            scope.created_at = moment(parseInt(ts, 10)).format('MMMM Do YYYY, h:mm:ss a');
             scope.calcTime = moment(parseInt(ts, 10)).fromNow();
         });
     }

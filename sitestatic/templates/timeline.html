@@ -49,7 +49,7 @@
                 </div>
                 <div class="comments">
                     <div class="comment" ng-repeat="comment in entry.comments.results">
-                        <i class="social foundicon-chat"></i>
+                        <i class="social foundicon-chat" title="{{ created_at }}"></i>
                         <div class="content">
                             {{ comment.content }}
                             <span> - </span>
