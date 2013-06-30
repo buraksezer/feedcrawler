@@ -28,6 +28,7 @@ urlpatterns = patterns('',
     url(r'^api/like/(?P<entry_id>[\w-]+)/$', 'apps.api.views.like'),
     url(r'^api/post_comment/', 'apps.api.views.post_comment'),
     url(r'^api/fetch_comments/(?P<entry_id>[\w-]+)/$', 'apps.api.views.fetch_comments'),
+    url(r'^api/delete_comment/(?P<comment_id>[\w-]+)/$', 'apps.api.views.delete_comment'),
 
     #url(r'^subs$', 'apps.frontend.views.subs', name='subs'),
 

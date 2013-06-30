@@ -18,9 +18,18 @@
     <script type='text/javascript' src='/static/js/moment.min.js'></script>
 
     <!-- Base JS variables -->
-    <script>
+    <script type="text/javascript" charset="utf-8">
         var SiteTitle = "ChapStream";
+        window.CsFrontend = {};
     </script>
+
+    {% if user.is_authenticated %}
+    <script type="text/javascript" charset="utf-8">
+        CsFrontend.Globals = {
+            'username': "{{ user.username }}"
+        };
+    </script>
+    {% endif %}
 
     <!-- Base Stylesheet imports -->
     <link rel="stylesheet" href="/static/css/hint.min.css"></link>

@@ -36,6 +36,7 @@ def get_latest_comments(entry_id):
     comment_count = Comment.objects.filter(entry_id=entry_id).count() - 2
     for comment in sorted(comments, key=lambda comment: comment.id):
         item = {
+            "id": comment.id,
             "content": comment.content,
             "created_at": int(time.mktime(comment.created_at.timetuple())*1000),
             "author": comment.user.username
@@ -325,6 +326,8 @@ def like(request, entry_id):
         return HttpResponse(json.dumps({"code": 1, "msg": "Unlike"}), content_type="application/json")
 
 
+# Comment related functions
+
 @ajax_required
 @login_required
 def post_comment(request):
@@ -335,9 +338,24 @@ def post_comment(request):
     comment.save()
 
     # Result a json for presenting the new comment
-    result = {"epoch": int(time.mktime(comment.created_at.timetuple())*1000), \
-        "author": request.user.username}
+    result = {
+        "epoch": int(time.mktime(comment.created_at.timetuple())*1000),
+        "author": request.user.username,
+        "id": comment.id
+    }
     return HttpResponse(json.dumps(result), content_type="application/json")
+
+
+@ajax_required
+@login_required
+def delete_comment(request, comment_id):
+    try:
+        comment = Comment.objects.get(id=comment_id, user=request.user)
+        comment.delete()
+    except Comment.DoesNotExist:
+        return HttpResponse(json.dumps({"code": 0, "msg": "Invalid comment id."}), content_type="application/json")
+
+    return HttpResponse(json.dumps({"code": 1, "msg": "Comment has been deleted successfully."}), content_type="application/json")
 
 
 @ajax_required

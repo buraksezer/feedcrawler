@@ -77,6 +77,18 @@ ChapStream.directive('postComment', function($http) {
     }
 });
 
+ChapStream.directive('deleteComment', function($http) {
+    return function (scope, element, attrs) {
+        $(element).click(function(event) {
+            scope.commentLoading = true;
+            $http.post("/api/delete_comment/"+attrs.cId+"/").success(function(data) {
+                scope.commentLoading = false;
+                scope.entry.comments.results.splice(attrs.cIndex, 1);
+            });
+        });
+    }
+})
+
 ChapStream.directive('cancelComment', function() {
     return function(scope, element, attrs) {
         $(element).click(function(event) {
@@ -119,6 +131,7 @@ ChapStream.directive('calcFromNow', function() {
 });
 
 ChapStream.run(function($rootScope) {
+    $rootScope.username = CsFrontend.Globals.username;
     $rootScope.renderToReader = function(id) {
         document.location.href = "/reader/"+id;
     };
