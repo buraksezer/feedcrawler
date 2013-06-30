@@ -46,6 +46,78 @@ ChapStream.directive('entryLike', function($http) {
     }
 });
 
+ChapStream.directive('commentBox', function($http) {
+    return function (scope, element, attrs) {
+        $(element).click(function(event) {
+            $('textarea').autosize();
+            scope.showCommentBox = true;
+        });
+    }
+});
+
+ChapStream.directive('postComment', function($http) {
+    return function (scope, element, attrs) {
+        $(element).click(function(event) {
+            scope.postingComment = true;
+            $http({
+                url: '/api/post_comment/',
+                method: "POST",
+                data:  $.param({content: scope.commentContent, entry_id: scope.entry.id}),
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+            }).success(function (data, status, headers, config) {
+                scope.postingComment = false;
+                scope.showCommentBox = false;
+                data.content = scope.commentContent;
+                scope.entry.comments.results.push(data);
+                scope.commentContent = undefined;
+            }).error(function (data, status, headers, config) {
+                // Error case
+            });
+        });
+    }
+});
+
+ChapStream.directive('cancelComment', function() {
+    return function(scope, element, attrs) {
+        $(element).click(function(event) {
+            scope.showCommentBox = false;
+            scope.commentContent = "";
+        });
+    }
+});
+
+ChapStream.directive('loadComments', function($http) {
+    return function(scope, element, attrs) {
+        $(element).click(function(event) {
+            $http.get("/api/fetch_comments/"+scope.entry.id+"/").success(function(data) {
+                scope.entry.comments = data;
+            });
+        })
+    }
+});
+
+ChapStream.directive('countChar', function($http) {
+    return function(scope, element, attrs) {
+        scope.maxCharCount = 2000;
+        $(element).bind("keypress keyup keydown paste", function(event) {
+            if (typeof scope.commentContent == 'undefined') return;
+            if (scope.restCharCount <= 0) {
+                event.preventDefault();
+            } else {
+                scope.restCharCount = scope.maxCharCount - scope.commentContent.length;
+            }
+        });
+    }
+});
+
+ChapStream.directive('calcFromNow', function() {
+    return function(scope, element, attrs) {
+        attrs.$observe('ts', function(ts) {
+            scope.calcTime = moment(parseInt(ts, 10)).fromNow();
+        });
+    }
+});
+
 ChapStream.run(function($rootScope) {
     $rootScope.renderToReader = function(id) {
         document.location.href = "/reader/"+id;
@@ -141,7 +213,6 @@ function TimelineCtrl($scope, $http) {
     $scope.entries = [];
     $scope.offset = 0;
     $scope.limit = increment;
-
     $scope.loadTimelineEntries = function() {
         if (typeof $scope.endOfData != 'undefined') return;
         if ($scope.busy) return;

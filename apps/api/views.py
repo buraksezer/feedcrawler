@@ -1,8 +1,9 @@
 import json
+import time
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
-from apps.storage.models import Feed, Entry, EntryLike
+from apps.storage.models import Feed, Entry, EntryLike, Comment
 from userena.utils import get_profile_model, get_user_model
 from django.contrib.auth.decorators import login_required
 from utils import ajax_required
@@ -27,6 +28,20 @@ def get_user_timeline(user_id, offset=0, limit=15):
     feeds = Feed.objects.filter(users=user_id)
     return Entry.objects.filter(feed_id__in=feeds)[offset:limit]
 
+def get_latest_comments(entry_id):
+    offset = 0
+    limit = 2
+    results = []
+    comments = Comment.objects.filter(entry_id=entry_id)[offset:limit]
+    comment_count = Comment.objects.filter(entry_id=entry_id).count() - 2
+    for comment in sorted(comments, key=lambda comment: comment.id):
+        item = {
+            "content": comment.content,
+            "created_at": int(time.mktime(comment.created_at.timetuple())*1000),
+            "author": comment.user.username
+        }
+        results.append(item)
+    return {"results": results, "count": comment_count}
 
 @ajax_required
 @login_required
@@ -68,7 +83,9 @@ def timeline(request):
             'link': entry.link,
             'available': 1 if entry.available_in_frame is None else entry.available_in_frame,
             'like_msg': like_msg,
-            'like_count': like_count
+            'like_count': like_count,
+            'created_at': int(time.mktime(entry.published_at.timetuple())*1000),
+            'comments': get_latest_comments(entry.id)
         }
         result.append(item)
     return HttpResponse(json.dumps(result), content_type='application/json')
@@ -109,7 +126,9 @@ def feed_detail(request, feed_id):
             'link': entry.link,
             'available': 1 if entry.available_in_frame is None else entry.available_in_frame,
             'like_msg': like_msg,
-            'like_count': like_count
+            'like_count': like_count,
+            'created_at': int(time.mktime(entry.published_at.timetuple())*1000),
+            'comments': get_latest_comments(entry.id)
         }
         items.append(item)
     result.update({"entries": items})
@@ -124,7 +143,6 @@ def subs_search(request, keyword):
         results.append({
             "id": feed.id,
             "value": feed.title,
-            "link": feed.link,
             "tokens": tokens
             }
         )
@@ -305,3 +323,33 @@ def like(request, entry_id):
             my_item.save()
         # TODO:Error cases
         return HttpResponse(json.dumps({"code": 1, "msg": "Unlike"}), content_type="application/json")
+
+
+@ajax_required
+@login_required
+def post_comment(request):
+    comment = Comment()
+    comment.entry_id = request.POST.get("entry_id")
+    comment.user_id = request.user.id
+    comment.content = request.POST.get("content").strip()
+    comment.save()
+
+    # Result a json for presenting the new comment
+    result = {"epoch": int(time.mktime(comment.created_at.timetuple())*1000), \
+        "author": request.user.username}
+    return HttpResponse(json.dumps(result), content_type="application/json")
+
+
+@ajax_required
+@login_required
+def fetch_comments(request, entry_id):
+    comments = Comment.objects.filter(entry_id=entry_id)
+    results = []
+    for comment in sorted(comments, key=lambda comment: comment.id):
+        item = {
+            "content": comment.content,
+            "created_at": int(time.mktime(comment.created_at.timetuple())*1000),
+            "author": comment.user.username
+        }
+        results.append(item)
+    return HttpResponse(json.dumps({"results": results, "count": 0}), content_type="application/json")

@@ -219,9 +219,14 @@ class Comment(models.Model):
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    entry = models.OneToOneField(Entry)
-    user = models.OneToOneField(User)
+    entry = models.ForeignKey(Entry)
+    user = models.ForeignKey(User)
 
+    class Meta:
+        ordering = ["-id"]
+
+    def __unicode__(self):
+        return str(self.id)
 
 class EntryLike(models.Model):
     entry = models.OneToOneField(Entry)

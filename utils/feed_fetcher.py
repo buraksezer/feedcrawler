@@ -80,7 +80,7 @@ class ProcessEntry(object):
 class ProcessFeed(object):
     def __init__(self, feed):
         self.feed = feed
-        self.user_agent = "FeedCraft RSS Reader User Agent"
+        self.user_agent = "ChapStream RSS Reader User Agent"
 
     def process(self):
         self.parsed = feedparser.parse(self.feed.feed_url, agent=self.user_agent, \

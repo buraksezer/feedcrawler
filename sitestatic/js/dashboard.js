@@ -2,7 +2,7 @@ $(document).ready(function(){
     $('.search-query').typeahead(
         [{
             remote: '/api/subs-search/%QUERY',
-            template: '<p class="search-result">{{value}}<small> {{link}}</small></p>',
+            template: '<p class="search-result">{{value}}</p>',
             engine: Hogan
         }]
     ).on('typeahead:selected', function($e, data) {
