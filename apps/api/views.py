@@ -367,7 +367,8 @@ def fetch_comments(request, entry_id):
         item = {
             "content": comment.content,
             "created_at": int(time.mktime(comment.created_at.timetuple())*1000),
-            "author": comment.user.username
+            "author": comment.user.username,
+            "id": comment.id
         }
         results.append(item)
     return HttpResponse(json.dumps({"results": results, "count": 0}), content_type="application/json")
