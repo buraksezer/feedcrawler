@@ -1,4 +1,4 @@
-var ChapStream = angular.module('ChapStream', ['infinite-scroll'],
+var ChapStream = angular.module('ChapStream', ['infinite-scroll', 'ngSanitize'],
     function($routeProvider, $locationProvider) {
         $locationProvider.html5Mode(true);
         $routeProvider
@@ -57,7 +57,8 @@ ChapStream.directive('commentBox', function($http) {
 
 ChapStream.directive('postComment', function($http) {
     return function (scope, element, attrs) {
-        $(element).click(function(event) {
+        function post_comment() {
+            if (!scope.commentContent.trim().length) return;
             scope.postingComment = true;
             $http({
                 url: '/api/post_comment/',
@@ -67,12 +68,26 @@ ChapStream.directive('postComment', function($http) {
             }).success(function (data, status, headers, config) {
                 scope.postingComment = false;
                 scope.showCommentBox = false;
-                data.content = scope.commentContent;
+                data.content = nl2br(scope.commentContent);
                 scope.entry.comments.results.push(data);
                 scope.commentContent = undefined;
             }).error(function (data, status, headers, config) {
                 // Error case
             });
+        }
+
+        $(element).closest(".comments-area").find("textarea").keypress(function(event) {
+            if (event.shiftKey) {
+                scope.commentContent =+ "\n";
+            } else {
+                if (event.keyCode != 13) return;
+                event.preventDefault();
+                post_comment();
+            }
+        });
+
+        $(element).click(function(event) {
+            post_comment();
         });
     }
 });
@@ -93,6 +108,7 @@ ChapStream.directive('cancelComment', function() {
     return function(scope, element, attrs) {
         $(element).click(function(event) {
             scope.showCommentBox = false;
+            scope.postingComment = false;
             scope.commentContent = "";
         });
     }
@@ -102,6 +118,9 @@ ChapStream.directive('loadComments', function($http) {
     return function(scope, element, attrs) {
         $(element).click(function(event) {
             $http.get("/api/fetch_comments/"+scope.entry.id+"/").success(function(data) {
+                for(var i=0; i < data.results.length; i++) {
+                    data.results[i].content = nl2br(data.results[i].content);
+                }
                 scope.entry.comments = data;
             });
         })
@@ -188,6 +207,10 @@ function FeedDetailCtrl($scope, $http, $routeParams) {
                 }
 
                 for(var i = 0; i < data.entries.length; i++) {
+                    for(var j=0; j < data.entries[i].comments.results.length; j++) {
+                        // A bit confusing?
+                        data.entries[i].comments.results[j].content = nl2br(data.entries[i].comments.results[j].content);
+                    }
                     $scope.feed_detail.entries.push(data.entries[i]);
                 }
 
@@ -237,6 +260,10 @@ function TimelineCtrl($scope, $http) {
                 $scope.busy = false;
             } else {
                 for(var i = 0; i < data.length; i++) {
+                    for(var j=0; j < data[i].comments.results.length; j++) {
+                        // A bit confusing?
+                        data[i].comments.results[j].content = nl2br(data[i].comments.results[j].content);
+                    }
                     $scope.entries.push(data[i]);
                 }
                 $scope.offset += increment;
