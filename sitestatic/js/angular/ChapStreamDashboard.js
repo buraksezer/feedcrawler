@@ -32,20 +32,6 @@ ChapStream.config(function($httpProvider) {
     $httpProvider.defaults.headers.post['X-CSRFToken'] = $('input[name=csrfmiddlewaretoken]').val();
 });
 
-ChapStream.directive('catchNewComment', function() {
-    return function(scope, element, attrs) {
-        $(element).bind("new_comment_event", function(event, data) {
-            scope.$apply(function () {
-                if (scope.entry.comments.last_comment_id != data.new_comment.id) {
-                    data.new_comment.content = nl2br(data.new_comment.content);
-                    scope.entry.comments.results.push(data.new_comment);
-                    scope.entry.comments.last_comment_id = data.new_comment.id
-                }
-            });
-        });
-    }
-});
-
 ChapStream.directive('preventDefault', function() {
     return function(scope, element, attrs) {
         $(element).click(function(event) {
@@ -129,7 +115,37 @@ ChapStream.directive('postComment', function($http) {
     }
 });
 
-ChapStream.directive('deleteComment', function($http) {
+ChapStream.directive('catchNewComment', function() {
+    return function(scope, element, attrs) {
+        $(element).bind("new_comment_event", function(event, data) {
+            scope.$apply(function () {
+                if (scope.entry.comments.last_comment_id != data.new_comment.id) {
+                    data.new_comment.content = nl2br(data.new_comment.content);
+                    scope.entry.comments.results.push(data.new_comment);
+                    scope.entry.comments.last_comment_id = data.new_comment.id
+                }
+            });
+        });
+    }
+});
+
+ChapStream.directive('deleteComment',function($http) {
+    return function (scope, element, attrs) {
+        $(element).click(function(event) {
+            scope.commentDelSure = true;
+        });
+    }
+});
+
+ChapStream.directive('cancelDeleteComment',function($http) {
+    return function (scope, element, attrs) {
+        $(element).click(function(event) {
+            scope.commentDelSure = false;
+        });
+    }
+});
+
+ChapStream.directive('sureDeleteComment', function($http) {
     return function (scope, element, attrs) {
         $(element).click(function(event) {
             scope.commentLoading = true;
