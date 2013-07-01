@@ -61,7 +61,7 @@
                         View {{ entry.comments.count }} more comments
                     </a>
                 </div>
-                <div class="comments">
+                <div class="comments" catch-new-comment id="comments_{{ entry.id }}">
                     <div class="comment" ng-repeat="comment in entry.comments.results">
                         <i class="social foundicon-chat" title="{{ created_at }}"></i>
                         <div class="content">

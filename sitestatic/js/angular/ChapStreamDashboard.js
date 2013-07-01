@@ -37,6 +37,7 @@ ChapStream.directive('catchNewComment', function() {
         $(element).bind("new_comment_event", function(event, data) {
             scope.$apply(function () {
                 if (scope.entry.comments.last_comment_id != data.new_comment.id) {
+                    data.new_comment.content = nl2br(data.new_comment.content);
                     scope.entry.comments.results.push(data.new_comment);
                     scope.entry.comments.last_comment_id = data.new_comment.id
                 }
