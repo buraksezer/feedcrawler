@@ -69,8 +69,13 @@ ChapStream.directive('entryLike', function($http) {
 ChapStream.directive('commentBox', function($http) {
     return function (scope, element, attrs) {
         $(element).click(function(event) {
-            $('textarea').autosize();
-            scope.showCommentBox = true;
+            var target = $(element).closest(".dashboard-entry").find(".comments-area textarea.comment")
+            target.autosize();
+            scope.$apply(function() {
+                scope.showCommentBox = true;
+            })
+            target.focus();
+
         });
     }
 });
