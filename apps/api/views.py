@@ -341,8 +341,19 @@ def post_comment(request):
     result = {
         "epoch": int(time.mktime(comment.created_at.timetuple())*1000),
         "author": request.user.username,
-        "id": comment.id
+        "id": comment.id,
+        "content": request.POST.get("content").strip(),
+        "entry_id": request.POST.get("entry_id")
     }
+
+    #realtime_result = result
+    #realtime_result.update({
+    #    "content": request.POST.get("content").strip(),
+    #    "entry_id": request.POST.get("entry_id")
+    #}) deep copy?
+    feed_id = Feed.objects.get(entry__id=request.POST.get("entry_id")).id
+    announce_client.broadcast_group(feed_id, 'new_comment', data=result)
+
     return HttpResponse(json.dumps(result), content_type="application/json")
 
 

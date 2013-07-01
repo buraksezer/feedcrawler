@@ -8,8 +8,41 @@ var ChapStream = angular.module('ChapStream', ['infinite-scroll', 'ngSanitize'],
     }
 );
 
+ChapStream.factory('InitService', function() {
+    return {
+        realtime: function() {
+            console.log("I am ready to fetch realtime data.");
+            announce.init();
+            announce.on('new_comment', function(data){
+                $("#comments_"+data.entry_id).trigger("new_comment_event", {new_comment: data});
+            });
+        }
+    }
+});
+
+ChapStream.run(function($rootScope, InitService) {
+    $rootScope.username = CsFrontend.Globals.username;
+    InitService.realtime();
+    $rootScope.renderToReader = function(id) {
+        document.location.href = "/reader/"+id;
+    };
+});
+
 ChapStream.config(function($httpProvider) {
     $httpProvider.defaults.headers.post['X-CSRFToken'] = $('input[name=csrfmiddlewaretoken]').val();
+});
+
+ChapStream.directive('catchNewComment', function() {
+    return function(scope, element, attrs) {
+        $(element).bind("new_comment_event", function(event, data) {
+            scope.$apply(function () {
+                if (scope.entry.comments.last_comment_id != data.new_comment.id) {
+                    scope.entry.comments.results.push(data.new_comment);
+                    scope.entry.comments.last_comment_id = data.new_comment.id
+                }
+            });
+        });
+    }
 });
 
 ChapStream.directive('preventDefault', function() {
@@ -69,7 +102,10 @@ ChapStream.directive('postComment', function($http) {
                 scope.postingComment = false;
                 scope.showCommentBox = false;
                 data.content = nl2br(scope.commentContent);
-                scope.entry.comments.results.push(data);
+                if (scope.entry.comments.last_comment_id != data.id) {
+                    scope.entry.comments.results.push(data);
+                    scope.entry.comments.last_comment_id = data.id;
+                }
                 scope.commentContent = undefined;
             }).error(function (data, status, headers, config) {
                 // Error case
@@ -148,13 +184,6 @@ ChapStream.directive('calcFromNow', function() {
             scope.calcTime = moment(parseInt(ts, 10)).fromNow();
         });
     }
-});
-
-ChapStream.run(function($rootScope) {
-    $rootScope.username = CsFrontend.Globals.username;
-    $rootScope.renderToReader = function(id) {
-        document.location.href = "/reader/"+id;
-    };
 });
 
 function SubscriptionsCtrl($scope, $http, $routeParams) {
