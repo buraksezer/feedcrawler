@@ -645,6 +645,10 @@ label[for="id_feed_search"] {
     display: none;
 }
 
+.feed-404 {
+    text-align: center;
+}
+
 .feed-detail-header {
     background-color: rgb(240, 240, 240);
 }
@@ -857,35 +861,3 @@ textarea.comment {
   -webkit-transition: height 0.2s;
   -moz-transition: height 0.2s;
 }
-
-/*
-#overview {
--webkit-background-clip: border-box;
--webkit-background-origin: padding-box;
--webkit-background-size: auto;
--webkit-box-shadow: rgba(0, 0, 0, 0.2) 0px 3px 7px 0px inset, rgba(0, 0, 0, 0.2) 0px -3px 7px 0px inset;
-background-attachment: scroll;
-background-clip: border-box;
-background-color: rgba(0, 0, 0, 0);
-background-image: linear-gradient(45deg, rgb(2, 0, 49) 0%, rgb(109, 51, 83) 100%);
-background-origin: padding-box;
-background-size: auto;
-border-bottom-color: rgb(221, 221, 221);
-border-bottom-style: solid;
-border-bottom-width: 1px;
-box-shadow: rgba(0, 0, 0, 0.2) 0px 3px 7px 0px inset, rgba(0, 0, 0, 0.2) 0px -3px 7px 0px inset;
-color: rgb(255, 255, 255);
-display: block;
-font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-font-size: 14px;
-height: 160px;
-line-height: 20px;
-padding-bottom: 40px;
-padding-left: 0px;
-padding-right: 0px;
-padding-top: 40px;
-position: relative;
-text-align: left;
-text-shadow: rgba(0, 0, 0, 0.4) 0px 1px 3px, rgba(0, 0, 0, 0.0745098) 0px 0px 30px;
-width: 1286px;
-}*/

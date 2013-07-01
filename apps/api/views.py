@@ -96,7 +96,10 @@ def feed_detail(request, feed_id):
     offset = request.GET.get("offset", 0)
     limit = request.GET.get("limit", 15)
     entries = Entry.objects.filter(feed_id=feed_id)[offset:limit]
-    feed = entries[0].feed if entries else Feed.objects.get(id=feed_id)
+    try:
+        feed = entries[0].feed if entries else Feed.objects.get(id=feed_id)
+    except Feed.DoesNotExist:
+        return HttpResponse(json.dumps({}), content_type='application/json')
     # FIXME: Move this blocks to model as a method
     result = {
         'feed': {

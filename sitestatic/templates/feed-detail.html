@@ -1,3 +1,9 @@
+<div ng-show="feed-404" class="feed-404">
+    <h3>:'(</h3>
+    <h3>Sorry, that page doesn't exist!</h3>
+    <h4><a href="/">Go to timeline</a></h4>
+</div>
+
 <div ng-show="!loading" class="feed-detail-header">
     <h4>
         <a href="{{ feed_detail.feed.link }}" target="_blank">{{ feed_detail.feed.title }}</a>
@@ -90,7 +96,7 @@
             </div>
         </div>
     </div>
-<div id="timeline-endless-loading">
+<div ng-hide="feed-404" id="timeline-endless-loading">
     <img ng-show="busy" src="/static/img/ajax-loader.gif"/>
     <p ng-show="busy">Please wait...</p>
     <p ng-show="endOfData">~ No more entry ~</p>

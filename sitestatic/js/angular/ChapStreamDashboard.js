@@ -249,6 +249,12 @@ function FeedDetailCtrl($scope, $http, $routeParams) {
         if ($scope.busy) return;
         $scope.busy = true;
         $http.get("/api/feed_detail/"+$routeParams.feedId+"/?&offset="+$scope.offset+"&limit="+$scope.limit).success(function(data) {
+            if (!data.length) {
+                $scope.endOfData = true;
+                $scope.feed404 = true;
+                $scope.busy = false;
+                return;
+            }
             if (!data.entries.length) {
                 $scope.endOfData = true;
                 $scope.busy = false;
