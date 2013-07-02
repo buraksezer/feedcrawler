@@ -86,6 +86,22 @@ a.brand {
     line-height: 2.2;
 }
 
+#header .right-menu {
+    float: right;
+}
+
+#header .link-signout {
+    text-decoration: none;
+    color: #555555;
+}
+
+#header .signout-button {
+    float: right;
+    margin-top: 10.2px;
+    margin-left: 5px;
+    font-size: 21px;
+}
+
 [class*="foundicon-"],
 a.brand {
     -webkit-transition: color .5s;

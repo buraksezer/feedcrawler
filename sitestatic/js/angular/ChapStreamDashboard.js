@@ -5,6 +5,7 @@ var ChapStream = angular.module('ChapStream', ['infinite-scroll', 'ngSanitize'],
         .when('/', { templateUrl: '/static/templates/timeline.html', controller: 'TimelineCtrl' })
         .when('/feed/:feedId', { templateUrl: '/static/templates/feed-detail.html', controller: 'FeedDetailCtrl' })
         .when('/subscriptions', { templateUrl: '/static/templates/subscriptions.html', controller: 'SubscriptionsCtrl' })
+        .when('/user/signout', {templateUrl: ' ', controller: 'SignoutCtrl'})
     }
 );
 
@@ -365,4 +366,8 @@ function UserspaceCtrl($scope, $http, $timeout) {
     $http.get("/api/user_profile/").success(function(data) {
         $scope.profile = data;
     });
+}
+
+function SignoutCtrl() {
+    document.location.href = "/user/signout";
 }

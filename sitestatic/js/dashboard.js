@@ -29,13 +29,7 @@ $(document).ready(function(){
         e.stopPropagation();
     });
 
-    /* $(".search-query").keydown(throttle(function(evt) {
-        var query = $(".search-query").val();
-        if (!query.length) return;
-        $.get('/subs-search/'+query, function(data) {
-            $("#search-results").addClass("open");
-        });
-    })); */
-
+    // Initialize bootstrap tooltips
+    $("#header .link-signout i.signout-button").tooltip();
 });
 

@@ -17,45 +17,15 @@
 
 {% block body %}
 <body ng-app="ChapStream" id="dashboard-layout">
-    <!--
-    <div class="navbar navbar-fixed-top">
-        <div class="navbar-inner">
-            <div class="container">
-                <a class="brand" href="{% url "home" %}"><i>Chap<strong>Stream</strong><small> &alpha;</small></i></a>
-                <div class="nav-collapse collapse">
-                    <form class="navbar-search">
-                        <input type="text" class="search-query span4" placeholder="Search in your subscriptions">
-                    </form>
-                    <div class="nav-collapse">
-                        <ul class="nav pull-right">
-                            {% if user.is_authenticated %}
-                            <li><a href="#">Find to follow</a></li>
-                            <li class="divider-vertical"></li>
-                            <li class="dropdown">
-                                <a href="#" data-toggle="dropdown" role="button" class="dropdown-toggle"><i class="foundicon-settings"></i></a>
-                                <ul role="menu" class="dropdown-menu">
-                                    <li role="presentation"><a href="/user/{{ user.username }}" tabindex="-1" role="menuitem">Profile</a></li>
-                                    <li role="presentation"><a href="/user/signout" tabindex="-1" role="menuitem">Sign Out</a></li>
-                                </ul>
-                            </li>
-                            {% else %}
-                            <li><a href="/user/signin">Sign in</a></li>
-                            {% endif %}
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
--->
-
     <header id="header">
         <div class="container">
-                                <a class="brand" href="{% url "home" %}"><i>Chap<strong>Stream</strong><small> &alpha;</small></i></a>
-
-                                <form class="navbar-search">
-                        <input type="text" class="search-query span4" placeholder="Search in your subscriptions">
-                    </form>
+            <a class="brand" href="{% url "home" %}"><i>Chap<strong>Stream</strong><small> &alpha;</small></i></a>
+            <a class="link-signout" href="/user/signout">
+                <i data-toggle="tooltip" title="Sign out" data-placement="bottom" class="signout-button social foundicon-torso"></i>
+            </a>
+            <form class="navbar-search">
+                <input type="text" class="search-query span4" placeholder="Search in your subscriptions">
+            </form>
         </div>
     </header>
 
