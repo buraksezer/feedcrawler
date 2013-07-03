@@ -41,15 +41,6 @@ class SyncFeed(Task):
 
     def run(self, feed, **kwargs):
         DriveSync(feed)
-        # For doing realtime stuff
-        for user in feed.users.all():
-            dom = render_to_string("frontend/partials/rightbar_feed_item.html",
-                {"feed": feed})
-            announce_client.emit(
-                user.id,
-                'newfeed_rightbar',
-                data={'dom' : dom}
-            )
 
 class FirstSync(Task):
     name = 'first-sync'

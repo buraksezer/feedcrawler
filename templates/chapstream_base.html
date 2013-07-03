@@ -21,13 +21,13 @@
 
     <!-- Base JS variables -->
     <script type="text/javascript" charset="utf-8">
-        var SiteTitle = "ChapStream";
         window.CsFrontend = {};
     </script>
 
     {% if user.is_authenticated %}
     <script type="text/javascript" charset="utf-8">
         CsFrontend.Globals = {
+            'SiteTitle': "ChapStream",
             'username': "{{ user.username }}"
         };
     </script>
@@ -44,7 +44,9 @@
     {% block reader_requirements %}{% endblock %}
 
     <link rel="shortcut icon" href="/ico/favicon.png">
+    {% if user.is_authenticated %}
     <div id="csrf-token">{% csrf_token %}</div>
+    {% endif %}
 </head>
 <!-- Start -->
 {% block body %}{% endblock %}

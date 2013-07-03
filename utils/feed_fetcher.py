@@ -68,14 +68,18 @@ class ProcessEntry(object):
 
             entry_item.save()
 
-            announce_client.broadcast_group(self.feed.id, 'new_entry', data={'id': entry_item.id,
-                'feed_id': self.feed.id,
-                'link': entry.link,
-                'published_at': entry_item.published_at.strftime("%B %d, %y") if isinstance(entry_item.published_at, datetime) else entry_item.published_at,
-                'feed_title': self.feed.title,
-                'title':entry.title,
-                'available': entry_item.available_in_frame}
+            announce_client.broadcast_group(self.feed.id, 'new_entry',
+                data = {
+                    'id': entry_item.id,
+                    'title': entry_item.title,
+                    'feed_id': entry_item.feed.id,
+                    'feed_title': self.feed.title,
+                    'link': entry_item.link,
+                    'available': 1 if entry_item.available_in_frame is None else entry_item.available_in_frame,
+                    'created_at': int(time.mktime(entry_item.published_at.timetuple())*1000),
+                }
             )
+            # created_at field seems problematic.
 
 class ProcessFeed(object):
     def __init__(self, feed):

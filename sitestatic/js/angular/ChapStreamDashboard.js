@@ -16,6 +16,11 @@ ChapStream.factory('InitService', function() {
             announce.on('new_comment', function(data){
                 $("#comments_"+data.entry_id).trigger("new_comment_event", {new_comment: data});
             });
+
+            announce.on('new_entry', function(data){
+                $("#new-entry").trigger("new_entry_event", {new_entry: data});
+            });
+
         }
     }
 });
@@ -32,8 +37,68 @@ ChapStream.config(function($httpProvider) {
     $httpProvider.defaults.headers.post['X-CSRFToken'] = $('input[name=csrfmiddlewaretoken]').val();
 });
 
+ChapStream.directive('catchNewEntry', function() {
+    return function (scope, element, attrs) {
+        scope.newEntryCount = 0;
+        scope.originalTitle = document.title;
+        $(element).bind("new_entry_event", function(event, data) {
+            scope.$apply(function() {
+                // Dont show this entry until user clicks notifier
+                data.new_entry.instantEntry = true;
+                // Add some fields that not included by default
+                data.new_entry.like_msg = "Like",
+                data.new_entry.like_count = 0,
+                data.new_entry.comments = {"results": [], "count": 0}
+                if (typeof scope.feed_detail == 'undefined') {
+                    // This is timeline
+                    scope.entries.unshift(data.new_entry);
+                    scope.hiddenEntry = true;
+                    scope.newEntryCount++;
+                    document.title = "("+scope.newEntryCount+") "+scope.originalTitle;
+                } else {
+                    // This is feed detail
+                    if (scope.feed_detail.feed.id == data.new_entry.feed_id) {
+                        scope.feed_detail.entries.unshift(data.new_entry);
+                        scope.hiddenEntry = true;
+                        scope.newEntryCount++;
+                        document.title = "("+scope.newEntryCount+") "+scope.originalTitle;
+                    }
+                }
+            });
+        });
+    }
+});
+
+ChapStream.directive('showHiddenEntry', function() {
+    return function (scope, element, attrs) {
+        $(element).click(function() {
+            scope.$apply(function() {
+                scope.hiddenEntry = false;
+                scope.newEntryCount = 0;
+                document.title = scope.originalTitle;
+
+                if (typeof scope.feed_detail == 'undefined') {
+                    var dataset = scope.entries;
+                } else {
+                    var dataset = scope.feed_detail.entries;
+                }
+
+                for (var i=0; i<dataset.length; i++ ) {
+                    if (dataset[i].instantEntry == true) {
+                        dataset[i].instantEntry = false;
+                    } else {
+                        break;
+                    }
+                }
+                $(".dashboard-entry").slideDown('fast');
+            });
+        });
+    }
+});
+
+
 ChapStream.directive('signOut', function() {
-    return function(scope, element, attrs) {
+    return function (scope, element, attrs) {
         $(element).click(function() {
             document.location.href = "/user/signout";
         });
@@ -134,10 +199,12 @@ ChapStream.directive('catchNewComment', function() {
             scope.$apply(function () {
                 if (scope.entry.comments.last_comment_id != data.new_comment.id) {
                     data.new_comment.content = nl2br(data.new_comment.content);
+                    data.new_comment.instantComment = true;
                     scope.entry.comments.results.push(data.new_comment);
-                    scope.entry.comments.last_comment_id = data.new_comment.id
+                    scope.entry.comments.last_comment_id = data.new_comment.id;
                 }
             });
+            $(".comment").slideDown();
         });
     }
 });
@@ -217,7 +284,7 @@ ChapStream.directive('calcFromNow', function() {
 });
 
 function SubscriptionsCtrl($scope, $http, $routeParams) {
-    document.title = "Your subscriptions"+" | "+SiteTitle;
+    document.title = "Your subscriptions"+" | "+CsFrontend.Globals.SiteTitle;
     var increment = 10;
     $scope.busy = false;
     $scope.subscriptions= [];
@@ -283,7 +350,7 @@ function FeedDetailCtrl($scope, $http, $routeParams) {
                 $scope.offset += increment;
                 $scope.limit += increment;
                 $scope.busy = false;
-                document.title = data.feed.title+" | "+SiteTitle;
+                document.title = data.feed.title+" | "+CsFrontend.Globals.SiteTitle;
             }
         });
     };
@@ -308,7 +375,7 @@ function FeedDetailCtrl($scope, $http, $routeParams) {
 }
 
 function TimelineCtrl($scope, $http) {
-    document.title = SiteTitle;
+    document.title = CsFrontend.Globals.SiteTitle;
 
     $scope.busy = false;
     var increment = 15;
