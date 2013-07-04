@@ -193,6 +193,57 @@ ChapStream.directive('postComment', function($http) {
     }
 });
 
+ChapStream.directive('editComment', function() {
+    return function(scope, element, attrs) {
+        $(element).click(function() {
+            var comment = scope.entry.comments.results[attrs.cIndex];
+            var comment_content = $(element).closest(".comment .content");
+            var comment_edit = $(element).closest(".comment").find(".edit-comment-form");
+            comment_edit.find("textarea").autosize();
+            scope.commentContent = scope.entry.comments.results[attrs.cIndex].content;
+            scope.commentEdit = true;
+            scope.showCommentEditBox = true;
+        });
+    }
+});
+
+ChapStream.directive('doneEditComment', function($http) {
+    return function(scope, element, attrs) {
+        function post_comment() {
+            if (!scope.commentContent.trim().length) return;
+            scope.postingComment = true;
+            $http({
+                url: '/api/update_comment/',
+                method: "POST",
+                data:  $.param({content: scope.commentContent, id: attrs.cId}),
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+            }).success(function (data, status, headers, config) {
+                scope.postingComment = false;
+                scope.showCommentEditBox = false;
+                scope.commentEdit = false;
+                scope.entry.comments.results[attrs.cIndex].content = nl2br(scope.commentContent);
+                scope.commentContent = undefined;
+            }).error(function (data, status, headers, config) {
+                // Error case
+            });
+        }
+
+        $(element).closest(".edit-comment-form").find("textarea").keypress(function(event) {
+            if (event.shiftKey) {
+                scope.commentContent =+ "\n";
+            } else {
+                if (event.keyCode != 13) return;
+                event.preventDefault();
+                post_comment();
+            }
+        });
+
+        $(element).click(function(event) {
+            post_comment();
+        });
+    }
+});
+
 ChapStream.directive('catchNewComment', function() {
     return function(scope, element, attrs) {
         $(element).bind("new_comment_event", function(event, data) {
@@ -240,8 +291,13 @@ ChapStream.directive('sureDeleteComment', function($http) {
 ChapStream.directive('cancelComment', function() {
     return function(scope, element, attrs) {
         $(element).click(function(event) {
+            // Edit related variables
+            scope.showCommentEditBox = false;
+            scope.commentEdit = false;
+            // New comment related variables
             scope.showCommentBox = false;
             scope.postingComment = false;
+
             scope.commentContent = "";
         });
     }

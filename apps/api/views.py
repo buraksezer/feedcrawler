@@ -72,7 +72,7 @@ def timeline(request):
             like_msg = "Like"
 
         try:
-            like_count = EntryLike.objects.get(entry__id=entry.id).user.count()
+            like_count = EntryLike.objects.filter(entry__id=entry.id).count()
         except EntryLike.DoesNotExist:
             like_count = 0
 
@@ -120,7 +120,7 @@ def feed_detail(request, feed_id):
             like_msg = "Like"
 
         try:
-            like_count = EntryLike.objects.get(entry__id=entry.id).user.count()
+            like_count = EntryLike.objects.filter(entry__id=entry.id).count()
         except EntryLike.DoesNotExist:
             like_count = 0
 
@@ -310,23 +310,20 @@ def entries_by_feed(request, feed_id):
 def like(request, entry_id):
     '''Sets or removes user votes on entries.'''
     if request.method == "POST":
-        entry = Entry.objects.get(id=entry_id)
-        try:
-            item = EntryLike.objects.get(entry=entry)
-            if not item.user.filter(username__contains=request.user.username):
-                item.user.add(request.user)
-                item.save()
-            else:
-                item.user.remove(request.user)
-                return HttpResponse(json.dumps({"code": -1, "msg": "Like"}), content_type="application/json")
-        except EntryLike.DoesNotExist:
-            item = EntryLike(entry=entry)
-            item.save()
-            my_item = EntryLike.objects.get(id=item.id)
-            my_item.user.add(request.user)
-            my_item.save()
-        # TODO:Error cases
-        return HttpResponse(json.dumps({"code": 1, "msg": "Unlike"}), content_type="application/json")
+        item = EntryLike.objects.filter(user__id=request.user.id, entry__id=entry_id)
+        if item:
+            item.delete()
+            return HttpResponse(json.dumps({"code": -1, "msg": "Like"}), content_type="application/json")
+        else:
+            try:
+                new_item = EntryLike()
+                new_item.entry_id = entry_id
+                new_item.user_id = request.user.id
+                new_item.save()
+                return HttpResponse(json.dumps({"code": 1, "msg": "Unlike"}), content_type="application/json")
+            except EntryLike.IntegrityError:
+                return HttpResponse(json.dumps({"code": 0, "msg": "Entry could not be found: %s" % entry_id}),
+                    content_type="application/json")
 
 
 # Comment related functions
@@ -358,6 +355,15 @@ def post_comment(request):
     announce_client.broadcast_group(feed_id, 'new_comment', data=result)
 
     return HttpResponse(json.dumps(result), content_type="application/json")
+
+@ajax_required
+@login_required
+def update_comment(request):
+    comment = Comment.objects.get(id=request.POST.get("id"), user__id=request.user.id)
+    #comment.user_id = request.user.id
+    comment.content = request.POST.get("content").strip()
+    comment.save()
+    return HttpResponse(json.dumps({"code": 1}), content_type="application/json")
 
 
 @ajax_required

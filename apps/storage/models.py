@@ -229,5 +229,12 @@ class Comment(models.Model):
         return str(self.id)
 
 class EntryLike(models.Model):
-    entry = models.OneToOneField(Entry)
-    user = models.ManyToManyField(User)
+    entry = models.ForeignKey(Entry)
+    user = models.ForeignKey(User)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-id"]
+
+    def __unicode__(self):
+        return self.user.username + " liked " + self.entry.title
