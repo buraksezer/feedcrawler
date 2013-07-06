@@ -1,5 +1,6 @@
 import json
 import time
+import datetime
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
@@ -8,6 +9,7 @@ from userena.utils import get_profile_model, get_user_model
 from django.contrib.auth.decorators import login_required
 from utils import ajax_required
 from django.db.models import Q
+from django.db import IntegrityError
 
 # For doing realtime stuff
 from announce import AnnounceClient
@@ -85,11 +87,42 @@ def timeline(request):
             'available': 1 if entry.available_in_frame is None else entry.available_in_frame,
             'like_msg': like_msg,
             'like_count': like_count,
-            'created_at': int(time.mktime(entry.published_at.timetuple())*1000),
+            'created_at': int(time.mktime(entry.created_at.timetuple())*1000),
             'comments': get_latest_comments(entry.id)
         }
         result.append(item)
     return HttpResponse(json.dumps(result), content_type='application/json')
+
+
+@ajax_required
+@login_required
+def single_entry(request, entry_id):
+    entry = Entry.objects.get(id=entry_id)
+    # FIXME: Move this blocks to model as a method
+    try:
+        EntryLike.objects.get(entry__id=entry_id, user=request.user)
+        like_msg = "Unlike"
+    except EntryLike.DoesNotExist:
+        like_msg = "Like"
+
+    try:
+        like_count = EntryLike.objects.filter(entry__id=entry_id).count()
+    except EntryLike.DoesNotExist:
+        like_count = 0
+
+    item = {
+        'id': entry.id,
+        'title': entry.title,
+        'feed_id': entry.feed.id,
+        'feed_title': entry.feed.title,
+        'link': entry.link,
+        'available': 1 if entry.available_in_frame is None else entry.available_in_frame,
+        'like_msg': like_msg,
+        'like_count': like_count,
+        'created_at': int(time.mktime(entry.created_at.timetuple())*1000),
+        'comments': get_latest_comments(entry.id)
+    }
+    return HttpResponse(json.dumps(item), content_type='application/json')
 
 
 def feed_detail(request, feed_id):
@@ -131,7 +164,7 @@ def feed_detail(request, feed_id):
             'available': 1 if entry.available_in_frame is None else entry.available_in_frame,
             'like_msg': like_msg,
             'like_count': like_count,
-            'created_at': int(time.mktime(entry.published_at.timetuple())*1000),
+            'created_at': int(time.mktime(entry.created_at.timetuple())*1000),
             'comments': get_latest_comments(entry.id)
         }
         items.append(item)
@@ -320,8 +353,14 @@ def like(request, entry_id):
                 new_item.entry_id = entry_id
                 new_item.user_id = request.user.id
                 new_item.save()
+
+                # Set last_interaction field
+                entry = Entry.objects.get(id=entry_id)
+                entry.last_interaction = datetime.datetime.utcnow()
+                entry.save()
+
                 return HttpResponse(json.dumps({"code": 1, "msg": "Unlike"}), content_type="application/json")
-            except EntryLike.IntegrityError:
+            except IntegrityError:
                 return HttpResponse(json.dumps({"code": 0, "msg": "Entry could not be found: %s" % entry_id}),
                     content_type="application/json")
 
@@ -336,6 +375,11 @@ def post_comment(request):
     comment.user_id = request.user.id
     comment.content = request.POST.get("content").strip()
     comment.save()
+
+    # Set last_interaction field
+    entry = Entry.objects.get(id=request.POST.get("entry_id"))
+    entry.last_interaction = datetime.datetime.utcnow()
+    entry.save()
 
     # Result a json for presenting the new comment
     result = {
@@ -392,3 +436,56 @@ def fetch_comments(request, entry_id):
         }
         results.append(item)
     return HttpResponse(json.dumps({"results": results, "count": 0}), content_type="application/json")
+
+@ajax_required
+@login_required
+def interactions(request):
+    offset = request.GET.get("offset", 0)
+    limit = request.GET.get("limit", 15)
+    user_id = request.user.id
+    entries = Entry.objects.filter(Q(interaction__comment__user=user_id) | \
+        Q(interaction__entrylike__user=user_id)).values(
+        "id",
+        "title",
+        "feed__id",
+        "feed__title",
+        "link",
+        "available_in_frame",
+        "created_at",
+        ).order_by("-last_interaction").distinct()[offset:limit]
+
+    tmp = []
+    result = []
+    for entry in entries:
+        if entry["id"] in tmp:
+            continue
+        try:
+            EntryLike.objects.get(entry__id=entry["id"], user=request.user)
+            like_msg = "Unlike"
+        except EntryLike.DoesNotExist:
+            like_msg = "Like"
+
+        try:
+            like_count = EntryLike.objects.filter(entry__id=entry["id"]).count()
+        except EntryLike.DoesNotExist:
+            like_count = 0
+
+        item = {
+            'id': entry["id"],
+            'title': entry["title"],
+            'feed_id': entry["feed__id"],
+            'feed_title': entry["feed__title"],
+            'link': entry["link"],
+            'available': 1 if entry["available_in_frame"] is None else entry["available_in_frame"],
+            'like_msg': like_msg,
+            'like_count': like_count,
+            'created_at': int(time.mktime(entry["created_at"].timetuple())*1000),
+            'comments': get_latest_comments(entry["id"])
+        }
+
+        # FIXME: We should use a better method to handle duplicate items.
+        # Django's distinct() method does not work for this case.
+        if not entry["id"] in tmp:
+            result.append(item)
+            tmp.append(entry["id"])
+    return HttpResponse(json.dumps(result), content_type="application/json")

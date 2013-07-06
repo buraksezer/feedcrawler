@@ -17,3 +17,7 @@ def reader(request, entry_id):
 @login_required
 def subscriptions(request):
     return render_to_response('frontend/home.html', context_instance=RequestContext(request))
+
+@login_required
+def interactions(request):
+    return render_to_response('frontend/home.html', context_instance=RequestContext(request))

@@ -1,32 +1,12 @@
-<div ng-show="feed404 == true" class="feed-404">
-    <h3>:'(</h3>
-    <h3>Sorry, that page doesn't exist!</h3>
-    <h4><a href="/">Go to timeline</a></h4>
+<div class="interactions-header">
+    Interactions
 </div>
-
-<div ng-show="!loading" class="feed-detail-header">
-    <h4>
-        <a href="{{ feed_detail.feed.link }}" target="_blank">{{ feed_detail.feed.title }}</a>
-        <span ng-show='feed_detail.feed.subs_count == 0' class="subs-count">No subscriber</span>
-        <span ng-show='feed_detail.feed.subs_count == 1' class="subs-count">1 subscriber</span>
-        <span ng-show='feed_detail.feed.subs_count > 1' class="subs-count">{{ feed_detail.feed.subs_count }} subscribers</span>
-        <a ng-click="unsubscribeFeed(feed_detail.feed.id)" ng-show="feed_detail.feed.is_subscribed == true" id="unsubscribe-feed-detail" class="btn btn-danger pull-right">Unsubscribe</a>
-        <a ng-click="subscribeFeed(feed_detail.feed.id)" ng-show="feed_detail.feed.is_subscribed == false" id="subscribe-feed-detail" class="btn btn-primary pull-right">Subscribe</a>
-    </h4>
-    <div class="feed-info">
-        <span class="tagline">{{ feed_detail.feed.tagline }}</span><br/>
-        <span>Last sync at {{ feed_detail.feed.last_sync }}</span>
-    </div>
-    <div class="divider"></div>
+<div id="new-interaction" ng-show="hiddenEntry == true" class="new-entry-counter" catch-new-interaction show-hidden-entry>
+    <a href="#" ng-show="newEntryCount == 1">{{ newEntryCount }} new interaction</a>
+    <a href="#" ng-show="newEntryCount > 1">{{ newEntryCount }} new interactions</a>
 </div>
-
-<div id="new-entry" ng-show="hiddenEntry == true" class="new-entry-counter" catch-new-entry show-hidden-entry>
-    <a href="#" ng-show="newEntryCount == 1">{{ newEntryCount }} new entry</a>
-    <a href="#" ng-show="newEntryCount > 1">{{ newEntryCount }} new entries</a>
-</div>
-
-    <div infinite-scroll='loadFeedDetail()' infinite-scroll-disabled='busy' class="dashboard-entries">
-        <div ng-hide="entry.instantEntry == true" ng-mouseenter="myClass='show'" ng-mouseleave="myClass=''" class="dashboard-entry" ng-repeat="entry in feed_detail.entries">
+<div infinite-scroll='loadInteractions()' infinite-scroll-disabled='busy' class="dashboard-entries">
+        <div ng-hide="entry.instantEntry == true" ng-mouseenter="myClass='show'" ng-mouseleave="myClass=''" id="entry-{{ entry.id }}" class="dashboard-entry" ng-repeat="entry in interactions.entries">
             <ul ng-class="myClass" class="entry-topbar">
                 <li>
                     <a href="{{ entry.link }}" target="_blank">
@@ -47,6 +27,8 @@
                 <a ng-show="entry.available != 1" class="entry-title" href="#" clickjacking-warn>
                     {{ entry.title }}
                 </a>
+                <br>
+                <a class="feed" href="/feed/{{ entry.feed_id }}">{{ entry.feed_title }}</a>
                 <div class="timeline-entry-interaction">
                     <span calc-from-now ts="{{ entry.created_at }}">{{ calcTime }}</span>
                     <span>&sdot;</span>
@@ -105,9 +87,9 @@
                 </form>
             </div>
         </div>
-    </div>
+</div>
+
 <div id="timeline-endless-loading">
     <img ng-show="busy" src="/static/img/ajax-loader.gif"/>
-    <p ng-show="busy">Please wait...</p>
-    <span ng-hide="feed404"><p ng-show="endOfData">~ No more entry ~</p></span>
+    <p ng-show="endOfData">~ No more entry ~</p>
 </div>

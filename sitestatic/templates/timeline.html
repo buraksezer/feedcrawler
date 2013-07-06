@@ -45,14 +45,14 @@
             </div>
             <div class="comments-area">
                 <div class="load-more" ng-show="entry.comments.count > 0">
-                    <i class="general foundicon-refresh"></i>
+                    <i class="icon-refresh"></i>
                     <a href="#"  class="load-more" load-comments>
                         View {{ entry.comments.count }} more comments
                     </a>
                 </div>
                 <div class="comments" catch-new-comment id="comments_{{ entry.id }}">
                     <div ng-hide="comment.instantComment" class="comment" ng-repeat="comment in entry.comments.results">
-                        <i class="social foundicon-chat" title="{{ created_at }}"></i>
+                        <i class="icon-comment" title="{{ created_at }}"></i>
                         <div ng-hide="commentEdit" class="content">
                             <span ng-bind-html="comment.content"></span>
                             <span> - </span>

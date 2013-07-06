@@ -18,22 +18,22 @@
             <!-- left side of the navbar -->
             <ul class="menu">
                 <li ng-show="entry.liked" class="hint--bottom liked" data-hint="You liked">
-                    <i class="cursor-pointer social foundicon-thumb-up" entry-like></i>
+                    <i class="cursor-pointer icon-thumbs-up" entry-like></i>
                 </li>
                 <li ng-show="!entry.liked" class="hint--bottom" data-hint="Like">
-                    <i class="cursor-pointer social foundicon-thumb-up" entry-like></i>
+                    <i class="cursor-pointer icon-thumbs-up" entry-like></i>
                 </li>
                 <li class="hint--bottom" data-hint="Read later">
-                    <i class="general foundicon-clock"></i>
+                    <i class="icon-time"></i>
                 </li>
                 <li class="hint--bottom" data-hint="Bookmark this">
-                    <i class="general foundicon-star"></i>
+                    <i class="icon-star"></i>
                 </li>
                 <li class="hint--bottom" data-hint="Comments">
-                    <i class="social foundicon-chat"></i>
+                    <i class="icon-comment"></i>
                 </li>
                 <li class="dropdown">
-                    <i class="dropdown-menu general foundicon-settings"></i>
+                    <i class="dropdown-menu icon-cog"></i>
                     <div class="submenu">
                         <ul class="root">
                             <li ><a href="#Dashboard" >Dashboard</a></li>
@@ -48,15 +48,15 @@
             <ul class="navigation">
                 <li ng-show="!empty(entry.previous)" class="hint--bottom" data-hint="Previous: {{ entry.previous.title }}">
                     <a href="/reader/{{ entry.previous.id }}">
-                        <i class="general foundicon-left-arrow"></i>
+                        <i class="icon-arrow-left"></i>
                     </a>
                 </li>
                 <li ng-show="empty(entry.previous)" class="hint--bottom" data-hint="No more entry">
-                    <i class="cursor-pointer general foundicon-left-arrow"></i>
+                    <i class="cursor-pointer general icon-arrow-left"></i>
                 </li>
 
                 <li class="show-other-entries dropdown">
-                    <i ng-click="loadEntries(entry.feed_id)" class="cursor-pointer dropdown-menu general foundicon-website"></i>
+                    <i ng-click="loadEntries(entry.feed_id)" class="cursor-pointer dropdown-menu icon-list-alt"></i>
                     <div class="dropdown-entries submenu">
                         <section class="entries-header">
                             <!-- <ul class="action">
@@ -77,11 +77,11 @@
 
                 <li ng-show="!empty(entry.next)" class="hint--bottom" data-hint="Next: {{ entry.next.title }}">
                     <a href="/reader/{{ entry.next.id }}">
-                        <i class="general foundicon-right-arrow"></i>
+                        <i class="icon-arrow-right"></i>
                     </a>
                 </li>
                 <li ng-show="empty(entry.next)" class="hint--bottom" data-hint="No more entry">
-                    <i class="cursor-pointer general foundicon-right-arrow"></i>
+                    <i class="cursor-pointer icon-arrow-right"></i>
                 </li>
             </ul>
 

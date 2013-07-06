@@ -5,6 +5,7 @@ var ChapStream = angular.module('ChapStream', ['infinite-scroll', 'ngSanitize'],
         .when('/', { templateUrl: '/static/templates/timeline.html', controller: 'TimelineCtrl' })
         .when('/feed/:feedId', { templateUrl: '/static/templates/feed-detail.html', controller: 'FeedDetailCtrl' })
         .when('/subscriptions', { templateUrl: '/static/templates/subscriptions.html', controller: 'SubscriptionsCtrl' })
+        .when('/interactions', { templateUrl: '/static/templates/interactions.html', controller: 'InteractionsCtrl' })
     }
 );
 
@@ -15,6 +16,9 @@ ChapStream.factory('InitService', function() {
             announce.init();
             announce.on('new_comment', function(data){
                 $("#comments_"+data.entry_id).trigger("new_comment_event", {new_comment: data});
+                $("#new-interaction,#new-interaction-count").trigger("new_interaction_event",
+                    {interaction_id: data.entry_id, owner: data.author}
+                );
             });
 
             announce.on('new_entry', function(data){
@@ -31,6 +35,19 @@ ChapStream.run(function($rootScope, InitService) {
     $rootScope.renderToReader = function(id) {
         document.location.href = "/reader/"+id;
     };
+
+    $rootScope.safeApply = function(fn) {
+        var phase = this.$root.$$phase;
+        if(phase == '$apply' || phase == '$digest') {
+            if(fn && (typeof(fn) === 'function')) {
+                fn();
+            }
+        } else {
+            this.$apply(fn);
+        }
+    };
+
+    $rootScope.interaction_count = 0;
 });
 
 ChapStream.config(function($httpProvider) {
@@ -244,6 +261,63 @@ ChapStream.directive('doneEditComment', function($http) {
     }
 });
 
+ChapStream.directive('countNewInteractions', function() {
+    return function(scope, element, attrs) {
+        if (!$("#new-interaction").length) {
+            scope.interaction_count = 0;
+        }
+        $(element).bind("reset_interaction_count", function(event) {
+            scope.safeApply(function() {
+                scope.interaction_count = 0;
+            });
+        });
+
+        $(element).bind("new_interaction_event", function(event, data) {
+            if (!$("#new-interaction").length && scope.username != data.owner) {
+                scope.safeApply(function() {
+                    scope.interaction_count++;
+                });
+            }
+        });
+    }
+});
+
+ChapStream.directive('catchNewInteraction', function($http) {
+    return function(scope, element, attrs) {
+        scope.interaction_count = 0;
+        scope.newEntryCount = 0;
+        scope.originalTitle = document.title;
+        $(element).bind("new_interaction_event", function(event, data) {
+            var single_entry = false;
+            scope.hiddenEntry = false;
+            for (var i=0; i<scope.interactions.entries.length; i++) {
+                if (scope.interactions.entries[i].id == data.interaction_id) {
+                    single_entry = true;
+                    if (i == 0) break;
+                    scope.safeApply(function() {
+                        scope.interactions.entries.unshift(scope.interactions.entries[i]);
+                        scope.interactions.entries.splice(i+1, 1);
+                        $("#entry-"+data.interaction_id).hide().fadeIn();
+                    });
+                    break;
+                }
+            }
+            if (!single_entry) {
+                $http.get("/api/single_entry/"+data.interaction_id+"/").success(function(data) {
+                    scope.hiddenEntry = true;
+                    scope.safeApply(function() {
+                        scope.newEntryCount++;
+                        data.instantEntry = true;
+                        scope.interactions.entries.unshift(data);
+                    });
+                });
+            }
+
+        });
+    }
+});
+
+
 ChapStream.directive('catchNewComment', function() {
     return function(scope, element, attrs) {
         $(element).bind("new_comment_event", function(event, data) {
@@ -338,6 +412,45 @@ ChapStream.directive('calcFromNow', function() {
         });
     }
 });
+
+function InteractionsCtrl($scope, $http, $rootScope) {
+    document.title = "Interactions"+" | "+CsFrontend.Globals.SiteTitle;
+    // Reset interaction count in user space
+    $("#new-interaction-count").trigger("reset_interaction_count");
+
+    $scope.busy = false;
+    var increment = 15;
+    $scope.entries = [];
+    $scope.offset = 0;
+    $scope.limit = increment;
+    $scope.interactions = {entries: []};
+    $scope.loadInteractions = function() {
+        if (typeof $scope.endOfData != 'undefined') return;
+        if ($scope.busy) return;
+        $scope.busy = true;
+        $http.get("/api/interactions/"+"?&offset="+$scope.offset+"&limit="+$scope.limit).success(function(data) {
+            if (!data.length) {
+                $scope.endOfData = true;
+                $scope.busy = false;
+            } else {
+                for(var i = 0; i < data.length; i++) {
+                    for(var j=0; j < data[i].comments.results.length; j++) {
+                        // A bit confusing?
+                        data[i].comments.results[j].content = nl2br(data[i].comments.results[j].content);
+                    }
+                    $scope.interactions.entries.push(data[i]);
+                }
+                $scope.offset += increment;
+                $scope.limit += increment;
+                $scope.busy = false;
+            }
+        });
+    };
+
+    $scope.showClickjackingWarn = function() {
+        $scope.clickjacking = true;
+    };
+}
 
 function SubscriptionsCtrl($scope, $http, $routeParams) {
     document.title = "Your subscriptions"+" | "+CsFrontend.Globals.SiteTitle;

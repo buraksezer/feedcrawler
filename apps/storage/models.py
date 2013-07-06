@@ -200,7 +200,8 @@ class Entry(models.Model):
     #slug = models.SlugField(blank=True)
 
     available_in_frame = models.IntegerField(null=True, blank=True)
-
+    last_interaction = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     feed = models.ForeignKey(Feed)
 
@@ -215,12 +216,17 @@ class Entry(models.Model):
         super(Entry, self).save(*args, **kwargs)
 
 
-class Comment(models.Model):
-    content = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+class Interaction(models.Model):
     entry = models.ForeignKey(Entry)
     user = models.ForeignKey(User)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-id"]
+
+class Comment(Interaction):
+    content = models.TextField()
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["-id"]
@@ -228,13 +234,6 @@ class Comment(models.Model):
     def __unicode__(self):
         return str(self.id)
 
-class EntryLike(models.Model):
-    entry = models.ForeignKey(Entry)
-    user = models.ForeignKey(User)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ["-id"]
-
+class EntryLike(Interaction):
     def __unicode__(self):
         return self.user.username + " liked " + self.entry.title

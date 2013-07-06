@@ -60,7 +60,7 @@ a.brand {
 
 .liked,
 .enable-hover:hover,
-[class*="foundicon-"]:hover,
+[class*="icon-"]:hover,
 a.brand:hover {
     color: #DD4B39;
 }

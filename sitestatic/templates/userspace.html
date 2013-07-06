@@ -1,4 +1,4 @@
-<div ng-show="profile" class="user">
+<div ng-show="profile" class="profile">
     <div class="user">
         <img class="mugshot img-rounded" src="{{ profile.mugshot_url }}"/>
         <dd class="username"><a href="/user/{{ user.username }}/">{{ profile.display_name }}</a></dd>
@@ -7,7 +7,7 @@
         <small class="hint--bottom" data-hint="Show your subscriptions" ng-show="profile.subs_count > 1 "><a href="/subscriptions">{{ profile.subs_count }} subscriptions</a></small>
         <ul class="top-area pull-right">
             <li data-hint="Subscribe" class="hint--top dropdown">
-                <i data-toggle="dropdown" title="Subscribe" id="subscribe-feed" class="dropdown-toggle foundicon-plus"></i>
+                <i data-toggle="dropdown" title="Subscribe" id="subscribe-feed" class="dropdown-toggle icon-plus-sign-alt"></i>
                 <div ng-controller="SubscribeController" class="dropdown-menu">
                     <form name="subscribe-form" class="subscribe-feed-dropdown">
                         <label for="id_feed_url">New subscription:
@@ -19,13 +19,39 @@
                     </form>
                 </div>
             </li>
-            <li class="hint--top" data-hint="Stream">
-                <a href="/">
-                    <i id="live-stream" class="foundicon-globe"></i>
-                </a>
-            </li>
         </ul>
     </div>
 </div>
+
+<div class="control">
+    <div class="control-items">
+        <div class="control-item stream">
+            <a href="/">
+                <i class="icon-globe"></i>
+                <span class="text">
+                    Stream
+                </span>
+            </a>
+        </div>
+        <div id="new-interaction-count" class="control-item interactions" count-new-interactions>
+            <a href="/interactions">
+                <i class="icon-exchange"></i>
+                <span class="text">
+                    Interactions
+                </span>
+                <span ng-show="interaction_count > 0" class="badge badge-important pull-right interaction-count">
+                    {{ interaction_count }}
+                </span>
+            </a>
+        </div>
+        <div class="control-item">
+            <i class="icon-list"></i>
+            <span class="text">
+                Lists
+            </span>
+        </div>
+    </div>
+</div>
+
 
 <img id="profile-loading" ng-show="!profile" src="/static/img/ajax-loader.gif"/>
