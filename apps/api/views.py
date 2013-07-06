@@ -142,6 +142,7 @@ def feed_detail(request, feed_id):
             'link': feed.link,
             'is_subscribed': True if feed.users.filter(username=request.user.username) else False,
             'subs_count': feed.users.count(),
+            'last_sync': int(time.mktime(feed.last_sync.timetuple())*1000),
         }
     }
     items = []

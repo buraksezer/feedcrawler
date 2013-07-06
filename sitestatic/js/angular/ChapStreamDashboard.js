@@ -507,6 +507,8 @@ function FeedDetailCtrl($scope, $http, $routeParams) {
                     $scope.feed_detail.feed = data.feed;
                 }
 
+                data.feed.last_sync = moment(parseInt(data.feed.last_sync, 10)).fromNow();
+
                 for(var i = 0; i < data.entries.length; i++) {
                     for(var j=0; j < data.entries[i].comments.results.length; j++) {
                         // A bit confusing?
