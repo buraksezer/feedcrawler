@@ -76,7 +76,7 @@ class ProcessEntry(object):
                     'feed_title': self.feed.title,
                     'link': entry_item.link,
                     'available': 1 if entry_item.available_in_frame is None else entry_item.available_in_frame,
-                    'created_at': int(time.mktime(entry_item.published_at.timetuple())*1000),
+                    'created_at': int(time.mktime(entry_item.created_at.timetuple())*1000),
                 }
             )
             # created_at field seems problematic.
