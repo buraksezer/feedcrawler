@@ -87,13 +87,15 @@
                             <span class="from-now" calc-from-now ts="{{ comment.created_at }}">{{ calcTime }}</span>
                             <img ng-show="commentLoading" src="/static/img/realtime_spinner.gif"/>
                         </div>
-                        <form ng-show="username == comment.author" ng-hide="!showCommentEditBox" class="edit-comment-form">
-                            <textarea ng-model="commentContent" class='comment textbox-transition' count-char></textarea>
-                            <button class="btn btn-small btn-primary" type="button" done-edit-comment c-index="{{ $index }}" c-id="{{ comment.id }}">Done</button>
-                            <a href="#" class="cancel" cancel-comment>Cancel</a>
-                            <span ng-class="{redfont: restCharCount == 0}" class="pull-right">{{ maxCharCount - commentContent.length }}</span>
-                            <img ng-show="postingComment" src="/static/img/realtime_spinner.gif"/>
-                        </form>
+                        <span ng-show="username == comment.author">
+                            <form ng-hide="!showCommentEditBox" class="edit-comment-form">
+                                <textarea ng-model="commentContent" class='comment textbox-transition' count-char></textarea>
+                                <button class="btn btn-small btn-primary" type="button" done-edit-comment c-index="{{ $index }}" c-id="{{ comment.id }}">Done</button>
+                                <a href="#" class="cancel" cancel-comment>Cancel</a>
+                                <span ng-class="{redfont: restCharCount == 0}" class="pull-right">{{ maxCharCount - commentContent.length }}</span>
+                                <img ng-show="postingComment" src="/static/img/realtime_spinner.gif"/>
+                            </form>
+                        </span>
                     </div>
                 </div>
                 <form ng-show="showCommentBox" class="comment-form">
