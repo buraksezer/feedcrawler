@@ -5,9 +5,10 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from apps.storage.models import Feed, Entry, EntryLike, Comment
+from apps.storage.tasks import SyncFeed
 from userena.utils import get_profile_model, get_user_model
 from django.contrib.auth.decorators import login_required
-from utils import ajax_required
+from utils import ajax_required, feedfinder
 from django.db.models import Q
 from django.db import IntegrityError
 
@@ -186,42 +187,6 @@ def subs_search(request, keyword):
         )
     return HttpResponse(json.dumps(results), content_type='application/json')
 
-@ajax_required
-@login_required
-def unsubscribe(request, feed_id):
-    try:
-        feed = Feed.objects.get(id=feed_id)
-    except Feed.DoesNotExist:
-        return HttpResponse(json.dumps({"code": 0, "text": "This feed does not exist: %s" % feed_id}), \
-            content_type='application/json')
-    # Unsubcribe from the feed
-    feed.users.remove(User.objects.get(id=request.user.id))
-    # Unregister feed real time notification group
-    try:
-        announce_client.unregister_group(request.user.id, feed.id)
-    except AttributeError:
-        # This is an error case. We should return an error message about that case and log this.
-        # Maybe we should send an email to admins
-        pass
-    return HttpResponse(json.dumps({"code": 1, \
-        "text": "You have been unsubscribed successfully from %s." % feed.title }), \
-        content_type='application/json')
-
-@ajax_required
-@login_required
-def subscribe_by_id(request, feed_id):
-    # FIXME: We should handle error cases.
-    feed_obj = Feed.objects.get(id=feed_id)
-    user = User.objects.get(username=request.user.username)
-    if not feed_obj.users.filter(username__contains=request.user.username):
-        feed_obj.users.add(user)
-        announce_client.register_group(request.user.id, feed_obj.id)
-        return HttpResponse(json.dumps({"code": 1, "text":
-            "New feed source has been added successfully."}), content_type='application/json')
-    else:
-        return HttpResponse(json.dumps({"code": 1,
-            "text": "You have already subscribed this feed."}), content_type='application/json')
-
 
 @ajax_required
 def reader(request, entry_id):
@@ -284,6 +249,50 @@ def reader(request, entry_id):
 
 @ajax_required
 @login_required
+def unsubscribe(request, feed_id):
+    try:
+        feed = Feed.objects.get(id=feed_id)
+    except Feed.DoesNotExist:
+        return HttpResponse(json.dumps({"code": 0, "text": "This feed does not exist: %s" % feed_id}), \
+            content_type='application/json')
+    # Unsubcribe from the feed
+    feed.users.remove(User.objects.get(id=request.user.id))
+    # Unregister feed real time notification group
+    try:
+        announce_client.unregister_group(request.user.id, feed.id)
+    except AttributeError:
+        # This is an error case. We should return an error message about that case and log this.
+        # Maybe we should send an email to admins
+        pass
+    return HttpResponse(json.dumps({"code": 1, \
+        "text": "You have been unsubscribed successfully from %s." % feed.title }), \
+        content_type='application/json')
+
+@ajax_required
+@login_required
+def subscribe_by_id(request, feed_id):
+    # FIXME: We should handle error cases.
+    feed_obj = Feed.objects.get(id=feed_id)
+    user = User.objects.get(username=request.user.username)
+    if not feed_obj.users.filter(username__contains=request.user.username):
+        feed_obj.users.add(user)
+        announce_client.register_group(request.user.id, feed_obj.id)
+        return HttpResponse(json.dumps({"code": 1, "text":
+            "New feed source has been added successfully."}), content_type='application/json')
+    else:
+        return HttpResponse(json.dumps({"code": 1,
+            "text": "You have already subscribed this feed."}), content_type='application/json')
+
+
+@ajax_required
+@login_required
+def find_source(request):
+    url = request.GET.get("url", None)
+    return HttpResponse(json.dumps(feedfinder.feeds(url)), content_type='application/json')
+
+
+@ajax_required
+@login_required
 def subscribe(request):
     url = request.GET.get("url", None)
     # TODO: URL validation needed!
@@ -304,6 +313,7 @@ def subscribe(request):
         feed_obj = Feed.objects.get(feed_url=url)
         feed_obj.users.add(user)
         feed_obj.save()
+        SyncFeed.apply_async((feed_obj,))
     announce_client.register_group(request.user.id, feed_obj.id)
     return HttpResponse(json.dumps({"code": 1, "text": 'New feed source has been added successfully.'}), \
         content_type='application/json')

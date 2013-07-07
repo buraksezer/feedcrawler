@@ -307,26 +307,6 @@ ul.entry-topbar li {
     font-size: 17px;
 }
 
-.subscribe-feed-dropdown {
-    padding: 10px;
-    height: 61px;
-    width: 300px;
-    min-width: 0;
-    min-height: 0;
-}
-
-.subscribe-feed-dropdown button {
-    margin-top: 2px !important;
-}
-
-.subscribe-warning {
-    font-size: 12px;
-}
-
-.subscribe-feed-dropdown input#id_feed_url {
-    width: 78%;
-}
-
 ul.top-area {
     margin-left: 0;
     margin-top: -18px;
@@ -425,168 +405,6 @@ label[for="id_feed_search"] {
     box-shadow: 0 1px 0 rgba(0,0,0,.1);
     background-color: #dd4b39;
     border: none;
-}
-
-/* user profile */
-
-#profile-layout {
-    background-color: #FAFAFA;
-}
-
-#user-profile {
-    padding: 60px;
-}
-
-/*.profile-timeline,*/
-.profile-user-info,
-.profile-dashboard {
-    padding: 10px;
-    margin-top: 2px;
-}
-
-.profile-dashboard {
-    margin-right: 2px;
-    min-height: 170px;
-}
-
-.profile-timeline {
-    margin-top: 2px;
-    min-height: 170px;
-}
-
-.profile-box {
-    background-color: #FFFFFF;
-    border-top: 1px solid #E2E2E2;
-    border-left: 1px solid #E2E2E2;
-    border-right: 1px solid #E2E2E2;
-    border-bottom: 1px solid #E2E2E2;
-}
-
-
-.profile-dashboard .username {
-    margin-left: 100px;
-    margin-top: -80px;
-    font-size: 20px;
-}
-
-.profile-dashboard .divider {
-    margin-top: 72px;
-}
-
-.profile-timeline h4 {
-    padding-left: 5px;
-}
-
-.profile-timeline .header-inner {
-    background-color: #FFFFFF;
-    border-top: 1px solid #E2E2E2;
-    border-left: 1px solid #E2E2E2;
-    border-right: 1px solid #E2E2E2;
-    height: 42px;
-}
-
-.subscribe-user-icon,
-.unsubscribe-button {
-    padding-top: 0px;
-    padding-bottom: 0px;
-    margin-right: 5px;
-}
-
-.subscribe-user-icon {
-    float:right;
-}
-
-.unsubscribe-button {
-    border-radius: 0 !important;
-    display: none;
-    float: right;
-}
-
-#recommend-this-entry {
-    padding-left: 8px;
-}
-
-#recommend-this-entry button.btn {
-    margin-top: -10px;
-    margin-left: 5px;
-}
-
-#recommend-this-entry input {
-    width: 342px;
-}
-
-#post-to-my-feed input[name="note"] {
-    height: 200px;
-    width: 250px;
-}
-
-.make-textbox {
-    -moz-appearance: textfield-multiline;
-    -webkit-appearance: textarea;
-    resize: both;
-}
-
-.make-textbox,
-.fake-textbox {
-    border: 1px solid #DDDDDD;
-    font: medium;
-    font-weight: lighter;
-    font: -webkit-small-control;
-    height: 20px;
-    overflow: auto;
-    padding: 2px;
-    width: 524px;
-    cursor: text;
-}
-
-#post-to-my-feed .make-textbox {
-    min-width: 524px;
-    min-height: 83px;
-    height: 83px;
-    width: 524px;
-    display: none;
-}
-
-#post-to-my-feed .make-textbox:hover {
-    cursor: text;
-}
-
-
-#post-to-my-feed button.btn {
-    margin-top: 8px;
-}
-
-.share-box .mugshot {
-    width: 35px;
-    height: 35px;
-}
-
-.share-box {
-    background-color: #FFFFFF;
-    margin-bottom: -1px;
-    padding: 10px;
-    border-top: 1px solid #E2E2E2;
-    border-left: 1px solid #E2E2E2;
-    border-right: 1px solid #E2E2E2;
-    border-bottom: 1px solid #E2E2E2;
-}
-
-.share-box:hover {
-    background-color: #FBFBFB;
-}
-
-.share-box .participant {
-    margin-left: 40px;
-    margin-top: -37px;
-}
-
-.share-box .entry-timestamp {
-    font-size: 12px;
-    font-weight: lighter;
-}
-
-#post-to-my-feed .entry {
-    margin-bottom: 5px;
 }
 
 .form-signin {
@@ -913,4 +731,27 @@ textarea.comment {
     padding: 5px;
     font-size: 16px;
     font-weight: bold;
+}
+
+/* Subscribe Modal */
+#subscribeModal .results .result a {
+    font-size: 13px;
+}
+
+#subscribeModal .results .result a:hover {
+    border-bottom: 1px dotted #E2E2E2;
+}
+
+.feed-search input#id_feed_url {
+    width: 97.5%;
+}
+
+.feed-search {
+    margin: 0;
+}
+
+.subscribe-warning,
+#subscribe-search {
+    text-align: center;
+    display: block;
 }

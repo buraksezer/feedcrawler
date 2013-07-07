@@ -6,17 +6,33 @@
         <small class="hint--bottom" data-hint="Show your subscriptions" ng-show="profile.subs_count == 1 "><a href="/subscriptions">{{ profile.subs_count }} subscription</a></small>
         <small class="hint--bottom" data-hint="Show your subscriptions" ng-show="profile.subs_count > 1 "><a href="/subscriptions">{{ profile.subs_count }} subscriptions</a></small>
         <ul class="top-area pull-right">
-            <li data-hint="Subscribe" class="hint--top dropdown">
-                <i data-toggle="dropdown" title="Subscribe" id="subscribe-feed" class="dropdown-toggle icon-plus-sign-alt"></i>
-                <div ng-controller="SubscribeController" class="dropdown-menu">
-                    <form name="subscribe-form" class="subscribe-feed-dropdown">
-                        <label for="id_feed_url">New subscription:
-                            <img ng-show="showLoading" style="float: right" src="/static/img/realtime_spinner.gif"/>
-                        </label>
-                        <input id="id_feed_url" maxlength="256" ng-model="form.feed_url" placeholder="Give a valid URL" type="text">
-                        <button ng-click="subs_feed()" class="btn btn-small btn-primary" type="submit">Add</button>
-                        <span class="subscribe-warning">{{subscribe_warning}}</span>
-                    </form>
+            <li ng-controller="SubscribeController">
+                <i ng-click="cleanSubsModal()" id="subscribe-feed" class="icon-plus-sign-alt" data-toggle="modal" data-target="#subscribeModal"></i>
+                <!-- Modal -->
+                <div id="subscribeModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="subscribeModalLabel" aria-hidden="true">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h3 id="subscribeModalLabel">Add Subscription</h3>
+                    </div>
+                    <div class="modal-body">
+                        <form name="subscribe-form" class="feed-search">
+                            <label for="id_feed_url">Enter a search term to find sources or paste in a source URL:
+                                <img ng-show="showLoading" style="float: right" src="/static/img/realtime_spinner.gif"/>
+                            </label>
+                            <input id="id_feed_url" maxlength="256" ng-model="form.feed_url" placeholder="Give a valid URL" type="text">
+                            <span ng-hide="!showWait" id="subscribe-search">Please wait...</span>
+                            <span class="subscribe-warning">{{ warning }}</span>
+                        </form>
+                        <div ng-show="results" class="results">
+                            <div class="result" ng-repeat="result in results">
+                                <i ng-click="subsFeed(result)" class="icon-rss-sign"></i>
+                                <a href="{{result}}" target="_blank">{{ result }}</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button ng-click="findSource()" class="btn btn-primary">Search</button>
+                    </div>
                 </div>
             </li>
         </ul>
@@ -33,6 +49,7 @@
                 </span>
             </a>
         </div>
+        <!--
         <div id="new-interaction-count" class="control-item interactions" count-new-interactions>
             <a href="/interactions">
                 <i class="icon-exchange"></i>
@@ -41,6 +58,15 @@
                 </span>
                 <span ng-show="interaction_count > 0" class="badge badge-important pull-right interaction-count">
                     {{ interaction_count }}
+                </span>
+            </a>
+        </div>
+        -->
+        <div class="control-item interactions">
+            <a href="/interactions">
+                <i class="icon-exchange"></i>
+                <span class="text">
+                    Interactions
                 </span>
             </a>
         </div>

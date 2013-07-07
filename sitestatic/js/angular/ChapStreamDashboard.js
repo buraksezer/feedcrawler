@@ -16,7 +16,7 @@ ChapStream.factory('InitService', function() {
             announce.init();
             announce.on('new_comment', function(data){
                 $("#comments_"+data.entry_id).trigger("new_comment_event", {new_comment: data});
-                $("#new-interaction,#new-interaction-count").trigger("new_interaction_event",
+                $("#new-interaction").trigger("new_interaction_event",
                     {interaction_id: data.entry_id, owner: data.author}
                 );
             });
@@ -261,6 +261,7 @@ ChapStream.directive('doneEditComment', function($http) {
     }
 });
 
+/*
 ChapStream.directive('countNewInteractions', function() {
     return function(scope, element, attrs) {
         if (!$("#new-interaction").length) {
@@ -280,7 +281,8 @@ ChapStream.directive('countNewInteractions', function() {
             }
         });
     }
-});
+}); */
+
 
 ChapStream.directive('catchNewInteraction', function($http) {
     return function(scope, element, attrs) {
@@ -589,25 +591,46 @@ function SubscribeController($scope, $http, $timeout) {
         feed_url : ""
     };
     $scope.form = angular.copy(defaultForm);
-    $scope.subs_feed = function() {
+
+    $scope.findSource = function() {
+        $scope.warning = '';
+        $scope.results = [];
         if (typeof $scope.form.feed_url != "string" || $scope.form.feed_url.length < 3) {
-            $scope.subscribe_warning = "Please give a valid URL.";
+            $scope.warning = "Please give a valid URL.";
             return;
         }
-        $scope.showLoading = true;
-        $http.get("/api/subscribe?url="+$scope.form.feed_url).success(function(data) {
-            $scope.showLoading = false;
-            $scope.subscribe_warning = data.text;
+        $scope.showWait = true;
+        $http.get("/api/find_source?url="+$scope.form.feed_url).success(function(data) {
+            $scope.showWait = false;
+            if (!data.length) {
+                $scope.warning = "No result found.";
+                var delay = $timeout(function() {
+                    $scope.warning = '';
+                }, 2000);
+                return;
+            }
+            $scope.results = data;
+        });
+    }
+
+    $scope.subsFeed = function(url) {
+        $scope.showWait = true;
+        $http.get("/api/subscribe?url="+url).success(function(data) {
+            $scope.warning = data.text;
+            $scope.showWait = false;
             var delay = $timeout(function() {
-                $("form.subscribe-feed-dropdown").closest("li.dropdown").removeClass("open");
-                $scope.subscribe_warning = "";
-                $scope.form = angular.copy(defaultForm);
-            }, 1500);
+                $scope.warning = '';
+            }, 2000);
         });
     };
+
+    $scope.cleanSubsModal = function() {
+        $scope.form = angular.copy(defaultForm);
+        $scope.results = undefined;
+    }
 }
 
-function UserspaceCtrl($scope, $http, $timeout) {
+function UserspaceCtrl($scope, $http) {
     $http.get("/api/user_profile/").success(function(data) {
         $scope.profile = data;
     });
