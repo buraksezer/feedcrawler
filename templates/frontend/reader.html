@@ -1,6 +1,7 @@
 {% extends "chapstream_base.html" %}
 {% block reader_requirements %}
 <link rel="stylesheet" href="/static/css/reader.css"></link>
+<script type="application/javascript" src="/static/js/jquery.iframetracker.js"></script>
 <script type="application/javascript" src="/static/js/angular/ChapStreamReader.js"></script>
 <script type="application/javascript" src="/static/js/reader.js"></script>
 {% endblock %}
@@ -33,13 +34,12 @@
                     <i class="icon-comment"></i>
                 </li>
                 <li class="dropdown">
-                    <i class="dropdown-menu icon-cog"></i>
+                    <i class="dropdown-cog dropdown-menu icon-cog"></i>
                     <div class="submenu">
                         <ul class="root">
-                            <li ><a href="#Dashboard" >Dashboard</a></li>
-                                <li ><a href="#Profile" >Profile</a></li>
-                                <li ><a href="#settings">Settings</a></li>
-                                <li ><a href="#feedback">Send Feedback</a></li>
+                            <li>
+                                <a href="/user/signout">Sign out</a>
+                            </li>
                         </ul>
                     </div>
                 </li>
