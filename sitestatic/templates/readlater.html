@@ -1,15 +1,11 @@
-<div id="new-entry" ng-show="hiddenEntry == true" class="new-entry-counter" catch-new-entry show-hidden-entry>
-    <a href="#" ng-show="newEntryCount == 1">{{ newEntryCount }} new entry</a>
-    <a href="#" ng-show="newEntryCount > 1">{{ newEntryCount }} new entries</a>
+<div class="readlater-header">
+    Read Later List
 </div>
-<div infinite-scroll='loadTimelineEntries()' infinite-scroll-disabled='busy' class="dashboard-entries">
+<div infinite-scroll='loadReadLaterList()' infinite-scroll-disabled='busy' class="dashboard-entries">
         <div ng-hide="entry.instantEntry == true" ng-mouseenter="myClass='show'" ng-mouseleave="myClass=''" class="dashboard-entry" ng-repeat="entry in entries">
             <ul ng-class="myClass" class="entry-topbar">
                 <li>
-                    <a ng-show="!entry.inReadLater" data-hint="Read later" class="hint--top read-later" href="#" read-later>
-                        <i class="icon-time"></i>
-                    </a>
-                    <a ng-show="entry.inReadLater" data-hint="Remove from the read later list" class="hint--top read-later" href="#" read-later>
+                    <a data-hint="Remove from the list" class="hint--top read-later" href="#" read-later>
                         <i class="icon-eraser"></i>
                     </a>
                 </li>
@@ -99,4 +95,5 @@
 <div id="timeline-endless-loading">
     <img ng-show="busy" src="/static/img/ajax-loader.gif"/>
     <p ng-show="endOfData">~ No more entry ~</p>
+    <p ng-show="noData">~ No entry found in the list ~</p>
 </div>

@@ -400,6 +400,7 @@ label[for="id_feed_search"] {
     font-size: 20px;
 }
 
+.control-item .readlater-count,
 .control-item .interaction-count {
     -webkit-box-shadow: 0 1px 0 rgba(0,0,0,.1);
     box-shadow: 0 1px 0 rgba(0,0,0,.1);
@@ -726,6 +727,7 @@ textarea.comment {
 }
 
 /* Interactions */
+.readlater-header,
 .interactions-header {
     border-bottom: 1px solid #E2E2E2;
     padding: 5px;

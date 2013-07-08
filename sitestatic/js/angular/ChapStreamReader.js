@@ -59,6 +59,20 @@ ChapStreamReader.directive('whenScrolled', function() {
     };
 });
 
+ChapStreamReader.directive('readLater', function($http) {
+    return function(scope, element, attrs) {
+        $(element).click(function(event) {
+            $http.post("/api/readlater/"+scope.entry.id+"/").success(function(data) {
+                if (data.code == 1) {
+                    scope.entry.inReadLater = true;
+                } else if (data.code == -1) {
+                    scope.entry.inReadLater = false;
+                }
+            });
+        });
+    }
+});
+
 function ReaderMainCtrl($scope, $http, $routeParams) {
     // Remove old entry.link value to prevent reloading
     if (typeof $scope.entry != 'undefined') {

@@ -6,6 +6,7 @@ var ChapStream = angular.module('ChapStream', ['infinite-scroll', 'ngSanitize'],
         .when('/feed/:feedId', { templateUrl: '/static/templates/feed-detail.html', controller: 'FeedDetailCtrl' })
         .when('/subscriptions', { templateUrl: '/static/templates/subscriptions.html', controller: 'SubscriptionsCtrl' })
         .when('/interactions', { templateUrl: '/static/templates/interactions.html', controller: 'InteractionsCtrl' })
+        .when('/readlater', { templateUrl: '/static/templates/readlater.html', controller: 'ReadLaterCtrl' })
     }
 );
 
@@ -47,7 +48,7 @@ ChapStream.run(function($rootScope, InitService) {
         }
     };
 
-    $rootScope.interaction_count = 0;
+    $rootScope.readlater_count = 0;
 });
 
 ChapStream.config(function($httpProvider) {
@@ -415,6 +416,27 @@ ChapStream.directive('calcFromNow', function() {
     }
 });
 
+ChapStream.directive('readLater', function($rootScope, $http) {
+    return function(scope, element, attrs) {
+        $(element).click(function(event) {
+            $http.post("/api/readlater/"+scope.entry.id+"/").success(function(data) {
+                if (data.code == 1) {
+                    $rootScope.readlater_count++;
+                    scope.entry.inReadLater = true;
+                } else if (data.code == -1) {
+                    $rootScope.readlater_count--;
+                    scope.entry.inReadLater = false;
+                    if($(".readlater-header").length) {
+                        $(element).closest(".dashboard-entry").fadeOut(function() {
+                            scope.entries.splice(jQuery.inArray(scope.entry, scope.entries), 1);
+                        });
+                    }
+                }
+            });
+        });
+    }
+});
+
 function InteractionsCtrl($scope, $http, $rootScope) {
     document.title = "Interactions"+" | "+CsFrontend.Globals.SiteTitle;
     // Reset interaction count in user space
@@ -583,7 +605,40 @@ function TimelineCtrl($scope, $http) {
     };
 }
 
-function ReaderCtrl($scope, $http) {
+function ReadLaterCtrl($scope, $http) {
+    document.title = "Read Later List | "+CsFrontend.Globals.SiteTitle;
+
+    $scope.busy = false;
+    var increment = 15;
+    $scope.entries = [];
+    $scope.offset = 0;
+    $scope.limit = increment;
+    $scope.loadReadLaterList = function() {
+        if (typeof $scope.endOfData != 'undefined') return;
+        if ($scope.busy || $scope.noData) return;
+        $scope.busy = true;
+        $http.get("/api/readlater_list/"+"?&offset="+$scope.offset+"&limit="+$scope.limit).success(function(data) {
+            if (!data.length) {
+                if ($scope.offset > 0) {
+                    $scope.endOfData = true;
+                } else {
+                    $scope.noData = true;
+                }
+                $scope.busy = false;
+            } else {
+                for(var i = 0; i < data.length; i++) {
+                    for(var j=0; j < data[i].comments.results.length; j++) {
+                        // A bit confusing?
+                        data[i].comments.results[j].content = nl2br(data[i].comments.results[j].content);
+                    }
+                    $scope.entries.push(data[i]);
+                }
+                $scope.offset += increment;
+                $scope.limit += increment;
+                $scope.busy = false;
+            }
+        });
+    };
 }
 
 function SubscribeController($scope, $http, $timeout) {
@@ -630,8 +685,9 @@ function SubscribeController($scope, $http, $timeout) {
     }
 }
 
-function UserspaceCtrl($scope, $http) {
+function UserspaceCtrl($scope, $rootScope, $http) {
     $http.get("/api/user_profile/").success(function(data) {
+        $rootScope.readlater_count = data.rl_count;
         $scope.profile = data;
     });
 }

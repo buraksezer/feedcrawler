@@ -13,6 +13,7 @@ urlpatterns = patterns('',
     url(r'^feed/(?P<feed_id>[\w-]+)/$', 'apps.frontend.views.feed_detail', name='feed_detail'),
     url(r'^subscriptions/', 'apps.frontend.views.subscriptions', name='subscriptions'),
     url(r'^interactions/', 'apps.frontend.views.interactions', name='interactions'),
+    url(r'^readlater/', 'apps.frontend.views.readlater', name='readlater'),
     url(r'^reader/(?P<entry_id>[\w-]+)/$', 'apps.frontend.views.reader', name='reader'),
 
     # API requests
@@ -34,7 +35,8 @@ urlpatterns = patterns('',
     url(r'^api/delete_comment/(?P<comment_id>[\w-]+)/$', 'apps.api.views.delete_comment'),
     url(r'^api/interactions/', 'apps.api.views.interactions'),
     url(r'^api/single_entry/(?P<entry_id>[\w-]+)/$', 'apps.api.views.single_entry'),
-
+    url(r'^api/readlater/(?P<entry_id>[\w-]+)/$', 'apps.api.views.readlater'),
+    url(r'^api/readlater_list/', 'apps.api.views.readlater_list'),
 
     #url(r'^subs$', 'apps.frontend.views.subs', name='subs'),
 

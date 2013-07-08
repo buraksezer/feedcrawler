@@ -12,15 +12,13 @@ $(document).ready(function() {
     });
 
     //Mouse click on sub menu
-    /*$(".submenu").mouseup(function() {
-        console.log("submenu mouse up");
+    $(".submenu").mouseup(function() {
         return false
     });
 
     $(".dropdown-menu").mouseup(function() {
-        console.log("dropdown-menu mouse up");
         return false
-    });*/
+    });
 
     $(document).on('.dropdown-entries .entry', 'click', function(event) {
         $(".submenu").hide();

@@ -18,23 +18,26 @@
             </section>
             <!-- left side of the navbar -->
             <ul class="menu">
-                <li ng-show="entry.liked" class="hint--bottom liked" data-hint="You liked">
+                <li ng-show="entry.liked" class="hint--bottom active" data-hint="You liked">
                     <i class="cursor-pointer icon-thumbs-up" entry-like></i>
                 </li>
                 <li ng-show="!entry.liked" class="hint--bottom" data-hint="Like">
                     <i class="cursor-pointer icon-thumbs-up" entry-like></i>
                 </li>
-                <li class="hint--bottom" data-hint="Read later">
-                    <i class="icon-time"></i>
+                <li ng-show="!entry.inReadLater" class="hint--bottom" data-hint="Read later">
+                    <i class="cursor-pointer icon-time" read-later></i>
+                </li>
+                <li ng-show="entry.inReadLater" class="hint--bottom active" data-hint="Remove from the read later list">
+                    <i class="cursor-pointer icon-time" read-later></i>
                 </li>
                 <li class="hint--bottom" data-hint="Bookmark this">
-                    <i class="icon-star"></i>
+                    <i class="cursor-pointer icon-star"></i>
                 </li>
                 <li class="hint--bottom" data-hint="Comments">
-                    <i class="icon-comment"></i>
+                    <i class="cursor-pointer icon-comment"></i>
                 </li>
                 <li class="dropdown">
-                    <i class="dropdown-cog dropdown-menu icon-cog"></i>
+                    <i class="cursor-pointer dropdown-cog dropdown-menu icon-cog"></i>
                     <div class="submenu">
                         <ul class="root">
                             <li>

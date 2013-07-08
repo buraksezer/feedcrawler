@@ -58,7 +58,7 @@ a.brand {
     font-weight: lighter;
 }
 
-.liked,
+.active,
 .enable-hover:hover,
 [class*="icon-"]:hover,
 a.brand:hover {

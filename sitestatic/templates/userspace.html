@@ -76,8 +76,18 @@
                 Lists
             </span>
         </div>
+        <div class="control-item">
+            <a href="/readlater">
+                <i class="icon-time"></i>
+                <span class="text">
+                    Read later
+                </span>
+                <span ng-show="readlater_count > 0" class="badge badge-important pull-right readlater-count">
+                    {{ readlater_count }}
+                </span>
+            </a>
+        </div>
     </div>
 </div>
-
 
 <img id="profile-loading" ng-show="!profile" src="/static/img/ajax-loader.gif"/>

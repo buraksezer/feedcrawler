@@ -8,11 +8,19 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        pass
+        # Adding model 'ReadLater'
+        db.create_table(u'storage_readlater', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('entry', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['storage.Entry'])),
+            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
+            ('created_at', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
+        ))
+        db.send_create_signal(u'storage', ['ReadLater'])
 
 
     def backwards(self, orm):
-        pass
+        # Deleting model 'ReadLater'
+        db.delete_table(u'storage_readlater')
 
 
     models = {
@@ -52,6 +60,12 @@ class Migration(SchemaMigration):
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
+        u'storage.comment': {
+            'Meta': {'ordering': "['-id']", 'object_name': 'Comment', '_ormbases': [u'storage.Interaction']},
+            'content': ('django.db.models.fields.TextField', [], {}),
+            u'interaction_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['storage.Interaction']", 'unique': 'True', 'primary_key': 'True'}),
+            'updated_at': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'})
+        },
         u'storage.entry': {
             'Meta': {'ordering': "['-id']", 'object_name': 'Entry'},
             'author': ('django.db.models.fields.CharField', [], {'max_length': '256', 'null': 'True'}),
@@ -59,16 +73,22 @@ class Migration(SchemaMigration):
             'available_in_frame': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
             'content': ('django.db.models.fields.TextField', [], {}),
             'content_type': ('django.db.models.fields.CharField', [], {'max_length': '64'}),
+            'created_at': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'date_modified': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'entry_id': ('django.db.models.fields.URLField', [], {'unique': 'True', 'max_length': '512'}),
             'feed': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['storage.Feed']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'language': ('django.db.models.fields.CharField', [], {'max_length': '128', 'null': 'True'}),
+            'last_interaction': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'license': ('django.db.models.fields.CharField', [], {'max_length': '128', 'null': 'True'}),
             'link': ('django.db.models.fields.URLField', [], {'max_length': '512'}),
             'published_at': ('django.db.models.fields.DateTimeField', [], {}),
             'tags': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['storage.EntryTag']", 'symmetrical': 'False'}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '2048'})
+        },
+        u'storage.entrylike': {
+            'Meta': {'ordering': "['-id']", 'object_name': 'EntryLike', '_ormbases': [u'storage.Interaction']},
+            u'interaction_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['storage.Interaction']", 'unique': 'True', 'primary_key': 'True'})
         },
         u'storage.entrytag': {
             'Meta': {'ordering': "('name',)", 'object_name': 'EntryTag'},
@@ -104,6 +124,20 @@ class Migration(SchemaMigration):
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'tag': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '512'}),
             'users': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['auth.User']", 'symmetrical': 'False'})
+        },
+        u'storage.interaction': {
+            'Meta': {'ordering': "['-id']", 'object_name': 'Interaction'},
+            'created_at': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'entry': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['storage.Entry']"}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']"})
+        },
+        u'storage.readlater': {
+            'Meta': {'ordering': "['-created_at']", 'object_name': 'ReadLater'},
+            'created_at': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'entry': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['storage.Entry']"}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']"})
         }
     }
 

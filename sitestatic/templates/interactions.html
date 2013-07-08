@@ -9,6 +9,14 @@
         <div ng-hide="entry.instantEntry == true" ng-mouseenter="myClass='show'" ng-mouseleave="myClass=''" id="entry-{{ entry.id }}" class="dashboard-entry" ng-repeat="entry in interactions.entries">
             <ul ng-class="myClass" class="entry-topbar">
                 <li>
+                    <a ng-show="!entry.inReadLater" data-hint="Read later" class="hint--top read-later" href="#" read-later>
+                        <i class="icon-time"></i>
+                    </a>
+                    <a ng-show="entry.inReadLater" data-hint="Remove from the read later list" class="hint--top read-later" href="#" read-later>
+                        <i class="icon-eraser"></i>
+                    </a>
+                </li>
+                <li>
                     <a href="{{ entry.link }}" target="_blank">
                         <i data-toggle="tooltip" title="Original Link" class="icon-share-alt"></i>
                     </a>

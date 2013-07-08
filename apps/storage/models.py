@@ -237,3 +237,15 @@ class Comment(Interaction):
 class EntryLike(Interaction):
     def __unicode__(self):
         return self.user.username + " liked " + self.entry.title
+
+
+class ReadLater(models.Model):
+    entry = models.ForeignKey(Entry)
+    user = models.ForeignKey(User)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __unicode__(self):
+        return self.user.username+" will read "+self.entry.title

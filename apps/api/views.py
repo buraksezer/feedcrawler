@@ -4,7 +4,7 @@ import datetime
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
-from apps.storage.models import Feed, Entry, EntryLike, Comment
+from apps.storage.models import Feed, Entry, EntryLike, Comment, ReadLater
 from apps.storage.tasks import SyncFeed
 from userena.utils import get_profile_model, get_user_model
 from django.contrib.auth.decorators import login_required
@@ -56,6 +56,7 @@ def user_profile(request):
         "subs_count": profile.user.feed_set.count(),
         "display_name": profile.user.get_full_name() if profile.user.get_full_name() else profile.user.username,
         "mugshot_url": profile.get_mugshot_url(),
+        "rl_count": ReadLater.objects.filter(user=request.user).count()
     }
     return HttpResponse(json.dumps(user), content_type='application/json')
 
@@ -65,7 +66,7 @@ def timeline(request):
     offset = request.GET.get("offset", 0)
     limit = request.GET.get("limit", 15)
     entries = get_user_timeline(request.user.id, offset=offset, limit=limit)
-    result = []
+    results = []
     for entry in entries:
         # FIXME: Move this blocks to model as a method
         try:
@@ -89,10 +90,11 @@ def timeline(request):
             'like_msg': like_msg,
             'like_count': like_count,
             'created_at': int(time.mktime(entry.created_at.timetuple())*1000),
-            'comments': get_latest_comments(entry.id)
+            'comments': get_latest_comments(entry.id),
+            'inReadLater': True if ReadLater.objects.filter(user=request.user, entry__id=entry.id) else False
         }
-        result.append(item)
-    return HttpResponse(json.dumps(result), content_type='application/json')
+        results.append(item)
+    return HttpResponse(json.dumps(results), content_type='application/json')
 
 
 @ajax_required
@@ -213,6 +215,7 @@ def reader(request, entry_id):
         "feed_title": entry.feed.title,
         "available": 1 if entry.available_in_frame is None else entry.available_in_frame,
         "liked": liked,
+        "inReadLater": True if entry.readlater_set.only() else False
     }
 
     try:
@@ -466,7 +469,7 @@ def interactions(request):
         ).order_by("-last_interaction").distinct()[offset:limit]
 
     tmp = []
-    result = []
+    results = []
     for entry in entries:
         if entry["id"] in tmp:
             continue
@@ -497,6 +500,71 @@ def interactions(request):
         # FIXME: We should use a better method to handle duplicate items.
         # Django's distinct() method does not work for this case.
         if not entry["id"] in tmp:
-            result.append(item)
+            results.append(item)
             tmp.append(entry["id"])
-    return HttpResponse(json.dumps(result), content_type="application/json")
+    return HttpResponse(json.dumps(results), content_type="application/json")
+
+
+@ajax_required
+@login_required
+def readlater(request, entry_id):
+    readlater = ReadLater.objects.filter(user=request.user, entry__id=entry_id)
+    if readlater:
+        readlater.delete()
+        return HttpResponse(json.dumps({'code': -1, 'msg': 'Succesfully removed.'}),
+            content_type="application/json")
+    else:
+        try:
+            readlater = ReadLater()
+            readlater.entry_id = entry_id
+            readlater.user_id = request.user.id
+            readlater.save()
+            return HttpResponse(json.dumps({'code': 1, 'msg': 'Succesfully added.'}),
+                content_type="application/json")
+        except IntegrityError:
+            return HttpResponse(json.dumps({'code': 0, 'msg': 'Invalid user or entry.'}),
+                content_type="application/json")
+
+@ajax_required
+@login_required
+def readlater_list(request):
+    offset = request.GET.get("offset", 0)
+    limit = request.GET.get("limit", 15)
+    results = []
+    entries = ReadLater.objects.filter(user=request.user).values(
+        "entry__title",
+        "entry__link",
+        "entry__id",
+        "entry__available_in_frame",
+        "entry__created_at",
+        "entry__feed__id",
+        "entry__feed__title",
+    )[offset:limit]
+
+    for entry in entries:
+        try:
+            EntryLike.objects.get(entry__id=entry["entry__id"], user=request.user)
+            like_msg = "Unlike"
+        except EntryLike.DoesNotExist:
+            like_msg = "Like"
+
+        try:
+            like_count = EntryLike.objects.filter(entry__id=entry["entry__id"]).count()
+        except EntryLike.DoesNotExist:
+            like_count = 0
+
+        item = {
+            'id': entry["entry__id"],
+            'title': entry["entry__title"],
+            'feed_id': entry["entry__feed__id"],
+            'feed_title': entry["entry__feed__title"],
+            'link': entry["entry__link"],
+            'available': 1 if entry["entry__available_in_frame"] is None else entry["entry__available_in_frame"],
+            'like_msg': like_msg,
+            'like_count': like_count,
+            'created_at': int(time.mktime(entry["entry__created_at"].timetuple())*1000),
+            'comments': get_latest_comments(entry["entry__id"])
+        }
+        results.append(item)
+
+    return HttpResponse(json.dumps(results), content_type="application/json")
