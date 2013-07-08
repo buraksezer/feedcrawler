@@ -73,7 +73,7 @@ function ReaderMainCtrl($scope, $http, $routeParams) {
         } else {
             $scope.msg  = data.msg;
         }
-        document.title = $scope.entry.title+" | "+SiteTitle;
+        document.title = $scope.entry.title+" | "+CsFrontend.Globals.SiteTitle;
     });
 }
 
