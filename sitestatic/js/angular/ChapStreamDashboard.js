@@ -7,6 +7,7 @@ var ChapStream = angular.module('ChapStream', ['infinite-scroll', 'ngSanitize'],
         .when('/subscriptions', { templateUrl: '/static/templates/subscriptions.html', controller: 'SubscriptionsCtrl' })
         .when('/interactions', { templateUrl: '/static/templates/interactions.html', controller: 'InteractionsCtrl' })
         .when('/readlater', { templateUrl: '/static/templates/readlater.html', controller: 'ReadLaterCtrl' })
+        .when('/entry/:entryId', { templateUrl: '/static/templates/entry.html', controller: 'EntryCtrl' })
     }
 );
 
@@ -429,10 +430,26 @@ ChapStream.directive('readLater', function($rootScope, $http) {
                     if($(".readlater-header").length) {
                         $(element).closest(".dashboard-entry").fadeOut(function() {
                             scope.entries.splice(jQuery.inArray(scope.entry, scope.entries), 1);
+                            // This trick does not work. Why?
+                            /*if ($rootScope.readlater_count == 0) {
+                                scope.safeApply(function() {
+                                    scope.noData = true;
+                                });
+                            }*/
                         });
                     }
                 }
             });
+        });
+    }
+});
+
+ChapStream.directive('shareBox',  function() {
+    return function(scope, element, attrs) {
+        $(element).click(function(event) {
+            var box = $(element).closest(".dashboard-entry").find(".share-box");
+            box.find("input").val(document.location.origin+"/entry/"+scope.entry.id);
+            box.slideToggle('fast');
         });
     }
 });
@@ -476,7 +493,7 @@ function InteractionsCtrl($scope, $http, $rootScope) {
     };
 }
 
-function SubscriptionsCtrl($scope, $http, $routeParams) {
+function SubscriptionsCtrl($scope, $http) {
     document.title = "Your subscriptions"+" | "+CsFrontend.Globals.SiteTitle;
     var increment = 10;
     $scope.busy = false;
@@ -683,6 +700,15 @@ function SubscribeController($scope, $http, $timeout) {
         $scope.form = angular.copy(defaultForm);
         $scope.results = undefined;
     }
+}
+
+function EntryCtrl($scope, $http, $routeParams) {
+    $http.get("/api/single_entry/"+$routeParams.entryId+"/").success(function(data) {
+        document.title = data.title+" | "+CsFrontend.Globals.SiteTitle;
+        $scope.entry = data;
+        $scope.showCommentBox = true;
+        $(".comments-area form.comment-form textarea").autosize();
+    });
 }
 
 function UserspaceCtrl($scope, $rootScope, $http) {

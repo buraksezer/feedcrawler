@@ -1,9 +1,5 @@
-<div id="new-entry" ng-show="hiddenEntry == true" class="new-entry-counter" catch-new-entry show-hidden-entry>
-    <a href="#" ng-show="newEntryCount == 1">{{ newEntryCount }} new entry</a>
-    <a href="#" ng-show="newEntryCount > 1">{{ newEntryCount }} new entries</a>
-</div>
-<div infinite-scroll='loadTimelineEntries()' infinite-scroll-disabled='busy' class="dashboard-entries">
-        <div ng-hide="entry.instantEntry == true" ng-mouseenter="myClass='show'" ng-mouseleave="myClass=''" class="dashboard-entry" ng-repeat="entry in entries">
+<div class="dashboard-entries">
+        <div ng-hide="entry.instantEntry == true" ng-mouseenter="myClass='show'" ng-mouseleave="myClass=''" class="dashboard-entry">
             <ul ng-class="myClass" class="entry-topbar">
                 <li>
                     <a ng-show="!entry.inReadLater" data-hint="Read later" class="hint--top read-later" href="#" read-later>
@@ -35,9 +31,7 @@
                 <br>
                 <a class="feed" href="/feed/{{ entry.feed_id }}">{{ entry.feed_title }}</a>
                 <div class="timeline-entry-interaction">
-                    <a href="/entry/{{entry.id}}">
-                        <span calc-from-now ts="{{ entry.created_at }}">{{ calcTime }}</span>
-                    </a>
+                    <span calc-from-now ts="{{ entry.created_at }}">{{ calcTime }}</span>
                     <span>&sdot;</span>
                     <a href="#" class="like transition" entry-like>{{ entry.like_msg }}</a>
                     <span>&sdot;</span>
@@ -108,7 +102,3 @@
         </div>
 </div>
 
-<div id="timeline-endless-loading">
-    <img ng-show="busy" src="/static/img/ajax-loader.gif"/>
-    <p ng-show="endOfData">~ No more entry ~</p>
-</div>

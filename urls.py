@@ -15,6 +15,7 @@ urlpatterns = patterns('',
     url(r'^interactions/', 'apps.frontend.views.interactions', name='interactions'),
     url(r'^readlater/', 'apps.frontend.views.readlater', name='readlater'),
     url(r'^reader/(?P<entry_id>[\w-]+)/$', 'apps.frontend.views.reader', name='reader'),
+    url(r'^entry/(?P<entry_id>[\w-]+)/$', 'apps.frontend.views.entry', name='entry'),
 
     # API requests
     url(r'^api/reader/(?P<entry_id>[\w-]+)/$', 'apps.api.views.reader'),

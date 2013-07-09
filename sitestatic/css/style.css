@@ -757,3 +757,27 @@ textarea.comment {
     text-align: center;
     display: block;
 }
+
+.share-box {
+    display: none;
+    border-top: 1px solid #E2E2E2;
+    background-color: #FBFBFB;
+    padding: 5px 13px 5px 13px;
+    font-size: 12px;
+    margin-top: -10px;
+    margin-bottom: 9px;
+}
+
+.share-box p {
+    margin: 0;
+}
+
+.share-box i {
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.share-box input {
+    font-size: 12px;
+    padding: 3px;
+}

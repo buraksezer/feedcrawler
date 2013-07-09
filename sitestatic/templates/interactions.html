@@ -38,15 +38,26 @@
                 <br>
                 <a class="feed" href="/feed/{{ entry.feed_id }}">{{ entry.feed_title }}</a>
                 <div class="timeline-entry-interaction">
-                    <span calc-from-now ts="{{ entry.created_at }}">{{ calcTime }}</span>
-                    <span>&sdot;</span>
+                    <a href="/entry/{{entry.id}}">
+                        <span calc-from-now ts="{{ entry.created_at }}">{{ calcTime }}</span>
+                    </a>                    <span>&sdot;</span>
                     <a href="#" class="like transition" entry-like>{{ entry.like_msg }}</a>
                     <span>&sdot;</span>
                     <a href="#" class="comment transition" comment-box>Comment</a>
+                    <span>&sdot;</span>
+                    <a href="#" class="share transition" share-box>Share</a>
                     <span ng-show="entry.like_count > 0">&sdot;</span>
                     <span ng-show="entry.like_count == 1">{{ entry.like_count }} like</span>
                     <span ng-show="entry.like_count > 1">{{ entry.like_count }} likes</span>
                 </div>
+            </div>
+            <div class="share-box">
+                <p>Share this entry on a social network:</p>
+                <i class="icon-twitter"> Twitter</i>
+                <i class="icon-facebook-sign"> Facebook</i>
+                <i class="icon-google-plus-sign"> Google+</i>
+                <br/><span>Direct Link:</span><br/>
+                <input type="text" value="{{ entry.id }}"/>
             </div>
             <div class="clickjacking-warn">
                 <span>Unfortunately, viewing in an external site is disabled by publisher.</span>
