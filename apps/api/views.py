@@ -100,7 +100,12 @@ def timeline(request):
 @ajax_required
 @login_required
 def single_entry(request, entry_id):
-    entry = Entry.objects.get(id=entry_id)
+    try:
+        entry = Entry.objects.get(id=entry_id)
+    except Entry.DoesNotExist:
+        return HttpResponse(json.dumps({'code': 0, 'msg': 'The entry could not be found.'}),
+            content_type='application/json')
+
     # FIXME: Move this blocks to model as a method
     try:
         EntryLike.objects.get(entry__id=entry_id, user=request.user)

@@ -1,4 +1,14 @@
-<div class="dashboard-entries">
+<div ng-hide="!notFound" class="not-found">
+    <i class="icon-meh"></i>
+    <p>The entry could not be found.</p>
+</div>
+
+<div ng-show="loadingEntry" class="loading-entry" class="loading-entry">
+    <p>Please wait...</p>
+    <img src="/static/img/ajax-loader.gif"/>
+</div>
+
+<div ng-show="entry" class="dashboard-entries">
         <div ng-hide="entry.instantEntry == true" ng-mouseenter="myClass='show'" ng-mouseleave="myClass=''" class="dashboard-entry">
             <ul ng-class="myClass" class="entry-topbar">
                 <li>

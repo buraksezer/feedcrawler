@@ -781,3 +781,14 @@ textarea.comment {
     font-size: 12px;
     padding: 3px;
 }
+
+.loading-entry,
+.not-found {
+    padding: 20px;
+    font-size: 20px;
+    text-align: center;
+}
+
+.not-found i {
+    font-size: 50px;
+}
