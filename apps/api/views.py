@@ -99,15 +99,24 @@ def timeline(request, feeds=[]):
     return HttpResponse(json.dumps(results), content_type='application/json')
 
 
+@ajax_required
 @login_required
 def _list(request, list_slug):
     feeds = [feed[0] for feed in List.objects.filter(slug=list_slug).values_list("feed__id")]
     return timeline(request, feeds=feeds)
 
+
+@ajax_required
 @login_required
-def list_title(request, list_slug):
-    title = List.objects.filter(slug=list_slug).values("title")
-    return HttpResponse(json.dumps(title[0]["title"]), content_type='application/json')
+def prepare_list(request, list_slug):
+    values = List.objects.filter(slug=list_slug).values_list("title", "feed__id")
+    result = {}
+    if values:
+        feed_ids = []
+        for title, feed_id in values:
+            feed_ids.append(feed_id)
+        result = {"title": title, "feed_ids": feed_ids}
+    return HttpResponse(json.dumps(result), content_type='application/json')
 
 
 @ajax_required

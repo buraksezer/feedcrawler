@@ -62,6 +62,9 @@ ChapStream.directive('catchNewEntry', function() {
         scope.newEntryCount = 0;
         scope.originalTitle = document.title;
         $(element).bind("new_entry_event", function(event, data) {
+            if (jQuery.inArray(data.new_entry.id, scope.listFeedIds) == -1) {
+                return;
+            }
             scope.$apply(function() {
                 // Dont show this entry until user clicks notifier
                 data.new_entry.instantEntry = true;
@@ -842,8 +845,9 @@ function UserspaceCtrl($scope, $rootScope, $http) {
 }
 
 function ListCtrl($scope, $routeParams, $http) {
-    $http.get("/api/list_title/"+$routeParams.listSlug+"/").success(function(data) {
-        $scope.listTitle = data;
+    $http.get("/api/prepare_list/"+$routeParams.listSlug+"/").success(function(data) {
+        $scope.listTitle = data.title;
+        $scope.listFeedIds = data.feed_ids;
+        TimelineCtrl($scope, $routeParams, $http)
     });
-    TimelineCtrl($scope, $routeParams, $http)
 }

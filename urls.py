@@ -47,7 +47,7 @@ urlpatterns = patterns('',
     url(r'^api/delete_list/(?P<list_id>[\w-]+)/$', 'apps.api.views.delete_list'),
     url(r'^api/create_list/', 'apps.api.views.create_list'),
     url(r'^api/list/(?P<list_slug>[\w-]+)/$', 'apps.api.views._list'),
-    url(r'^api/list_title/(?P<list_slug>[\w-]+)/$', 'apps.api.views.list_title'),
+    url(r'^api/prepare_list/(?P<list_slug>[\w-]+)/$', 'apps.api.views.prepare_list'),
 
     # This is required for pubsubhubbub
     #url(r'^subscriber/', include('django_push.subscriber.urls')),
