@@ -62,8 +62,10 @@ ChapStream.directive('catchNewEntry', function() {
         scope.newEntryCount = 0;
         scope.originalTitle = document.title;
         $(element).bind("new_entry_event", function(event, data) {
-            if (jQuery.inArray(data.new_entry.feed_id, scope.listFeedIds) == -1) {
-                return;
+            if ($(".list-header").length !== 0) {
+                if (jQuery.inArray(data.new_entry.feed_id, scope.listFeedIds) == -1) {
+                    return;
+                }
             }
             scope.$apply(function() {
                 // Dont show this entry until user clicks notifier
