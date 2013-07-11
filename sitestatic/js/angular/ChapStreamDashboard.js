@@ -62,7 +62,7 @@ ChapStream.directive('catchNewEntry', function() {
         scope.newEntryCount = 0;
         scope.originalTitle = document.title;
         $(element).bind("new_entry_event", function(event, data) {
-            if (jQuery.inArray(data.new_entry.id, scope.listFeedIds) == -1) {
+            if (jQuery.inArray(data.new_entry.feed_id, scope.listFeedIds) == -1) {
                 return;
             }
             scope.$apply(function() {
