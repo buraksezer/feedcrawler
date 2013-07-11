@@ -704,7 +704,6 @@ function TimelineCtrl($scope, $routeParams, $http) {
     var urlBody = "timeline";
     if ($(".list-header").length !== 0) {
         urlBody = "list/"+$routeParams.listSlug;
-        document.title = $scope.listTitle +" | "+CsFrontend.Globals.SiteTitle;
     }
 
     document.title = CsFrontend.Globals.SiteTitle;
@@ -848,6 +847,6 @@ function ListCtrl($scope, $routeParams, $http) {
     $http.get("/api/prepare_list/"+$routeParams.listSlug+"/").success(function(data) {
         $scope.listTitle = data.title;
         $scope.listFeedIds = data.feed_ids;
-        TimelineCtrl($scope, $routeParams, $http)
+        document.title = $scope.listTitle +" | "+CsFrontend.Globals.SiteTitle;
     });
 }
