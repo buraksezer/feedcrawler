@@ -848,6 +848,7 @@ input[name="list-name"] {
 #lists {
     display: none;
     list-style: none;
+    margin-bottom: 0;
 }
 
 #lists .list {

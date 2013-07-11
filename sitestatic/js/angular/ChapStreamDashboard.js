@@ -699,7 +699,7 @@ function FeedDetailCtrl($scope, $http, $routeParams) {
 function TimelineCtrl($scope, $routeParams, $http) {
     // If this is a list, a custom timeline, use a different URL.
     var urlBody = "timeline";
-    if ($("#lists").length !== 0) {
+    if ($(".list-header").length !== 0) {
         urlBody = "list/"+$routeParams.listSlug;
         document.title = $scope.listTitle +" | "+CsFrontend.Globals.SiteTitle;
     }
