@@ -8,6 +8,7 @@ var ChapStream = angular.module('ChapStream', ['infinite-scroll', 'ngSanitize'],
         .when('/interactions', { templateUrl: '/static/templates/interactions.html', controller: 'InteractionsCtrl' })
         .when('/readlater', { templateUrl: '/static/templates/readlater.html', controller: 'ReadLaterCtrl' })
         .when('/entry/:entryId', { templateUrl: '/static/templates/entry.html', controller: 'EntryCtrl' })
+        .when('/list/:listSlug', { templateUrl: '/static/templates/list.html', controller: 'ListCtrl' })
     }
 );
 
@@ -454,6 +455,115 @@ ChapStream.directive('shareBox',  function() {
     }
 });
 
+ChapStream.directive('listControlModal', function() {
+    return {
+        templateUrl: '/static/templates/list-modal.html'
+    }
+});
+
+ChapStream.directive('runListControlModal', function($http, $rootScope) {
+    return function(scope, element, attrs) {
+        $(element).click(function(event) {
+            $http.get("/api/lists/").success(function(data) {
+                scope.safeApply(function() {
+                    $rootScope.lists = data;
+                    if (typeof scope.feed_detail != 'undefined') {
+                        $rootScope.feedItem = scope.feed_detail.feed.title;
+                        $rootScope.feedId = scope.feed_detail.feed.id;
+                    }
+                });
+            })
+        });
+    }
+});
+
+ChapStream.directive('listToggle', function($http) {
+    return function(scope, element, attrs) {
+        $(element).click(function(event) {
+            $(element).closest(".list").find(".items").slideToggle();
+        });
+    }
+});
+
+ChapStream.directive('appendToList', function($http, $rootScope) {
+    return function(scope, element, attrs) {
+        $(element).click(function(event) {
+            scope.listBusy = true;
+            $http.post("/api/append_to_list/"+attrs.listId+"/"+attrs.feedId+"/").success(function(data) {
+                scope.listBusy = false;
+                $(element).closest(".list").find(".items").slideDown();
+                if (data.code == 1) {
+                    scope.safeApply(function() {
+                        $rootScope.lists[attrs.listId].items.push({id: attrs.feedId, title: scope.feedItem});
+                    });
+                }
+            })
+        });
+    }
+});
+
+ChapStream.directive('deleteFromList', function($http, $rootScope) {
+    return function(scope, element, attrs) {
+        $(element).click(function(event) {
+            scope.listBusy = true;
+            $http.post("/api/delete_from_list/"+attrs.listId+"/"+attrs.feedId+"/").success(function(data) {
+                scope.listBusy = false;
+                if (data.code == 1) {
+                     scope.safeApply(function() {
+                        $rootScope.lists[attrs.listId].items.splice(attrs.itemIndex, 1);
+                    });
+                 }
+             });
+        });
+    }
+});
+
+ChapStream.directive('deleteList', function($http, $rootScope) {
+    return function(scope, element, attrs) {
+        $(element).click(function(event) {
+            scope.listBusy = true;
+            $http.post("/api/delete_list/"+attrs.listId+"/").success(function(data) {
+            scope.listBusy = false;
+                if (data.code == 1) {
+                     scope.safeApply(function() {
+                        delete $rootScope.lists[attrs.listId];
+                    });
+                 }
+             });
+        });
+    }
+});
+
+ChapStream.directive('createList', function($http, $rootScope) {
+    return function(scope, element, attrs) {
+        $(element).click(function(event) {
+            scope.listBusy = true;
+            $http({
+                url: '/api/create_list/',
+                method: "POST",
+                data:  $.param({title: scope.newListName}),
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+            }).success(function (data, status, headers, config) {
+                scope.listBusy = false;
+                if (data.code == 1) {
+                    scope.safeApply(function() {
+                        $rootScope.lists[data.id] = {id: data.id, title: scope.newListName, items:[], slug: data.slug};
+                        scope.showCreateList = '';
+                    });
+                }
+            });
+        });
+    }
+});
+
+ChapStream.directive('showLists', function($http) {
+    return function(scope, element, attrs) {
+        $(element).click(function(event) {
+            $("#lists").slideToggle('fast');
+        })
+    }
+});
+
 function InteractionsCtrl($scope, $http, $rootScope) {
     document.title = "Interactions"+" | "+CsFrontend.Globals.SiteTitle;
     // Reset interaction count in user space
@@ -586,9 +696,15 @@ function FeedDetailCtrl($scope, $http, $routeParams) {
     };
 }
 
-function TimelineCtrl($scope, $http) {
-    document.title = CsFrontend.Globals.SiteTitle;
+function TimelineCtrl($scope, $routeParams, $http) {
+    // If this is a list, a custom timeline, use a different URL.
+    var urlBody = "timeline";
+    if ($("#lists").length !== 0) {
+        urlBody = "list/"+$routeParams.listSlug;
+        document.title = $scope.listTitle +" | "+CsFrontend.Globals.SiteTitle;
+    }
 
+    document.title = CsFrontend.Globals.SiteTitle;
     $scope.busy = false;
     var increment = 15;
     $scope.entries = [];
@@ -598,7 +714,7 @@ function TimelineCtrl($scope, $http) {
         if (typeof $scope.endOfData != 'undefined') return;
         if ($scope.busy) return;
         $scope.busy = true;
-        $http.get("/api/timeline/"+"?&offset="+$scope.offset+"&limit="+$scope.limit).success(function(data) {
+        $http.get("/api/"+urlBody+"?&offset="+$scope.offset+"&limit="+$scope.limit).success(function(data) {
             if (!data.length) {
                 $scope.endOfData = true;
                 $scope.busy = false;
@@ -720,6 +836,14 @@ function EntryCtrl($scope, $http, $routeParams) {
 function UserspaceCtrl($scope, $rootScope, $http) {
     $http.get("/api/user_profile/").success(function(data) {
         $rootScope.readlater_count = data.rl_count;
+        $rootScope.lists = data.lists;
         $scope.profile = data;
     });
+}
+
+function ListCtrl($scope, $routeParams, $http) {
+    $http.get("/api/list_title/"+$routeParams.listSlug+"/").success(function(data) {
+        $scope.listTitle = data;
+    });
+    TimelineCtrl($scope, $routeParams, $http)
 }

@@ -90,12 +90,9 @@ a.brand {
     float: right;
 }
 
-#header .link-signout {
+#header .settings-dropdown a.dropdown-toggle {
     text-decoration: none;
     color: #555555;
-}
-
-#header .signout-button {
     float: right;
     margin-top: 9.2px;
     margin-left: 5px;
@@ -159,6 +156,7 @@ div.feed-item span.feed-title:hover {
     color: #0CAEE3;
 }
 
+.change-background,
 .active-feed {
     background-color: #FBFBFB;
 }
@@ -529,7 +527,11 @@ label[for="id_feed_search"] {
 }
 
 .show {
-    display: block !important;
+    display: inline-block !important;
+}
+
+.hide {
+    display: none;
 }
 
 /* scaffolding */
@@ -656,6 +658,7 @@ input.tt-hint {
     color: #555555;
 }
 
+#lists li a:hover,
 .timeline-entry-interaction a:hover {
     color: #0088CC;
 }
@@ -727,6 +730,7 @@ textarea.comment {
 }
 
 /* Interactions */
+.list-header,
 .readlater-header,
 .interactions-header {
     border-bottom: 1px solid #E2E2E2;
@@ -791,4 +795,69 @@ textarea.comment {
 
 .not-found i {
     font-size: 50px;
+}
+
+/* Feed detail control */
+.feed-detail-control i.icon-cog {
+    font-size: 20px;
+}
+
+/* Lists */
+.lists .items {
+    display: none;
+    margin-left: 13px;
+    font-size: 13px;
+}
+
+.list a {
+    font-size: 13px;
+    text-decoration: none;
+}
+
+button.create-list {
+    margin-bottom: 5px;
+}
+
+span.create-list {
+    display: none;
+}
+
+span.create-list button {
+    margin-top: -10px;
+}
+
+input.find-feed {
+    font-size: 13px;
+    width: 70%;
+}
+
+p.list-add-warn {
+    font-size: 12px;
+}
+
+.list .icon-remove-sign,
+.list .icon-remove {
+    display: none;
+}
+
+input[name="list-name"] {
+    padding: 0 5px 0 5px;
+    font-size: 13px;
+}
+
+#lists {
+    display: none;
+    list-style: none;
+}
+
+#lists .list {
+    font-size: 13px;
+}
+
+#lists .list a {
+    color: #555555;
+}
+
+#lists span {
+    font-size: 12px;
 }

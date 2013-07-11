@@ -4,7 +4,8 @@ import datetime
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
-from apps.storage.models import Feed, Entry, EntryLike, Comment, ReadLater
+from apps.storage.models import (Feed, Entry, EntryLike,
+    Comment, ReadLater, List)
 from apps.storage.tasks import SyncFeed
 from userena.utils import get_profile_model, get_user_model
 from django.contrib.auth.decorators import login_required
@@ -27,8 +28,8 @@ def get_user_profile(username):
     return profile
 
 
-def get_user_timeline(user_id, offset=0, limit=15):
-    feeds = Feed.objects.filter(users=user_id)
+def get_user_timeline(user_id, feeds=[], offset=0, limit=15):
+    feeds = feeds if feeds else Feed.objects.filter(users=user_id)
     return Entry.objects.filter(feed_id__in=feeds)[offset:limit]
 
 def get_latest_comments(entry_id):
@@ -56,16 +57,17 @@ def user_profile(request):
         "subs_count": profile.user.feed_set.count(),
         "display_name": profile.user.get_full_name() if profile.user.get_full_name() else profile.user.username,
         "mugshot_url": profile.get_mugshot_url(),
-        "rl_count": ReadLater.objects.filter(user=request.user).count()
+        "rl_count": ReadLater.objects.filter(user=request.user).count(),
+        "lists": [{"title": _list.title, "slug": _list.slug, "id": _list.id} for _list in List.objects.filter(user=request.user)]
     }
     return HttpResponse(json.dumps(user), content_type='application/json')
 
 
 @login_required
-def timeline(request):
+def timeline(request, feeds=[]):
     offset = request.GET.get("offset", 0)
     limit = request.GET.get("limit", 15)
-    entries = get_user_timeline(request.user.id, offset=offset, limit=limit)
+    entries = get_user_timeline(request.user.id, feeds=feeds, offset=offset, limit=limit)
     results = []
     for entry in entries:
         # FIXME: Move this blocks to model as a method
@@ -95,6 +97,17 @@ def timeline(request):
         }
         results.append(item)
     return HttpResponse(json.dumps(results), content_type='application/json')
+
+
+@login_required
+def _list(request, list_slug):
+    feeds = [feed[0] for feed in List.objects.filter(slug=list_slug).values_list("feed__id")]
+    return timeline(request, feeds=feeds)
+
+@login_required
+def list_title(request, list_slug):
+    title = List.objects.filter(slug=list_slug).values("title")
+    return HttpResponse(json.dumps(title[0]["title"]), content_type='application/json')
 
 
 @ajax_required
@@ -573,3 +586,101 @@ def readlater_list(request):
         results.append(item)
 
     return HttpResponse(json.dumps(results), content_type="application/json")
+
+
+@ajax_required
+@login_required
+def lists(request):
+    lists = List.objects.filter(user=request.user)
+    if not lists:
+        return HttpResponse(json.dumps({}), content_type="application/json")
+
+    results = {}
+    for _list in lists:
+        _list_id = _list.id
+        results[_list_id] = {'id': _list_id, 'slug': _list.slug, 'title': _list.title, 'items': []}
+        items = List.objects.filter(id=_list_id).values("feed__title", "feed")
+        for item in items:
+            result = {
+                'id': item["feed"],
+                'title': item["feed__title"]
+            }
+            results[_list_id]['items'].append(result)
+
+    return HttpResponse(json.dumps(results), content_type="application/json")
+
+@ajax_required
+@login_required
+def append_to_list(request, list_id, feed_id):
+    try:
+        feed_item = Feed.objects.get(id=feed_id)
+    except Feed.DoesNotExist:
+        return HttpResponse(json.dumps({"code": 0, "msg": "Feed item could not be found."}),
+            content_type="application/json")
+
+    try:
+        list_item = List.objects.get(id=list_id)
+        try:
+            list_item.feed.get(id=feed_id)
+            return HttpResponse(json.dumps({"code": 0, "msg": "The list already includes the feed."}),
+                content_type="application/json")
+        except Feed.DoesNotExist:
+            pass
+    except List.DoesNotExist:
+        return HttpResponse(json.dumps({"code": 0, "msg": "List item could not be found."}),
+            content_type="application/json")
+
+    list_item.feed.add(feed_item)
+    return HttpResponse(json.dumps({"code": 1, "msg": "Successfully added."}),
+            content_type="application/json")
+
+@ajax_required
+@login_required
+def delete_from_list(request, list_id, feed_id):
+    try:
+        feed_item = Feed.objects.get(id=feed_id)
+    except Feed.DoesNotExist:
+        return HttpResponse(json.dumps({"code": 0, "msg": "Feed item could not be found."}),
+            content_type="application/json")
+
+    try:
+        list_item = List.objects.get(id=list_id)
+        try:
+            list_item.feed.get(id=feed_id)
+        except Feed.DoesNotExist:
+            return HttpResponse(json.dumps({"code": 0, "msg": "The list does not include the feed."}),
+                content_type="application/json")
+    except List.DoesNotExist:
+        return HttpResponse(json.dumps({"code": 0, "msg": "The list could not be found."}),
+            content_type="application/json")
+
+    list_item.feed.remove(feed_item)
+    return HttpResponse(json.dumps({"code": 1, "msg": "Successfully deleted."}),
+            content_type="application/json")
+
+
+@ajax_required
+@login_required
+def delete_list(request, list_id):
+    try:
+        list_item = List.objects.get(id=list_id)
+    except List.DoesNotExist:
+        return HttpResponse(json.dumps({"code": 0, "msg": "The list could not be found."}),
+            content_type="application/json")
+
+    list_item.delete()
+    return HttpResponse(json.dumps({"code": 1, "msg": "Successfully deleted."}),
+            content_type="application/json")
+
+@ajax_required
+@login_required
+def create_list(request):
+    try:
+        List.objects.get(user=request.user, title=request.POST.get("title"))
+        return HttpResponse(json.dumps({"code": 0, "msg": "You have a list with that name."}),
+            content_type="application/json")
+    except List.DoesNotExist:
+        item = List(title=request.POST.get("title"), user=request.user)
+        item.save()
+        return HttpResponse(json.dumps({"code": 1, "msg": "Successfully created.", "id": item.id, "slug": item.slug}),
+            content_type="application/json")

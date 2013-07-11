@@ -10,6 +10,7 @@ $(document).ready(function(){
         // FIXME: Prevent sending a request again to subs-search
     });
 
+    /*
     // obtain a reference to the original handler
     var _clearMenus = $._data(document, "events").click.filter(function (el) {
         return el.namespace === 'data-api.dropdown' && el.selector === undefined
@@ -27,7 +28,7 @@ $(document).ready(function(){
     $(document).on('click', '.dropdown-menu', function(e) {
         e.preventDefault();
         e.stopPropagation();
-    });
+    }); */
 
     // Initialize bootstrap tooltips
     $("#header .link-signout i.signout-button").tooltip();

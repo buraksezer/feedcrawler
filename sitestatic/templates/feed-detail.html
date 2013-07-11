@@ -3,7 +3,6 @@
     <h3>Sorry, that page doesn't exist!</h3>
     <h4><a href="/">Go to timeline</a></h4>
 </div>
-
 <div ng-show="!loading" class="feed-detail-header">
     <h4>
         <a href="{{ feed_detail.feed.link }}" target="_blank">{{ feed_detail.feed.title }}</a>
@@ -16,6 +15,17 @@
     <div class="feed-info">
         <span class="tagline">{{ feed_detail.feed.tagline }}</span><br/>
         <span>Last sync: <i>{{ feed_detail.feed.last_sync }}</i></span>
+        <div class="feed-detail-control dropdown pull-right">
+            <i class="cursor-pointer dropdown-toggle icon-cog" data-toggle="dropdown"></i>
+            <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+                <li role="presentation">
+                    <a class="cursor-pointer" role="menuitem" tabindex="-1" data-toggle="modal" data-target="#listControlModal" run-list-control-modal>Add or remove from lists</a>
+                </li>
+                <li role="presentation">
+                    <a role="menuitem" tabindex="-1" href="#">Report abuse</a>
+                </li>
+            </ul>
+        </div>
     </div>
     <div class="divider"></div>
 </div>

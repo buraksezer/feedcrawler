@@ -71,11 +71,24 @@
             </a>
         </div>
         <div class="control-item">
-            <i class="icon-list"></i>
-            <span class="text">
-                Lists
-            </span>
+            <a href="#" show-lists>
+                <i class="icon-list"></i>
+                <span class="text">
+                    Lists
+                </span>
+            </a>
         </div>
+
+        <!-- This is no good! But it works perfectly!-->
+        <ul id="lists">
+            <i ng-hide="lists" class="icon-warning-sign"></i>
+            <span ng-hide="lists">No list found.</span>
+            <li class="list" ng-repeat="list in lists">
+                <i class="icon-asterisk"></i>
+                <a href="/list/{{ list.slug }}" class="transition">{{ list.title }}</span>
+            </li>
+        </ul>
+
         <div class="control-item">
             <a href="/readlater">
                 <i class="icon-time"></i>

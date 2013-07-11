@@ -29,3 +29,7 @@ def readlater(request):
 @login_required
 def entry(request, entry_id):
     return render_to_response('frontend/home.html', context_instance=RequestContext(request))
+
+@login_required
+def list(request, list_slug):
+    return render_to_response('frontend/home.html', context_instance=RequestContext(request))

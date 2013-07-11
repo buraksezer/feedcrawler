@@ -1,6 +1,7 @@
 import datetime
 import random
 import redis
+from autoslug import AutoSlugField
 from django.db import models
 from django.contrib.auth.models import User
 from utils import seconds_timesince
@@ -26,7 +27,7 @@ class Feed(models.Model):
 
     image = models.CharField(null=True, max_length=1024)
     language = models.CharField(null=True, max_length=128)
-    title = models.CharField(null=True, max_length=512)
+    title = models.CharField(null=True, max_length=1024)
     # This is obsolete
     link = models.CharField(null=True, max_length=512)
     encoding = models.CharField(null=True, max_length=128)
@@ -35,6 +36,7 @@ class Feed(models.Model):
     last_entry_date = models.DateTimeField(null=True, blank=True)
     min_to_decay = models.IntegerField(default=0)
     next_scheduled_update = models.DateTimeField(null=True, blank=True)
+    slug = AutoSlugField(populate_from='title', unique=True, null=True)
 
     class Meta:
         verbose_name = 'feed'
@@ -178,7 +180,7 @@ class Entry(models.Model):
     language = models.CharField(null=True, max_length=128)
     author = models.CharField(null=True, max_length=256)
     author_email = models.EmailField(blank=True)
-    link = models.URLField(max_length=512)
+    link = models.URLField(max_length=2048)
     tags = models.ManyToManyField(EntryTag)
 
     # The date this entry was first published,
@@ -192,12 +194,12 @@ class Entry(models.Model):
     date_modified = models.DateTimeField(null=True, blank=True)
 
     # A globally unique identifier for this entry.
-    entry_id = models.URLField(unique=True, max_length=512)
+    entry_id = models.URLField(unique=True, max_length=2048)
 
     license = models.CharField(null=True, max_length=128)
 
     # Unique slug for every entry
-    #slug = models.SlugField(blank=True)
+    slug = AutoSlugField(populate_from='title', unique=True, null=True)
 
     available_in_frame = models.IntegerField(null=True, blank=True)
     last_interaction = models.DateTimeField(null=True, blank=True)
@@ -249,3 +251,13 @@ class ReadLater(models.Model):
 
     def __unicode__(self):
         return self.user.username+" will read "+self.entry.title
+
+
+class List(models.Model):
+    title = models.CharField(max_length=256)
+    slug = AutoSlugField(populate_from='title', unique=True, null=True)
+    feed = models.ManyToManyField(Feed)
+    user = models.ForeignKey(User)
+
+    def __unicode__(self):
+        return self.user.username+"'s "+self.title

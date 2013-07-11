@@ -10,12 +10,15 @@ urlpatterns = patterns('',
     url(r'^user/signin/', 'apps.userena.views.signin', name='userena_signin'),
     url(r'^user/', include('userena.urls')),
 
+    # Dummy URLs
     url(r'^feed/(?P<feed_id>[\w-]+)/$', 'apps.frontend.views.feed_detail', name='feed_detail'),
     url(r'^subscriptions/', 'apps.frontend.views.subscriptions', name='subscriptions'),
     url(r'^interactions/', 'apps.frontend.views.interactions', name='interactions'),
     url(r'^readlater/', 'apps.frontend.views.readlater', name='readlater'),
     url(r'^reader/(?P<entry_id>[\w-]+)/$', 'apps.frontend.views.reader', name='reader'),
     url(r'^entry/(?P<entry_id>[\w-]+)/$', 'apps.frontend.views.entry', name='entry'),
+    url(r'^list/(?P<list_slug>\w+)', 'apps.frontend.views.list', name='list'),
+
 
     # API requests
     url(r'^api/reader/(?P<entry_id>[\w-]+)/$', 'apps.api.views.reader'),
@@ -38,9 +41,13 @@ urlpatterns = patterns('',
     url(r'^api/single_entry/(?P<entry_id>[\w-]+)/$', 'apps.api.views.single_entry'),
     url(r'^api/readlater/(?P<entry_id>[\w-]+)/$', 'apps.api.views.readlater'),
     url(r'^api/readlater_list/', 'apps.api.views.readlater_list'),
-
-    #url(r'^subs$', 'apps.frontend.views.subs', name='subs'),
-
+    url(r'^api/lists/', 'apps.api.views.lists'),
+    url(r'^api/append_to_list/(?P<list_id>[\w-]+)/(?P<feed_id>[\w-]+)/$', 'apps.api.views.append_to_list'),
+    url(r'^api/delete_from_list/(?P<list_id>[\w-]+)/(?P<feed_id>[\w-]+)/$', 'apps.api.views.delete_from_list'),
+    url(r'^api/delete_list/(?P<list_id>[\w-]+)/$', 'apps.api.views.delete_list'),
+    url(r'^api/create_list/', 'apps.api.views.create_list'),
+    url(r'^api/list/(?P<list_slug>[\w-]+)/$', 'apps.api.views._list'),
+    url(r'^api/list_title/(?P<list_slug>[\w-]+)/$', 'apps.api.views.list_title'),
 
     # This is required for pubsubhubbub
     #url(r'^subscriber/', include('django_push.subscriber.urls')),
