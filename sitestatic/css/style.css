@@ -762,6 +762,11 @@ textarea.comment {
     display: block;
 }
 
+.subs-plus-icon-warning {
+    font-size: 13px;
+    font-style: italic;
+}
+
 .share-box {
     display: none;
     border-top: 1px solid #E2E2E2;
@@ -838,6 +843,18 @@ p.list-add-warn {
 .list .icon-remove-sign,
 .list .icon-remove {
     display: none;
+    margin-left: 5px;
+    font-size: 18px;
+}
+
+.lists .list {
+    border-bottom: 1px dotted #E2E2E2;
+    margin-bottom: 5px;
+}
+
+.lists .list .add-to-list {
+    margin-right: 5px;
+    font-size: 18px;
 }
 
 input[name="list-name"] {
@@ -861,4 +878,22 @@ input[name="list-name"] {
 
 #lists span {
     font-size: 12px;
+}
+
+.lists ul.text {
+    margin: 0;
+}
+
+.lists ul.text li {
+    list-style: none;
+    display: inline;
+}
+
+.list-manage {
+    display: none;
+    font-size: 10px;
+}
+
+.list-manage:hover {
+    color: #0088cc;
 }

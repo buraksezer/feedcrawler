@@ -523,7 +523,7 @@ ChapStream.directive('deleteFromList', function($http, $rootScope) {
     }
 });
 
-ChapStream.directive('deleteList', function($http, $rootScope) {
+ChapStream.directive('sureDeleteList', function($http, $rootScope) {
     return function(scope, element, attrs) {
         $(element).click(function(event) {
             scope.listBusy = true;
@@ -541,7 +541,7 @@ ChapStream.directive('deleteList', function($http, $rootScope) {
 
 ChapStream.directive('createList', function($http, $rootScope) {
     return function(scope, element, attrs) {
-        $(element).click(function(event) {
+        function create_list() {
             scope.listBusy = true;
             $http({
                 url: '/api/create_list/',
@@ -554,9 +554,19 @@ ChapStream.directive('createList', function($http, $rootScope) {
                     scope.safeApply(function() {
                         $rootScope.lists[data.id] = {id: data.id, title: scope.newListName, items:[], slug: data.slug};
                         scope.showCreateList = '';
+                        scope.newListName = undefined;
                     });
                 }
             });
+        }
+
+        $(element).closest(".create-list").find("input[name=list-name]").keypress(function(event) {
+            if (event.keyCode != 13) return;
+            create_list();
+        });
+
+        $(element).click(function(event) {
+            create_list();
         });
     }
 });
@@ -564,7 +574,9 @@ ChapStream.directive('createList', function($http, $rootScope) {
 ChapStream.directive('showLists', function($http) {
     return function(scope, element, attrs) {
         $(element).click(function(event) {
-            $("#lists").slideToggle('fast');
+            if (!$(event.target).hasClass("list-manage")) {
+                $("#lists").slideToggle('fast');
+            }
         })
     }
 });
@@ -636,7 +648,7 @@ function SubscriptionsCtrl($scope, $http) {
     };
 }
 
-function FeedDetailCtrl($scope, $http, $routeParams) {
+function FeedDetailCtrl($scope, $http, $routeParams, $rootScope) {
     $scope.busy = false;
     var increment = 15;
     $scope.feed_detail = {feed: {}, entries: []};
@@ -687,6 +699,7 @@ function FeedDetailCtrl($scope, $http, $routeParams) {
             if (data.code == 1){
                 $scope.feed_detail.feed.is_subscribed = false;
                 $scope.feed_detail.feed.subs_count -= 1;
+                $rootScope.subscriptionCount -= 1;
             }
         });
     };
@@ -696,6 +709,7 @@ function FeedDetailCtrl($scope, $http, $routeParams) {
             if (data.code == 1) {
                 $scope.feed_detail.feed.is_subscribed = true;
                 $scope.feed_detail.feed.subs_count += 1;
+                $rootScope.subscriptionCount += 1;
             }
         });
     };
@@ -841,6 +855,8 @@ function UserspaceCtrl($scope, $rootScope, $http) {
     $http.get("/api/user_profile/").success(function(data) {
         $rootScope.readlater_count = data.rl_count;
         $rootScope.lists = data.lists;
+        $rootScope.subscriptionCount = data.subs_count;
+        delete data.subs_count;
         $scope.profile = data;
     });
 }

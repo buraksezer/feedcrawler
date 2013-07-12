@@ -16,15 +16,21 @@
     <div class="lists">
         <div ng-mouseenter="myClass='show'" ng-mouseleave="myClass=''" class="list" ng-repeat="list in lists">
             <span>
-                <i class="cursor-pointer icon-plus" append-to-list list-index="{{ $index }}" list-id="{{ list.id }}" feed-id="{{ feedId }}"></i>
+                <i class="add-to-list cursor-pointer icon-plus" append-to-list list-index="{{ $index }}" list-id="{{ list.id }}" feed-id="{{ feedId }}"></i>
                 <a href="#" list-toggle>{{ list.title }}</a>
-                <i ng-class="myClass" class="cursor-pointer icon-remove" delete-list list-id="{{ list.id }}"></i>
+                <span style="display: none" ng-class="listDelSure">
+                    Deleting, are you sure? (<a href="#" sure-delete-list list-id="{{ list.id }}">Yes</a> | <a href="#" ng-click="listDelSure=''">No</a>)
+                </span>
+                <i ng-class="myClass" class="cursor-pointer icon-remove" ng-click="listDelSure='show'"></i>
             </span>
             <div class="items" id="{{ list }}">
                 <div ng-mouseenter="showRemove='show'" ng-mouseleave="showRemove=''" class="item" ng-repeat="item in list.items">
                    <span>
                     {{ item.title }}
-                    <i ng-class="showRemove" class="cursor-pointer icon-remove-sign" delete-from-list item-index="{{ $index }}" list-id="{{ list.id }}" feed-id="{{ item.id }}"></i>
+                    <span style="display: none" ng-class="listItemDelSure">
+                        Deleting, are you sure? (<a href="#" delete-from-list item-index="{{ $index }}" list-id="{{ list.id }}" feed-id="{{ item.id }}">Yes</a> | <a href="#" ng-click="listItemDelSure=''">No</a>)
+                    </span>
+                    <i ng-class="showRemove" class="cursor-pointer icon-remove-sign" ng-click="listItemDelSure='show'"></i>
                    </span>
                 </div>
             </div>

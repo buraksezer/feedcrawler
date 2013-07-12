@@ -2,9 +2,9 @@
     <div class="user">
         <img class="mugshot img-rounded" src="{{ profile.mugshot_url }}"/>
         <dd class="username"><a href="/user/{{ user.username }}/">{{ profile.display_name }}</a></dd>
-        <small class="hint--bottom" data-hint="Show your subscriptions" ng-show="profile.subs_count == 0"><a href="/subscriptions">No subscription</a></small>
-        <small class="hint--bottom" data-hint="Show your subscriptions" ng-show="profile.subs_count == 1 "><a href="/subscriptions">{{ profile.subs_count }} subscription</a></small>
-        <small class="hint--bottom" data-hint="Show your subscriptions" ng-show="profile.subs_count > 1 "><a href="/subscriptions">{{ profile.subs_count }} subscriptions</a></small>
+        <small class="hint--bottom" data-hint="Show your subscriptions" ng-show="subscriptionCount  == 0"><a href="/subscriptions">No subscription</a></small>
+        <small class="hint--bottom" data-hint="Show your subscriptions" ng-show="subscriptionCount  == 1 "><a href="/subscriptions">{{ subscriptionCount }} subscription</a></small>
+        <small class="hint--bottom" data-hint="Show your subscriptions" ng-show="subscriptionCount  > 1 "><a href="/subscriptions">{{ subscriptionCount }} subscriptions</a></small>
         <ul class="top-area pull-right">
             <li ng-controller="SubscribeController">
                 <i ng-click="cleanSubsModal()" id="subscribe-feed" class="icon-plus-sign-alt" data-toggle="modal" data-target="#subscribeModal"></i>
@@ -17,7 +17,7 @@
                     <div class="modal-body">
                         <form name="subscribe-form" class="feed-search">
                             <label for="id_feed_url">Enter a search term to find sources or paste in a source URL:
-                                <img ng-show="showLoading" style="float: right" src="/static/img/realtime_spinner.gif"/>
+                                <img ng-show="showWait" style="float: right" src="/static/img/realtime_spinner.gif"/>
                             </label>
                             <input id="id_feed_url" maxlength="256" ng-model="form.feed_url" placeholder="Give a valid URL" type="text">
                             <span ng-hide="!showWait" id="subscribe-search">Please wait...</span>
@@ -25,9 +25,10 @@
                         </form>
                         <div ng-show="results" class="results">
                             <div class="result" ng-repeat="result in results">
-                                <i ng-click="subsFeed(result)" class="icon-rss-sign"></i>
+                                <i ng-click="subsFeed(result)" class="icon-plus-sign"></i>
                                 <a href="{{result}}" target="_blank">{{ result }}</a>
                             </div>
+                            <span class="subs-plus-icon-warning">Click the plus icon to subscribe.</span>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -70,12 +71,15 @@
                 </span>
             </a>
         </div>
-        <div class="control-item">
+        <div ng-mouseenter="myClass='show'" ng-mouseleave="myClass=''" class="control-item lists">
             <a href="#" show-lists>
-                <i class="icon-list"></i>
-                <span class="text">
-                    Lists
-                </span>
+                <ul class="text">
+                    <li><i class="icon-list"></i></li>
+                    <li>Lists</li>
+                    <li>
+                        <span ng-class="myClass" class="list-manage pull-right cursor-pointer" data-toggle="modal" data-target="#listControlModal" run-list-control-modal>Manage</span>
+                    </li>
+                </ul>
             </a>
         </div>
 
