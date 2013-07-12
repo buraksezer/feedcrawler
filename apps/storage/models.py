@@ -7,8 +7,10 @@ from django.contrib.auth.models import User
 from utils import seconds_timesince
 from django.conf import settings
 
+import caching.base
 
-class Feed(models.Model):
+
+class Feed(caching.base.CachingMixin, models.Model):
     feed_url = models.CharField(unique=True, max_length=512)
     hub = models.CharField(null=True, max_length=512)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -37,6 +39,8 @@ class Feed(models.Model):
     min_to_decay = models.IntegerField(default=0)
     next_scheduled_update = models.DateTimeField(null=True, blank=True)
     slug = AutoSlugField(populate_from='title', unique=True, null=True)
+
+    objects = caching.base.CachingManager()
 
     class Meta:
         verbose_name = 'feed'
@@ -140,10 +144,13 @@ class Feed(models.Model):
 
 
 
-class FeedTag(models.Model):
+class FeedTag(caching.base.CachingMixin, models.Model):
     tag = models.CharField(unique=True, max_length=512)
     feed = models.ManyToManyField(Feed)
     users = models.ManyToManyField(User)
+
+    objects = caching.base.CachingManager()
+
 
     def __unicode__(self):
         return self.tag
@@ -152,8 +159,10 @@ class FeedTag(models.Model):
         super(FeedTag, self).save(*args, **kwargs)
 
 
-class EntryTag(models.Model):
+class EntryTag(caching.base.CachingMixin, models.Model):
     name = models.CharField(max_length=50, unique=True)
+
+    objects = caching.base.CachingManager()
 
     class Meta:
         verbose_name = 'tag'
@@ -166,7 +175,7 @@ class EntryTag(models.Model):
     def save(self, *args, **kwargs):
         super(EntryTag, self).save(*args, **kwargs)
 
-class Entry(models.Model):
+class Entry(caching.base.CachingMixin, models.Model):
     title = models.CharField(max_length=2048)
     content = models.TextField()
     # The content type of this piece of content.
@@ -207,6 +216,8 @@ class Entry(models.Model):
 
     feed = models.ForeignKey(Feed)
 
+    objects = caching.base.CachingManager()
+
     class Meta:
         ordering = ["-id"]
 
@@ -226,9 +237,11 @@ class Interaction(models.Model):
     class Meta:
         ordering = ["-id"]
 
-class Comment(Interaction):
+class Comment(caching.base.CachingMixin, Interaction):
     content = models.TextField()
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = caching.base.CachingManager()
 
     class Meta:
         ordering = ["-id"]
@@ -236,15 +249,19 @@ class Comment(Interaction):
     def __unicode__(self):
         return str(self.id)
 
-class EntryLike(Interaction):
+class EntryLike(caching.base.CachingMixin, Interaction):
+    objects = caching.base.CachingManager()
+
     def __unicode__(self):
         return self.user.username + " liked " + self.entry.title
 
 
-class ReadLater(models.Model):
+class ReadLater(caching.base.CachingMixin, models.Model):
     entry = models.ForeignKey(Entry)
     user = models.ForeignKey(User)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = caching.base.CachingManager()
 
     class Meta:
         ordering = ["-created_at"]
@@ -253,11 +270,13 @@ class ReadLater(models.Model):
         return self.user.username+" will read "+self.entry.title
 
 
-class List(models.Model):
+class List(caching.base.CachingMixin, models.Model):
     title = models.CharField(max_length=256)
     slug = AutoSlugField(populate_from='title', unique=True, null=True)
     feed = models.ManyToManyField(Feed)
     user = models.ForeignKey(User)
+
+    objects = caching.base.CachingManager()
 
     def __unicode__(self):
         return self.user.username+"'s "+self.title
