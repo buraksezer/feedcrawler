@@ -42,10 +42,16 @@ class SyncFeed(Task):
     def run(self, feed, **kwargs):
         DriveSync(feed)
 
-class FirstSync(Task):
-    name = 'first-sync'
+class UnattendedFeedsSync(Task):
+    name = 'unattended-feeds-sync'
 
     def run(self, **kwargs):
-        for feed in Feed.objects.filter(is_active=True, last_sync=None):
+        r = redis.Redis(connection_pool=settings.REDIS_FEED_POOL)
+        scheduled_feed_ids = r.zrange("scheduled_updates", 0, -1)
+        unattended_feeds = []
+        for feed in Feed.objects.filter(is_active=True):
+            if not str(feed.id) in scheduled_feed_ids:
+                unattended_feeds.append(feed)
+        for feed in unattended_feeds:
             SyncFeed.apply_async((feed,))
 
