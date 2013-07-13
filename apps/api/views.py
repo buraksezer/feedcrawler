@@ -335,7 +335,7 @@ def subscribe(request):
         if not feed_obj.users.filter(username__contains=request.user.username):
             feed_obj.users.add(user)
         else:
-            return HttpResponse(json.dumps({"code": 1, "text": "You have already subscribed this feed."}), \
+            return HttpResponse(json.dumps({"code": 0, "text": "You have already subscribed this feed."}), \
                 content_type='application/json')
     except Feed.DoesNotExist:
         new_feed = Feed(feed_url=url)

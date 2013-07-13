@@ -15,11 +15,11 @@
                         <h3 id="subscribeModalLabel">Add Subscription</h3>
                     </div>
                     <div class="modal-body">
-                        <form name="subscribe-form" class="feed-search">
+                        <form ng-submit="findSource()" name="subscribe-form" class="feed-search">
                             <label for="id_feed_url">Enter a search term to find sources or paste in a source URL:
                                 <img ng-show="showWait" style="float: right" src="/static/img/realtime_spinner.gif"/>
                             </label>
-                            <input id="id_feed_url" maxlength="256" ng-model="form.feed_url" placeholder="Give a valid URL" type="text">
+                            <input id="id_feed_url" maxlength="256" ng-model="form.feed_url" placeholder="Give a valid URL" type="text" ng-keyup="findSource()">
                             <span ng-hide="!showWait" id="subscribe-search">Please wait...</span>
                             <span class="subscribe-warning">{{ warning }}</span>
                         </form>

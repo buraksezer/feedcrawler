@@ -792,7 +792,7 @@ function ReadLaterCtrl($scope, $http) {
     };
 }
 
-function SubscribeController($scope, $http, $timeout) {
+function SubscribeController($scope, $http, $timeout, $rootScope) {
     var defaultForm = {
         feed_url : ""
     };
@@ -822,6 +822,9 @@ function SubscribeController($scope, $http, $timeout) {
     $scope.subsFeed = function(url) {
         $scope.showWait = true;
         $http.get("/api/subscribe?url="+url).success(function(data) {
+            if (data.code == 1) {
+                $rootScope.subscriptionCount += 1;
+            }
             $scope.warning = data.text;
             $scope.showWait = false;
             var delay = $timeout(function() {

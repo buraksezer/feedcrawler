@@ -9,8 +9,8 @@ from django.conf import settings
 
 
 class Feed(models.Model):
-    feed_url = models.CharField(unique=True, max_length=512)
-    hub = models.CharField(null=True, max_length=512)
+    feed_url = models.TextField(unique=True)
+    hub = models.CharField(null=True, max_length=1024)
     created_at = models.DateTimeField(auto_now_add=True)
     last_sync = models.DateTimeField(null=True, blank=True)
     is_active = models.BooleanField('is active', default=True,
@@ -25,13 +25,13 @@ class Feed(models.Model):
     updated_at = models.DateField(null=True)
     users = models.ManyToManyField(User)
 
-    image = models.CharField(null=True, max_length=1024)
-    language = models.CharField(null=True, max_length=128)
-    title = models.CharField(null=True, max_length=1024)
+    image = models.CharField(null=True, max_length=2048)
+    language = models.CharField(null=True, max_length=512)
+    title = models.CharField(null=True, max_length=2048)
     # This is obsolete
-    link = models.CharField(null=True, max_length=512)
-    encoding = models.CharField(null=True, max_length=128)
-    subtitle = models.CharField(null=True, max_length=512)
+    link = models.CharField(null=True, max_length=2048)
+    encoding = models.CharField(null=True, max_length=2048)
+    subtitle = models.CharField(null=True, max_length=2048)
     entries_last_month = models.IntegerField(default=0)
     last_entry_date = models.DateTimeField(null=True, blank=True)
     min_to_decay = models.IntegerField(default=0)
