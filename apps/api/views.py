@@ -18,6 +18,21 @@ from announce import AnnounceClient
 announce_client = AnnounceClient()
 
 # Utility functions
+
+def process_like(entry_id, user_id):
+    try:
+        EntryLike.objects.get(entry__id=entry_id, user=user_id)
+        like_msg = "Unlike"
+    except EntryLike.DoesNotExist:
+        like_msg = "Like"
+
+    try:
+        like_count = EntryLike.objects.filter(entry__id=entry_id).count()
+    except EntryLike.DoesNotExist:
+        like_count = 0
+
+    return like_msg, like_count
+
 def get_user_profile(username):
     user = get_object_or_404(get_user_model(), username__iexact=username)
     profile_model = get_profile_model()
@@ -28,25 +43,28 @@ def get_user_profile(username):
     return profile
 
 
-def get_user_timeline(user_id, feeds=[], offset=0, limit=15):
-    feeds = feeds if feeds else Feed.objects.filter(users=user_id)
-    return Entry.objects.filter(feed_id__in=feeds)[offset:limit]
+def get_user_timeline(user_id, feed_ids=[], offset=0, limit=15):
+    if not feed_ids:
+        feed_ids = [feed_id[0] for feed_id in Feed.objects.filter(users=user_id).values_list("id")]
+    return Entry.objects.filter(feed_id__in=feed_ids).values("id", "title", "feed__id", \
+        "feed__title", "link", "available_in_frame", "created_at")[offset:limit]
 
-def get_latest_comments(entry_id):
-    offset = 0
-    limit = 2
+
+def get_latest_comments(entry_id, offset=0, limit=2):
     results = []
-    comments = Comment.objects.filter(entry_id=entry_id)[offset:limit]
+    comments = Comment.objects.filter(entry_id=entry_id).values('id', \
+        'content', 'created_at', 'user__username')[offset:limit]
     comment_count = Comment.objects.filter(entry_id=entry_id).count() - 2
-    for comment in sorted(comments, key=lambda comment: comment.id):
+    for comment in sorted(comments, key=lambda comment: comment["id"]):
         item = {
-            "id": comment.id,
-            "content": comment.content,
-            "created_at": int(time.mktime(comment.created_at.timetuple())*1000),
-            "author": comment.user.username
+            "id": comment["id"],
+            "content": comment["content"],
+            "created_at": int(time.mktime(comment["created_at"].timetuple())*1000),
+            "author": comment['user__username']
         }
         results.append(item)
     return {"results": results, "count": comment_count}
+
 
 @ajax_required
 @login_required
@@ -64,36 +82,25 @@ def user_profile(request):
 
 
 @login_required
-def timeline(request, feeds=[]):
+def timeline(request, feed_ids=[]):
     offset = request.GET.get("offset", 0)
     limit = request.GET.get("limit", 15)
-    entries = get_user_timeline(request.user.id, feeds=feeds, offset=offset, limit=limit)
+    entries = get_user_timeline(request.user.id, feed_ids=feed_ids, offset=offset, limit=limit)
     results = []
     for entry in entries:
-        # FIXME: Move this blocks to model as a method
-        try:
-            EntryLike.objects.get(entry__id=entry.id, user=request.user)
-            like_msg = "Unlike"
-        except EntryLike.DoesNotExist:
-            like_msg = "Like"
-
-        try:
-            like_count = EntryLike.objects.filter(entry__id=entry.id).count()
-        except EntryLike.DoesNotExist:
-            like_count = 0
-
+        like_msg, like_count = process_like(entry["id"], request.user.id)
         item = {
-            'id': entry.id,
-            'title': entry.title,
-            'feed_id': entry.feed.id,
-            'feed_title': entry.feed.title,
-            'link': entry.link,
-            'available': 1 if entry.available_in_frame is None else entry.available_in_frame,
+            'id': entry["id"],
+            'title': entry["title"],
+            'feed_id': entry["feed__id"],
+            'feed_title': entry["feed__title"],
+            'link': entry["link"],
+            'available': 1 if entry["available_in_frame"] is None else entry["available_in_frame"],
             'like_msg': like_msg,
             'like_count': like_count,
-            'created_at': int(time.mktime(entry.created_at.timetuple())*1000),
-            'comments': get_latest_comments(entry.id),
-            'inReadLater': True if ReadLater.objects.filter(user=request.user, entry__id=entry.id) else False
+            'created_at': int(time.mktime(entry["created_at"].timetuple())*1000),
+            'comments': get_latest_comments(entry["id"]),
+            'inReadLater': True if ReadLater.objects.filter(user=request.user, entry__id=entry["id"]) else False
         }
         results.append(item)
     return HttpResponse(json.dumps(results), content_type='application/json')
@@ -102,8 +109,8 @@ def timeline(request, feeds=[]):
 @ajax_required
 @login_required
 def _list(request, list_slug):
-    feeds = [feed[0] for feed in List.objects.filter(slug=list_slug).values_list("feed__id")]
-    return timeline(request, feeds=feeds)
+    feed_ids = [feed[0] for feed in List.objects.filter(slug=list_slug).values_list("feed__id")]
+    return timeline(request, feed_ids=feed_ids)
 
 
 @ajax_required
@@ -123,80 +130,72 @@ def prepare_list(request, list_slug):
 @login_required
 def single_entry(request, entry_id):
     try:
-        entry = Entry.objects.get(id=entry_id)
+        entry = Entry.objects.filter(id=entry_id).values("id", "title", "feed__id", \
+            "feed__title", "link", "available_in_frame", "created_at")
+        entry = entry[0]
     except Entry.DoesNotExist:
         return HttpResponse(json.dumps({'code': 0, 'msg': 'The entry could not be found.'}),
             content_type='application/json')
-
-    # FIXME: Move this blocks to model as a method
-    try:
-        EntryLike.objects.get(entry__id=entry_id, user=request.user)
-        like_msg = "Unlike"
-    except EntryLike.DoesNotExist:
-        like_msg = "Like"
-
-    try:
-        like_count = EntryLike.objects.filter(entry__id=entry_id).count()
-    except EntryLike.DoesNotExist:
-        like_count = 0
-
+    like_msg, like_count = process_like(entry["id"], request.user.id)
     item = {
-        'id': entry.id,
-        'title': entry.title,
-        'feed_id': entry.feed.id,
-        'feed_title': entry.feed.title,
-        'link': entry.link,
-        'available': 1 if entry.available_in_frame is None else entry.available_in_frame,
+        'id': entry["id"],
+        'title': entry["title"],
+        'feed_id': entry["feed__id"],
+        'feed_title': entry["feed__title"],
+        'link': entry["link"],
+        'available': 1 if entry["available_in_frame"] is None else entry["available_in_frame"],
         'like_msg': like_msg,
         'like_count': like_count,
-        'created_at': int(time.mktime(entry.created_at.timetuple())*1000),
-        'comments': get_latest_comments(entry.id)
+        'created_at': int(time.mktime(entry["created_at"].timetuple())*1000),
+        'comments': get_latest_comments(entry["id"]),
+        'inReadLater': True if ReadLater.objects.filter(user=request.user, entry__id=entry["id"]) else False
     }
+
     return HttpResponse(json.dumps(item), content_type='application/json')
 
 
 def feed_detail(request, feed_id):
     offset = request.GET.get("offset", 0)
     limit = request.GET.get("limit", 15)
-    entries = Entry.objects.filter(feed_id=feed_id)[offset:limit]
+
     try:
-        feed = entries[0].feed if entries else Feed.objects.get(id=feed_id)
+        feed_query = Feed.objects.get(id=feed_id)
     except Feed.DoesNotExist:
         return HttpResponse(json.dumps({}), content_type='application/json')
+
+    entries = Entry.objects.filter(feed_id=feed_id).values("id", "title", \
+        "link", "available_in_frame", "created_at")[offset:limit]
+
+    feed = Feed.objects.filter(id=feed_id).values("id", "title", \
+            "tagline", "link", "last_sync")[0]
     # FIXME: Move this blocks to model as a method
     result = {
         'feed': {
-            'id': feed.id,
-            'title': feed.title,
-            'tagline': feed.tagline,
-            'link': feed.link,
-            'is_subscribed': True if feed.users.filter(username=request.user.username) else False,
-            'subs_count': feed.users.count(),
-            'last_sync': int(time.mktime(feed.last_sync.timetuple())*1000),
+            'id': feed["id"],
+            'title': feed["title"],
+            'tagline': feed["tagline"],
+            'link': feed["link"],
+            'is_subscribed': True if feed_query.users.filter(username=request.user.username) else False,
+            'subs_count': feed_query.users.count(),
+            'last_sync': int(time.mktime(feed["last_sync"].timetuple())*1000),
         }
     }
     items = []
     for entry in entries:
-        try:
-            EntryLike.objects.get(entry__id=entry.id, user=request.user)
-            like_msg = "Unlike"
-        except EntryLike.DoesNotExist:
-            like_msg = "Like"
-
-        try:
-            like_count = EntryLike.objects.filter(entry__id=entry.id).count()
-        except EntryLike.DoesNotExist:
-            like_count = 0
+        like_msg, like_count = process_like(entry["id"], request.user.id)
 
         item = {
-            'id': entry.id,
-            'title': entry.title,
-            'link': entry.link,
-            'available': 1 if entry.available_in_frame is None else entry.available_in_frame,
+            'id': entry["id"],
+            'title': entry["title"],
+            'feed_id': feed["id"],
+            'feed_title': feed["title"],
+            'link': entry["link"],
+            'available': 1 if entry["available_in_frame"] is None else entry["available_in_frame"],
             'like_msg': like_msg,
             'like_count': like_count,
-            'created_at': int(time.mktime(entry.created_at.timetuple())*1000),
-            'comments': get_latest_comments(entry.id)
+            'created_at': int(time.mktime(entry["created_at"].timetuple())*1000),
+            'comments': get_latest_comments(entry["id"]),
+            'inReadLater': True if ReadLater.objects.filter(user=request.user, entry__id=entry["id"]) else False
         }
         items.append(item)
     result.update({"entries": items})
@@ -204,13 +203,13 @@ def feed_detail(request, feed_id):
 
 
 def subs_search(request, keyword):
-    feeds = Feed.objects.filter(title__icontains=keyword)
+    feeds = Feed.objects.filter(title__icontains=keyword).values("id", "value")
     results = []
     for feed in feeds:
-        tokens = feed.title.split(" ")
+        tokens = feed["title"].split(" ")
         results.append({
-            "id": feed.id,
-            "value": feed.title,
+            "id": feed["id"],
+            "value": feed["title"],
             "tokens": tokens
             }
         )
@@ -223,52 +222,55 @@ def reader(request, entry_id):
     previous = {}
     # Firstly, find feed id
     try:
-        entry = Entry.objects.get(id=entry_id)
+        entry = Entry.objects.filter(id=entry_id).values("id", "title", "link", "feed__title", \
+            "available_in_frame", "readlater", "feed__id")[0]
     except Entry.DoesNotExist:
         return HttpResponse(json.dumps({"code": 0, "msg": "Sorry, that page doesn't exist!"}),
             content_type='application/json')
 
     try:
-        EntryLike.objects.get(entry__id=entry.id, user=request.user)
+        EntryLike.objects.get(entry__id=entry["id"], user=request.user)
         liked = True
     except EntryLike.DoesNotExist:
         liked = False
 
-    feed_id = entry.feed.id
+    feed_id = entry["feed__id"]
     result = {
-        "title": entry.title,
-        "link": entry.link,
-        "id": entry.id,
-        "feed_title": entry.feed.title,
-        "available": 1 if entry.available_in_frame is None else entry.available_in_frame,
+        "title": entry["title"],
+        "link": entry["link"],
+        "id": entry["id"],
+        "feed_title": entry["feed__title"],
+        "available": 1 if entry["available_in_frame"] is None else entry["available_in_frame"],
         "liked": liked,
-        "inReadLater": True if entry.readlater_set.only() else False
+        "inReadLater": True if entry["readlater"] is not None else False
     }
 
     try:
-        next_item = Entry.objects.filter(feed=feed_id, id__gt=entry_id).order_by("id")[0]
+        next_item = Entry.objects.filter(feed=feed_id, \
+            id__gt=entry_id).order_by("id").values("link", "id", "title")[0]
         #n_available = next_item.available_in_frame
         #if n_available is None:
         #    n_available = 1
         next = {
             "feed_id": feed_id,
-            "link": next_item.link,
-            "id": next_item.id,
-            "title": next_item.title,
+            "link": next_item["link"],
+            "id": next_item["id"],
+            "title": next_item["title"],
         #    "available": n_available
         }
     except IndexError:
         pass
     try:
-        previous_item = Entry.objects.filter(feed=feed_id, id__lt=entry_id)[0]
+        previous_item = Entry.objects.filter(feed=feed_id, \
+            id__lt=entry_id).values("link", "id", "title")[0]
         #p_available = previous_item.available_in_frame
         #if p_available is None:
         #    p_available = 1
         previous = {
             "feed_id": feed_id,
-            "link": previous_item.link,
-            "id": previous_item.id,
-            "title": previous_item.title,
+            "link": previous_item["link"],
+            "id": previous_item["id"],
+            "title": previous_item["title"],
         #    "available": p_available
         }
     except IndexError:
@@ -353,31 +355,36 @@ def subscribe(request):
 def subscriptions(request):
     offset = request.GET.get("offset", 0)
     limit = request.GET.get("limit", 10)
-    subscriptions = Feed.objects.filter(~Q(last_sync=None), users=request.user).order_by("-entries_last_month")[offset:limit]
+    subscriptions = Feed.objects.filter(~Q(last_sync=None), \
+        users=request.user).order_by("-entries_last_month").values("id", \
+        "title", "tagline", "subtitle", "link")[offset:limit]
     results = []
     for subscription in subscriptions:
         item = {
-            "id": subscription.id,
-            "title": subscription.title,
-            "summary": subscription.tagline if subscription.tagline is not None else subscription.subtitle,
-            'link': subscription.link
+            "id": subscription["id"],
+            "title": subscription["title"],
+            "summary": subscription["tagline"] if subscription["tagline"] \
+                is not None else subscription["subtitle"],
+            'link': subscription["link"]
         }
         results.append(item)
     return HttpResponse(json.dumps(results), content_type="application/json")
+
 
 @login_required
 def entries_by_feed(request, feed_id):
     offset = request.GET.get("offset", 0)
     limit = request.GET.get("limit", 10)
     results = []
-    entries = Entry.objects.filter(feed=feed_id)[offset:limit]
+    entries = Entry.objects.filter(feed=feed_id).values("id", "title")[offset:limit]
     for entry in entries:
         item = {
-            "id": entry.id,
-            "title": entry.title,
+            "id": entry["id"],
+            "title": entry["title"],
         }
         results.append(item)
     return HttpResponse(json.dumps(results), content_type="application/json")
+
 
 @ajax_required
 @login_required
@@ -441,6 +448,7 @@ def post_comment(request):
 
     return HttpResponse(json.dumps(result), content_type="application/json")
 
+
 @ajax_required
 @login_required
 def update_comment(request):
@@ -463,6 +471,7 @@ def delete_comment(request, comment_id):
     return HttpResponse(json.dumps({"code": 1, "msg": "Comment has been deleted successfully."}), content_type="application/json")
 
 
+
 @ajax_required
 @login_required
 def fetch_comments(request, entry_id):
@@ -477,6 +486,7 @@ def fetch_comments(request, entry_id):
         }
         results.append(item)
     return HttpResponse(json.dumps({"results": results, "count": 0}), content_type="application/json")
+
 
 @ajax_required
 @login_required
@@ -500,17 +510,7 @@ def interactions(request):
     for entry in entries:
         if entry["id"] in tmp:
             continue
-        try:
-            EntryLike.objects.get(entry__id=entry["id"], user=request.user)
-            like_msg = "Unlike"
-        except EntryLike.DoesNotExist:
-            like_msg = "Like"
-
-        try:
-            like_count = EntryLike.objects.filter(entry__id=entry["id"]).count()
-        except EntryLike.DoesNotExist:
-            like_count = 0
-
+        like_msg, like_count = process_like(entry["id"], request.user.id)
         item = {
             'id': entry["id"],
             'title': entry["title"],
@@ -569,17 +569,7 @@ def readlater_list(request):
     )[offset:limit]
 
     for entry in entries:
-        try:
-            EntryLike.objects.get(entry__id=entry["entry__id"], user=request.user)
-            like_msg = "Unlike"
-        except EntryLike.DoesNotExist:
-            like_msg = "Like"
-
-        try:
-            like_count = EntryLike.objects.filter(entry__id=entry["entry__id"]).count()
-        except EntryLike.DoesNotExist:
-            like_count = 0
-
+        like_msg, like_count = process_like(entry["id"], request.user.id)
         item = {
             'id': entry["entry__id"],
             'title': entry["entry__title"],
@@ -680,6 +670,7 @@ def delete_list(request, list_id):
     list_item.delete()
     return HttpResponse(json.dumps({"code": 1, "msg": "Successfully deleted."}),
             content_type="application/json")
+
 
 @ajax_required
 @login_required
