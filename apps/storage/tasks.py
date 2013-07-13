@@ -5,6 +5,7 @@ from utils import log as logging
 from utils.feed_fetcher import DriveSync
 from django.conf import settings
 from apps.storage.models import Feed
+from django.db.models import Q
 from django.template.loader import render_to_string
 
 # For doing realtime stuff
@@ -36,11 +37,13 @@ class TaskFeed(Task):
             except Feed.DoesNotExist:
                 r.zrem("scheduled_updates", feed_id)
 
+
 class SyncFeed(Task):
     name = 'sync-feed'
 
     def run(self, feed, **kwargs):
         DriveSync(feed)
+
 
 class UnattendedFeedsSync(Task):
     name = 'unattended-feeds-sync'
@@ -48,10 +51,6 @@ class UnattendedFeedsSync(Task):
     def run(self, **kwargs):
         r = redis.Redis(connection_pool=settings.REDIS_FEED_POOL)
         scheduled_feed_ids = r.zrange("scheduled_updates", 0, -1)
-        unattended_feeds = []
-        for feed in Feed.objects.filter(is_active=True):
-            if not str(feed.id) in scheduled_feed_ids:
-                unattended_feeds.append(feed)
-        for feed in unattended_feeds:
+        feeds = Feed.objects.filter(~Q(id__in=scheduled_feed_ids), is_active=True)
+        for feed in feeds:
             SyncFeed.apply_async((feed,))
-
