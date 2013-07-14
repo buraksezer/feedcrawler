@@ -71,9 +71,10 @@ class ProcessEntry(object):
             announce_client.broadcast_group(self.feed.id, 'new_entry',
                 data = {
                     'id': entry_item.id,
+                    'slug': entry_item.slug,
                     'title': entry_item.title,
                     'feed_id': entry_item.feed.id,
-                    'feed_title': self.feed.title,
+                    'feed_slug': self.feed.slug,
                     'link': entry_item.link,
                     'available': 1 if entry_item.available_in_frame is None else entry_item.available_in_frame,
                     'created_at': int(time.mktime(entry_item.created_at.timetuple())*1000),
