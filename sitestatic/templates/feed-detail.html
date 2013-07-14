@@ -52,14 +52,14 @@
                     </a>
                 </li>
                 <li>
-                    <a href="/reader/{{ entry.id }}" target="_blank">
+                    <a href="/reader/{{ entry.slug }}" target="_blank">
                         <i data-toggle="tooltip" title="Open new tab" class="icon-share"></i>
                     </a>
                 </li>
             </ul>
 
             <div class="entry-content">
-                <a ng-show="entry.available == 1" ng-click="renderToReader(entry.id)" class="entry-title" href="/reader/{{entry.id}}" prevent-default>
+                <a ng-show="entry.available == 1" ng-click="renderToReader(entry.slug)" class="entry-title" href="/reader/{{entry.slug}}" prevent-default>
                     {{ entry.title }}
                 </a>
                 <a ng-show="entry.available != 1" class="entry-title" href="#" clickjacking-warn>

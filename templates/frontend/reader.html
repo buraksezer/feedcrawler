@@ -12,7 +12,7 @@
     <div ng-controller="ReaderNavbarCtrl" class="header">
         <div class="container">
             <section class="brand">
-                <a  ng-click="goToHome()" class="brand transition" href="{% url 'home' %}" prevent-default>
+                <a  ng-click="goToHome()" class="brand transition" href="/" prevent-default>
                     <i>Chap<strong>Stream</strong><small> &alpha;</small></i>
                 </a>
             </section>
@@ -50,7 +50,7 @@
             <!-- Middle section of the navbar -->
             <ul class="navigation">
                 <li ng-show="!empty(entry.previous)" class="hint--bottom" data-hint="Previous: {{ entry.previous.title }}">
-                    <a href="/reader/{{ entry.previous.id }}">
+                    <a href="/reader/{{ entry.previous.slug }}">
                         <i class="icon-arrow-left"></i>
                     </a>
                 </li>
@@ -72,14 +72,14 @@
                         </section>
                         <div when-scrolled="loadEntries(entry.feed_id)" class="entries">
                             <div class="entry" ng-repeat="item in other_entries | filter:keyword">
-                                <a href="/reader/{{item.id}}">{{ item.title }}</a>
+                                <a href="/reader/{{item.slug}}">{{ item.title }}</a>
                             </div>
                         </div>
                     </div>
                 </li>
 
                 <li ng-show="!empty(entry.next)" class="hint--bottom" data-hint="Next: {{ entry.next.title }}">
-                    <a href="/reader/{{ entry.next.id }}">
+                    <a href="/reader/{{ entry.next.slug }}">
                         <i class="icon-arrow-right"></i>
                     </a>
                 </li>

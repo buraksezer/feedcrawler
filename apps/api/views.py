@@ -46,8 +46,8 @@ def get_user_profile(username):
 def get_user_timeline(user_id, feed_ids=[], offset=0, limit=15):
     if not feed_ids:
         feed_ids = [feed_id[0] for feed_id in Feed.objects.filter(users=user_id).values_list("id")]
-    return Entry.objects.filter(feed_id__in=feed_ids).values("id", "title", "feed__id", \
-        "feed__title", "link", "available_in_frame", "created_at")[offset:limit]
+    return Entry.objects.filter(feed_id__in=feed_ids).values("id", "title", "feed__slug", \
+        "feed__title", "link", "available_in_frame", "created_at", "slug")[offset:limit]
 
 
 def get_latest_comments(entry_id, offset=0, limit=2):
@@ -92,12 +92,13 @@ def timeline(request, feed_ids=[]):
         item = {
             'id': entry["id"],
             'title': entry["title"],
-            'feed_id': entry["feed__id"],
+            'feed_slug': entry["feed__slug"],
             'feed_title': entry["feed__title"],
             'link': entry["link"],
             'available': 1 if entry["available_in_frame"] is None else entry["available_in_frame"],
             'like_msg': like_msg,
             'like_count': like_count,
+            'slug': entry["slug"],
             'created_at': int(time.mktime(entry["created_at"].timetuple())*1000),
             'comments': get_latest_comments(entry["id"]),
             'inReadLater': True if ReadLater.objects.filter(user=request.user, entry__id=entry["id"]) else False
@@ -130,8 +131,8 @@ def prepare_list(request, list_slug):
 @login_required
 def single_entry(request, entry_id):
     try:
-        entry = Entry.objects.filter(id=entry_id).values("id", "title", "feed__id", \
-            "feed__title", "link", "available_in_frame", "created_at")
+        entry = Entry.objects.filter(id=entry_id).values("id", "title", "feed__slug", \
+            "feed__title", "link", "available_in_frame", "created_at", "slug")
         entry = entry[0]
     except Entry.DoesNotExist:
         return HttpResponse(json.dumps({'code': 0, 'msg': 'The entry could not be found.'}),
@@ -139,8 +140,9 @@ def single_entry(request, entry_id):
     like_msg, like_count = process_like(entry["id"], request.user.id)
     item = {
         'id': entry["id"],
+        'slug': entry["slug"],
         'title': entry["title"],
-        'feed_id': entry["feed__id"],
+        'feed_slug': entry["feed__slug"],
         'feed_title': entry["feed__title"],
         'link': entry["link"],
         'available': 1 if entry["available_in_frame"] is None else entry["available_in_frame"],
@@ -154,19 +156,19 @@ def single_entry(request, entry_id):
     return HttpResponse(json.dumps(item), content_type='application/json')
 
 
-def feed_detail(request, feed_id):
+def feed_detail(request, slug):
     offset = request.GET.get("offset", 0)
     limit = request.GET.get("limit", 15)
 
     try:
-        feed_query = Feed.objects.get(id=feed_id)
+        feed_query = Feed.objects.get(slug=slug)
     except Feed.DoesNotExist:
         return HttpResponse(json.dumps({}), content_type='application/json')
 
-    entries = Entry.objects.filter(feed_id=feed_id).values("id", "title", \
-        "link", "available_in_frame", "created_at")[offset:limit]
+    entries = Entry.objects.filter(feed__slug=slug).values("id", "title", \
+        "link", "available_in_frame", "created_at", "slug")[offset:limit]
 
-    feed = Feed.objects.filter(id=feed_id).values("id", "title", \
+    feed = Feed.objects.filter(slug=slug).values("id", "title", \
             "tagline", "link", "last_sync")[0]
     # FIXME: Move this blocks to model as a method
     result = {
@@ -187,6 +189,7 @@ def feed_detail(request, feed_id):
         item = {
             'id': entry["id"],
             'title': entry["title"],
+            'slug': entry["slug"],
             'feed_id': feed["id"],
             'feed_title': feed["title"],
             'link': entry["link"],
@@ -203,12 +206,12 @@ def feed_detail(request, feed_id):
 
 
 def subs_search(request, keyword):
-    feeds = Feed.objects.filter(title__icontains=keyword).values("id", "value")
+    feeds = Feed.objects.filter(title__icontains=keyword).values("slug", "title")
     results = []
     for feed in feeds:
         tokens = feed["title"].split(" ")
         results.append({
-            "id": feed["id"],
+            "slug": feed["slug"],
             "value": feed["title"],
             "tokens": tokens
             }
@@ -217,12 +220,13 @@ def subs_search(request, keyword):
 
 
 @ajax_required
-def reader(request, entry_id):
+def reader(request, slug):
+    print slug
     next = {}
     previous = {}
     # Firstly, find feed id
     try:
-        entry = Entry.objects.filter(id=entry_id).values("id", "title", "link", "feed__title", \
+        entry = Entry.objects.filter(slug=slug).values("id", "title", "link", "feed__title", \
             "available_in_frame", "readlater", "feed__id")[0]
     except Entry.DoesNotExist:
         return HttpResponse(json.dumps({"code": 0, "msg": "Sorry, that page doesn't exist!"}),
@@ -247,14 +251,14 @@ def reader(request, entry_id):
 
     try:
         next_item = Entry.objects.filter(feed=feed_id, \
-            id__gt=entry_id).order_by("id").values("link", "id", "title")[0]
+            id__gt=entry["id"]).order_by("id").values("link", "slug", "title")[0]
         #n_available = next_item.available_in_frame
         #if n_available is None:
         #    n_available = 1
         next = {
             "feed_id": feed_id,
             "link": next_item["link"],
-            "id": next_item["id"],
+            "slug": next_item["slug"],
             "title": next_item["title"],
         #    "available": n_available
         }
@@ -262,14 +266,14 @@ def reader(request, entry_id):
         pass
     try:
         previous_item = Entry.objects.filter(feed=feed_id, \
-            id__lt=entry_id).values("link", "id", "title")[0]
+            id__lt=entry["id"]).values("link", "slug", "title")[0]
         #p_available = previous_item.available_in_frame
         #if p_available is None:
         #    p_available = 1
         previous = {
             "feed_id": feed_id,
             "link": previous_item["link"],
-            "id": previous_item["id"],
+            "slug": previous_item["slug"],
             "title": previous_item["title"],
         #    "available": p_available
         }
@@ -357,11 +361,11 @@ def subscriptions(request):
     limit = request.GET.get("limit", 10)
     subscriptions = Feed.objects.filter(~Q(last_sync=None), \
         users=request.user).order_by("-entries_last_month").values("id", \
-        "title", "tagline", "subtitle", "link")[offset:limit]
+        "title", "tagline", "subtitle", "link", "slug")[offset:limit]
     results = []
     for subscription in subscriptions:
         item = {
-            "id": subscription["id"],
+            "slug": subscription["slug"],
             "title": subscription["title"],
             "summary": subscription["tagline"] if subscription["tagline"] \
                 is not None else subscription["subtitle"],
@@ -376,10 +380,10 @@ def entries_by_feed(request, feed_id):
     offset = request.GET.get("offset", 0)
     limit = request.GET.get("limit", 10)
     results = []
-    entries = Entry.objects.filter(feed=feed_id).values("id", "title")[offset:limit]
+    entries = Entry.objects.filter(feed=feed_id).values("slug", "title")[offset:limit]
     for entry in entries:
         item = {
-            "id": entry["id"],
+            "slug": entry["slug"],
             "title": entry["title"],
         }
         results.append(item)
@@ -498,9 +502,10 @@ def interactions(request):
         Q(interaction__entrylike__user=user_id)).values(
         "id",
         "title",
-        "feed__id",
         "feed__title",
+        "feed__slug",
         "link",
+        "slug",
         "available_in_frame",
         "created_at",
         ).order_by("-last_interaction").distinct()[offset:limit]
@@ -514,8 +519,9 @@ def interactions(request):
         item = {
             'id': entry["id"],
             'title': entry["title"],
-            'feed_id': entry["feed__id"],
+            'feed_slug': entry["feed__slug"],
             'feed_title': entry["feed__title"],
+            'slug': entry["slug"],
             'link': entry["link"],
             'available': 1 if entry["available_in_frame"] is None else entry["available_in_frame"],
             'like_msg': like_msg,
@@ -564,16 +570,18 @@ def readlater_list(request):
         "entry__id",
         "entry__available_in_frame",
         "entry__created_at",
-        "entry__feed__id",
+        "entry__feed__slug",
         "entry__feed__title",
+        "entry__slug"
     )[offset:limit]
 
     for entry in entries:
-        like_msg, like_count = process_like(entry["id"], request.user.id)
+        like_msg, like_count = process_like(entry["entry__id"], request.user.id)
         item = {
             'id': entry["entry__id"],
+            'slug': entry["entry__slug"],
             'title': entry["entry__title"],
-            'feed_id': entry["entry__feed__id"],
+            'feed_slug': entry["entry__feed__slug"],
             'feed_title': entry["entry__feed__title"],
             'link': entry["entry__link"],
             'available': 1 if entry["entry__available_in_frame"] is None else entry["entry__available_in_frame"],

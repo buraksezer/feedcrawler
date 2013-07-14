@@ -6,7 +6,7 @@ $(document).ready(function(){
             engine: Hogan
         }]
     ).on('typeahead:selected', function($e, data) {
-        window.location.href = "/feed/"+data.id;
+        window.location.href = "/feed/"+data.slug;
         // FIXME: Prevent sending a request again to subs-search
     });
 

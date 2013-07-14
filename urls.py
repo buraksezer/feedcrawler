@@ -11,21 +11,21 @@ urlpatterns = patterns('',
     url(r'^user/', include('userena.urls')),
 
     # Dummy URLs
-    url(r'^feed/(?P<feed_id>[\w-]+)/$', 'apps.frontend.views.feed_detail', name='feed_detail'),
+    url(r'^feed/(?P<slug>[-A-Za-z0-9_]+)/$', 'apps.frontend.views.feed_detail', name='feed_detail'),
     url(r'^subscriptions/', 'apps.frontend.views.subscriptions', name='subscriptions'),
     url(r'^interactions/', 'apps.frontend.views.interactions', name='interactions'),
     url(r'^readlater/', 'apps.frontend.views.readlater', name='readlater'),
-    url(r'^reader/(?P<entry_id>[\w-]+)/$', 'apps.frontend.views.reader', name='reader'),
+    url(r'^reader/(?P<slug>[-A-Za-z0-9_]+)/$', 'apps.frontend.views.reader', name='reader'),
     url(r'^entry/(?P<entry_id>[\w-]+)/$', 'apps.frontend.views.entry', name='entry'),
-    url(r'^list/(?P<list_slug>\w+)', 'apps.frontend.views.list', name='list'),
+    url(r'^list/(?P<list_slug>[-A-Za-z0-9_]+)/$', 'apps.frontend.views.list', name='list'),
 
 
     # API requests
-    url(r'^api/reader/(?P<entry_id>[\w-]+)/$', 'apps.api.views.reader'),
+    url(r'^api/reader/(?P<slug>[-A-Za-z0-9_]+)/$', 'apps.api.views.reader'),
     url(r'^api/subs-search/(?P<keyword>[\w-]+)/$', 'apps.api.views.subs_search'),
     url(r'^api/user_profile/', 'apps.api.views.user_profile'),
     url(r'^api/timeline/', 'apps.api.views.timeline'),
-    url(r'^api/feed_detail/(?P<feed_id>[\w-]+)/$', 'apps.api.views.feed_detail'),
+    url(r'^api/feed_detail/(?P<slug>[-A-Za-z0-9_]+)/$', 'apps.api.views.feed_detail'),
     url(r'^api/subscribe_by_id/(?P<feed_id>[\w-]+)/$', 'apps.api.views.subscribe_by_id', name='subscribe_by_id'),
     url(r'^api/unsubscribe/(?P<feed_id>[\w-]+)/$', 'apps.api.views.unsubscribe', name='unsubscribe'),
     url(r'^api/subscribe$', 'apps.api.views.subscribe'),
@@ -46,8 +46,8 @@ urlpatterns = patterns('',
     url(r'^api/delete_from_list/(?P<list_id>[\w-]+)/(?P<feed_id>[\w-]+)/$', 'apps.api.views.delete_from_list'),
     url(r'^api/delete_list/(?P<list_id>[\w-]+)/$', 'apps.api.views.delete_list'),
     url(r'^api/create_list/', 'apps.api.views.create_list'),
-    url(r'^api/list/(?P<list_slug>[\w-]+)/$', 'apps.api.views._list'),
-    url(r'^api/prepare_list/(?P<list_slug>[\w-]+)/$', 'apps.api.views.prepare_list'),
+    url(r'^api/list/(?P<list_slug>[-A-Za-z0-9_]+)/$', 'apps.api.views._list'),
+    url(r'^api/prepare_list/(?P<list_slug>[-A-Za-z0-9_]+)/$', 'apps.api.views.prepare_list'),
 
     # This is required for pubsubhubbub
     #url(r'^subscriber/', include('django_push.subscriber.urls')),

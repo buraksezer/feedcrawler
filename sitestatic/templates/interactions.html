@@ -6,7 +6,7 @@
     <a href="#" ng-show="newEntryCount > 1">{{ newEntryCount }} new interactions</a>
 </div>
 <div infinite-scroll='loadInteractions()' infinite-scroll-disabled='busy' class="dashboard-entries">
-        <div ng-hide="entry.instantEntry == true" ng-mouseenter="myClass='show'" ng-mouseleave="myClass=''" id="entry-{{ entry.id }}" class="dashboard-entry" ng-repeat="entry in interactions.entries">
+        <div ng-hide="entry.instantEntry == true" ng-mouseenter="myClass='show'" ng-mouseleave="myClass=''" id="entry-{{ entry.slug }}" class="dashboard-entry" ng-repeat="entry in interactions.entries">
             <ul ng-class="myClass" class="entry-topbar">
                 <li>
                     <a ng-show="!entry.inReadLater" data-hint="Read later" class="hint--top read-later" href="#" read-later>
@@ -22,21 +22,21 @@
                     </a>
                 </li>
                 <li>
-                    <a href="/reader/{{ entry.id }}" target="_blank">
+                    <a href="/reader/{{ entry.slug }}" target="_blank">
                         <i data-toggle="tooltip" title="Open new tab" class="icon-share"></i>
                     </a>
                 </li>
             </ul>
 
             <div class="entry-content">
-                <a ng-show="entry.available == 1" ng-click="renderToReader(entry.id)" class="entry-title" href="/reader/{{entry.id}}" prevent-default>
+                <a ng-show="entry.available == 1" ng-click="renderToReader(entry.slug)" class="entry-title" href="/reader/{{entry.slug}}" prevent-default>
                     {{ entry.title }}
                 </a>
                 <a ng-show="entry.available != 1" class="entry-title" href="#" clickjacking-warn>
                     {{ entry.title }}
                 </a>
                 <br>
-                <a class="feed" href="/feed/{{ entry.feed_id }}">{{ entry.feed_title }}</a>
+                <a class="feed" href="/feed/{{ entry.feed_slug }}">{{ entry.feed_title }}</a>
                 <div class="timeline-entry-interaction">
                     <a href="/entry/{{entry.id}}">
                         <span calc-from-now ts="{{ entry.created_at }}">{{ calcTime }}</span>
