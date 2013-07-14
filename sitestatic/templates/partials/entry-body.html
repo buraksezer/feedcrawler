@@ -1,0 +1,27 @@
+            <div class="entry-content">
+                <a ng-show="entry.available == 1" ng-click="renderToReader(entry.slug)" class="entry-title" href="/reader/{{entry.slug}}" prevent-default>
+                    {{ entry.title }}
+                </a>
+                <a ng-show="entry.available != 1" class="entry-title" href="#" clickjacking-warn>
+                    {{ entry.title }}
+                </a>
+                <br>
+                <a class="feed" href="/feed/{{ entry.feed_slug }}">{{ entry.feed_title }}</a>
+                <div class="timeline-entry-interaction">
+                    <span ng-switch on="singleEntry">
+                        <a ng-switch-when="undefined" href="/entry/{{ entry.id }}">
+                            <span calc-from-now ts="{{ entry.created_at }}">{{ calcTime }}</span>
+                        </a>
+                        <span ng-switch-when="true" calc-from-now ts="{{ entry.created_at }}">{{ calcTime }}</span>
+                    </span>
+                    <span>&sdot;</span>
+                    <a href="#" class="like transition" entry-like>{{ entry.like_msg }}</a>
+                    <span>&sdot;</span>
+                    <a href="#" class="comment transition" comment-box>Comment</a>
+                    <span>&sdot;</span>
+                    <a href="#" class="share transition" share-box>Share</a>
+                    <span ng-show="entry.like_count > 0">&sdot;</span>
+                    <span ng-show="entry.like_count == 1">{{ entry.like_count }} like</span>
+                    <span ng-show="entry.like_count > 1">{{ entry.like_count }} likes</span>
+                </div>
+            </div>

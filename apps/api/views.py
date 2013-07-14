@@ -50,11 +50,17 @@ def get_user_timeline(user_id, feed_ids=[], offset=0, limit=15):
         "feed__title", "link", "available_in_frame", "created_at", "slug")[offset:limit]
 
 
-def get_latest_comments(entry_id, offset=0, limit=2):
+def get_latest_comments(entry_id, offset=0, limit=2, whole=False):
     results = []
-    comments = Comment.objects.filter(entry_id=entry_id).values('id', \
-        'content', 'created_at', 'user__username')[offset:limit]
-    comment_count = Comment.objects.filter(entry_id=entry_id).count() - 2
+    if not whole:
+        comments = Comment.objects.filter(entry_id=entry_id).values('id', \
+            'content', 'created_at', 'user__username')[offset:limit]
+        surplus = Comment.objects.filter(entry_id=entry_id).count() - 2
+    else:
+        comments = Comment.objects.filter(entry_id=entry_id).values('id', \
+            'content', 'created_at', 'user__username')
+        surplus = 0
+
     for comment in sorted(comments, key=lambda comment: comment["id"]):
         item = {
             "id": comment["id"],
@@ -63,7 +69,7 @@ def get_latest_comments(entry_id, offset=0, limit=2):
             "author": comment['user__username']
         }
         results.append(item)
-    return {"results": results, "count": comment_count}
+    return {"results": results, "surplus_count": surplus}
 
 
 @ajax_required
@@ -132,9 +138,8 @@ def prepare_list(request, list_slug):
 def single_entry(request, entry_id):
     try:
         entry = Entry.objects.filter(id=entry_id).values("id", "title", "feed__slug", \
-            "feed__title", "link", "available_in_frame", "created_at", "slug")
-        entry = entry[0]
-    except Entry.DoesNotExist:
+            "feed__title", "link", "available_in_frame", "created_at", "slug")[0]
+    except (Entry.DoesNotExist, IndexError):
         return HttpResponse(json.dumps({'code': 0, 'msg': 'The entry could not be found.'}),
             content_type='application/json')
     like_msg, like_count = process_like(entry["id"], request.user.id)
@@ -149,7 +154,7 @@ def single_entry(request, entry_id):
         'like_msg': like_msg,
         'like_count': like_count,
         'created_at': int(time.mktime(entry["created_at"].timetuple())*1000),
-        'comments': get_latest_comments(entry["id"]),
+        'comments': get_latest_comments(entry["id"], whole=True),
         'inReadLater': True if ReadLater.objects.filter(user=request.user, entry__id=entry["id"]) else False
     }
 
@@ -221,14 +226,13 @@ def subs_search(request, keyword):
 
 @ajax_required
 def reader(request, slug):
-    print slug
     next = {}
     previous = {}
     # Firstly, find feed id
     try:
         entry = Entry.objects.filter(slug=slug).values("id", "title", "link", "feed__title", \
             "available_in_frame", "readlater", "feed__id")[0]
-    except Entry.DoesNotExist:
+    except (Entry.DoesNotExist, IndexError):
         return HttpResponse(json.dumps({"code": 0, "msg": "Sorry, that page doesn't exist!"}),
             content_type='application/json')
 

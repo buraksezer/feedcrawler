@@ -1,5 +1,5 @@
-<div ng-hide="!notFound" class="not-found">
-    <i class="icon-meh"></i>
+<div ng-hide="!notFound" class="dashboard-404">
+    <i class="icon-frown"></i>
     <p>The entry could not be found.</p>
 </div>
 
@@ -7,108 +7,5 @@
     <p>Please wait...</p>
     <img src="/static/img/ajax-loader.gif"/>
 </div>
-
-<div ng-show="entry" class="dashboard-entries">
-        <div ng-hide="entry.instantEntry == true" ng-mouseenter="myClass='show'" ng-mouseleave="myClass=''" class="dashboard-entry">
-            <ul ng-class="myClass" class="entry-topbar">
-                <li>
-                    <a ng-show="!entry.inReadLater" data-hint="Read later" class="hint--top read-later" href="#" read-later>
-                        <i class="icon-time"></i>
-                    </a>
-                    <a ng-show="entry.inReadLater" data-hint="Remove from the read later list" class="hint--top read-later" href="#" read-later>
-                        <i class="icon-eraser"></i>
-                    </a>
-                </li>
-                <li>
-                    <a data-hint="Original Link" class="hint--top" href="{{ entry.link }}" target="_blank">
-                        <i class="icon-share-alt"></i>
-                    </a>
-                </li>
-                <li>
-                    <a data-hint="Open new tab" class="hint--top" href="/reader/{{ entry.slug }}" target="_blank">
-                        <i class="icon-share"></i>
-                    </a>
-                </li>
-            </ul>
-
-            <div class="entry-content">
-                <a ng-show="entry.available == 1" ng-click="renderToReader(entry.slug)" class="entry-title" href="/reader/{{entry.slug}}" prevent-default>
-                    {{ entry.title }}
-                </a>
-                <a ng-show="entry.available != 1" class="entry-title" href="#" clickjacking-warn>
-                    {{ entry.title }}
-                </a>
-                <br>
-                <a class="feed" href="/feed/{{ entry.feed_slug }}">{{ entry.feed_title }}</a>
-                <div class="timeline-entry-interaction">
-                    <span calc-from-now ts="{{ entry.created_at }}">{{ calcTime }}</span>
-                    <span>&sdot;</span>
-                    <a href="#" class="like transition" entry-like>{{ entry.like_msg }}</a>
-                    <span>&sdot;</span>
-                    <a href="#" class="comment transition" comment-box>Comment</a>
-                    <span>&sdot;</span>
-                    <a href="#" class="share transition" share-box>Share</a>
-                    <span ng-show="entry.like_count > 0">&sdot;</span>
-                    <span ng-show="entry.like_count == 1">{{ entry.like_count }} like</span>
-                    <span ng-show="entry.like_count > 1">{{ entry.like_count }} likes</span>
-                </div>
-            </div>
-            <div class="share-box">
-                <p>Share this entry on a social network:</p>
-                <i class="icon-twitter"> Twitter</i>
-                <i class="icon-facebook-sign"> Facebook</i>
-                <i class="icon-google-plus-sign"> Google+</i>
-                <br/><span>Direct Link:</span><br/>
-                <input type="text" value="{{ entry.id }}"/>
-            </div>
-            <div class="clickjacking-warn">
-                <span>Unfortunately, viewing in an external site is disabled by publisher.</span>
-                <a class="external-link" href="{{ entry.link }}" target="_blank">
-                        Open in a new tab.
-                </a>
-            </div>
-            <div class="comments-area">
-                <div class="load-more" ng-show="entry.comments.count > 0">
-                    <i class="icon-refresh"></i>
-                    <a href="#"  class="load-more" load-comments>
-                        View {{ entry.comments.count }} more comments
-                    </a>
-                </div>
-                <div class="comments" catch-new-comment id="comments_{{ entry.id }}">
-                    <div ng-hide="comment.instantComment" class="comment" ng-repeat="comment in entry.comments.results">
-                        <i class="icon-comment" title="{{ created_at }}"></i>
-                        <div ng-hide="commentEdit" class="content">
-                            <span ng-bind-html="comment.content"></span>
-                            <span> - </span>
-                            <a ng-show="username != comment.author" href="#">{{ comment.author }}</a>
-                            <span ng-show="username == comment.author">
-                                <span ng-show="!commentDelSure">
-                                    <a href="#">You</a> (<a href="#" c-id="{{ comment.id }}" c-index="{{ $index }}" edit-comment>edit</a> | <a href="#" delete-comment>delete</a>)
-                                </span>
-                                <span ng-show="commentDelSure">Are you sure? (<a href="#" c-index="{{ $index }}" c-id="{{ comment.id }}" sure-delete-comment>Yes</a> | <a href="#" cancel-delete-comment>No</a>)</span>
-                            <span> &sdot; </span>
-                            <span class="from-now" calc-from-now ts="{{ comment.created_at }}">{{ calcTime }}</span>
-                            <img ng-show="commentLoading" src="/static/img/realtime_spinner.gif"/>
-                        </div>
-                        <span ng-show="username == comment.author">
-                            <form ng-hide="!showCommentEditBox" class="edit-comment-form">
-                                <textarea ng-model="commentContent" class='comment textbox-transition' count-char></textarea>
-                                <button class="btn btn-small btn-primary" type="button" done-edit-comment c-index="{{ $index }}" c-id="{{ comment.id }}">Done</button>
-                                <a href="#" class="cancel" cancel-comment>Cancel</a>
-                                <span ng-class="{redfont: restCharCount == 0}" class="pull-right">{{ maxCharCount - commentContent.length }}</span>
-                                <img ng-show="postingComment" src="/static/img/realtime_spinner.gif"/>
-                            </form>
-                        </span>
-                    </div>
-                </div>
-                <form ng-show="showCommentBox" class="comment-form">
-                    <textarea ng-model="commentContent" class='comment textbox-transition' count-char></textarea>
-                    <button class="btn btn-small btn-primary" type="button" post-comment>Post</button>
-                    <a href="#" class="cancel" cancel-comment>Cancel</a>
-                    <span ng-class="{redfont: restCharCount == 0}" class="pull-right">{{ maxCharCount - commentContent.length }}</span>
-                    <img ng-show="postingComment" src="/static/img/realtime_spinner.gif"/>
-                </form>
-            </div>
-        </div>
-</div>
+<div ng-include="'/static/templates/partials/timeline-block.html'"></div>
 

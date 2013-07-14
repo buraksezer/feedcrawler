@@ -167,6 +167,10 @@ section.brand {
     color: #555555;
 }
 
+.entry-doesnot-exist i.icon-frown {
+    font-size: 100px;
+}
+
 .show-other-entries .submenu{
     left: -191px;
     width: 400px;

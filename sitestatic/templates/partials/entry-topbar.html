@@ -1,0 +1,20 @@
+            <ul ng-class="myClass" class="entry-topbar">
+                <li>
+                    <a ng-show="!entry.inReadLater" data-hint="Read later" class="hint--top read-later" href="#" read-later>
+                        <i class="icon-time"></i>
+                    </a>
+                    <a ng-show="entry.inReadLater" data-hint="Remove from the read later list" class="hint--top read-later" href="#" read-later>
+                        <i class="icon-eraser"></i>
+                    </a>
+                </li>
+                <li>
+                    <a data-hint="Original Link" class="hint--top" href="{{ entry.link }}" target="_blank">
+                        <i class="icon-share-alt"></i>
+                    </a>
+                </li>
+                <li>
+                    <a data-hint="Open new tab" class="hint--top" href="/reader/{{ entry.slug }}" target="_blank">
+                        <i class="icon-share"></i>
+                    </a>
+                </li>
+            </ul>

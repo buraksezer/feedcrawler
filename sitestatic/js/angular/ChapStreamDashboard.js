@@ -859,6 +859,7 @@ function EntryCtrl($scope, $http, $routeParams) {
             document.title = data.title+" | "+CsFrontend.Globals.SiteTitle;
             $scope.entry = data;
             $scope.showCommentBox = true;
+            $scope.singleEntry = true;
             $(".comments-area form.comment-form textarea").autosize();
         }
     });

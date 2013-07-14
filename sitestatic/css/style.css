@@ -501,10 +501,6 @@ label[for="id_feed_search"] {
     display: none;
 }
 
-.feed-404 {
-    text-align: center;
-}
-
 .feed-detail-header {
     background-color: rgb(240, 240, 240);
 }
@@ -792,13 +788,13 @@ textarea.comment {
 }
 
 .loading-entry,
-.not-found {
+.dashboard-404 {
     padding: 20px;
     font-size: 20px;
     text-align: center;
 }
 
-.not-found i {
+.dashboard-404 i {
     font-size: 50px;
 }
 
