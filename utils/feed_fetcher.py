@@ -74,6 +74,7 @@ class ProcessEntry(object):
                     'slug': entry_item.slug,
                     'title': entry_item.title,
                     'feed_id': entry_item.feed.id,
+                    'feed_title': self.feed.title,
                     'feed_slug': self.feed.slug,
                     'link': entry_item.link,
                     'available': 1 if entry_item.available_in_frame is None else entry_item.available_in_frame,
