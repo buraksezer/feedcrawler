@@ -228,30 +228,46 @@ def subs_search(request, keyword):
 def reader(request, slug):
     next = {}
     previous = {}
-    # Firstly, find feed id
     try:
         entry = Entry.objects.filter(slug=slug).values("id", "title", "link", "feed__title", \
-            "available_in_frame", "readlater", "feed__id")[0]
+            "available_in_frame", "feed__id")[0]
     except (Entry.DoesNotExist, IndexError):
         return HttpResponse(json.dumps({"code": 0, "msg": "Sorry, that page doesn't exist!"}),
             content_type='application/json')
 
-    try:
-        EntryLike.objects.get(entry__id=entry["id"], user=request.user)
-        liked = True
-    except EntryLike.DoesNotExist:
-        liked = False
-
     feed_id = entry["feed__id"]
-    result = {
-        "title": entry["title"],
-        "link": entry["link"],
-        "id": entry["id"],
-        "feed_title": entry["feed__title"],
-        "available": 1 if entry["available_in_frame"] is None else entry["available_in_frame"],
-        "liked": liked,
-        "inReadLater": True if entry["readlater"] is not None else False
-    }
+
+    if request.user.is_authenticated():
+        try:
+            EntryLike.objects.get(entry__id=entry["id"], user=request.user)
+            liked = True
+        except EntryLike.DoesNotExist:
+            liked = False
+
+        try:
+            ReadLater.objects.get(entry__id=entry["id"], user=request.user)
+            inReadLater = True
+        except ReadLater.DoesNotExist:
+            inReadLater = False
+
+        result = {
+            "title": entry["title"],
+            "link": entry["link"],
+            "id": entry["id"],
+            "feed_title": entry["feed__title"],
+            "available": 1 if entry["available_in_frame"] is None else entry["available_in_frame"],
+            "liked": liked,
+            "inReadLater": inReadLater
+        }
+
+    else:
+        result = {
+            "title": entry["title"],
+            "link": entry["link"],
+            "id": entry["id"],
+            "feed_title": entry["feed__title"],
+            "available": 1 if entry["available_in_frame"] is None else entry["available_in_frame"],
+        }
 
     try:
         next_item = Entry.objects.filter(feed=feed_id, \
@@ -378,8 +394,7 @@ def subscriptions(request):
         results.append(item)
     return HttpResponse(json.dumps(results), content_type="application/json")
 
-
-@login_required
+@ajax_required
 def entries_by_feed(request, feed_id):
     offset = request.GET.get("offset", 0)
     limit = request.GET.get("limit", 10)

@@ -22,14 +22,16 @@
     <!-- Base JS variables -->
     <script type="text/javascript" charset="utf-8">
         window.CsFrontend = {};
+        CsFrontend.Globals = {
+            'SiteTitle': "ChapStream",
+            'isAuthenticated': "{{ user.is_authenticated|yesno:"true,false" }}",
+        };
     </script>
 
     {% if user.is_authenticated %}
     <script type="text/javascript" charset="utf-8">
-        CsFrontend.Globals = {
-            'SiteTitle': "ChapStream",
-            'username': "{{ user.username }}"
-        };
+        CsFrontend.Globals
+        CsFrontend.Globals['username'] = "{{ user.username }}";
     </script>
     {% endif %}
 

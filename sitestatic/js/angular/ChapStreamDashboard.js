@@ -34,6 +34,7 @@ ChapStream.factory('InitService', function() {
 
 ChapStream.run(function($rootScope, InitService) {
     $rootScope.username = CsFrontend.Globals.username;
+    $rootScope.isAuthenticated = CsFrontend.Globals.isAuthenticated;
     InitService.realtime();
     $rootScope.renderToReader = function(id) {
         document.location.href = "/reader/"+id;
@@ -167,13 +168,10 @@ ChapStream.directive('entryLike', function($http) {
 ChapStream.directive('commentBox', function($http) {
     return function (scope, element, attrs) {
         $(element).click(function(event) {
-            var target = $(element).closest(".dashboard-entry").find(".comments-area textarea.comment")
+            target = $(element).closest(".dashboard-entry").find(".comment-form textarea.comment")
             target.autosize();
-            scope.$apply(function() {
-                scope.showCommentBox = true;
-            })
             target.focus();
-
+            $(element).closest(".dashboard-entry").find(".comment-form").css("display", "block");
         });
     }
 });
@@ -379,10 +377,9 @@ ChapStream.directive('cancelComment', function() {
             scope.showCommentEditBox = false;
             scope.commentEdit = false;
             // New comment related variables
-            scope.showCommentBox = false;
             scope.postingComment = false;
-
             scope.commentContent = "";
+            $(element).closest(".dashboard-entry").find(".comment-form").css("display", "none");
         });
     }
 });
@@ -858,9 +855,10 @@ function EntryCtrl($scope, $http, $routeParams) {
         } else {
             document.title = data.title+" | "+CsFrontend.Globals.SiteTitle;
             $scope.entry = data;
-            $scope.showCommentBox = true;
             $scope.singleEntry = true;
             $(".comments-area form.comment-form textarea").autosize();
+            $(".comments-area form.comment-form").css("display", "block");
+            console.log("bura");
         }
     });
 }

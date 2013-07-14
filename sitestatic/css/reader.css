@@ -115,7 +115,7 @@ a.brand:hover {
 
 section.brand {
     float: left;
-    width: 345px;
+    width: 326px;
     text-align: left;
 }
 
@@ -127,6 +127,7 @@ section.brand {
     width: 250px;
 }
 
+.navigation li,
 .menu li {
     display: inline;
     padding-left: 10px;
@@ -139,10 +140,6 @@ section.brand {
 .navigation {
     margin: 0;
     padding-top: 1.4px;
-}
-
-.navigation li {
-    display: inline;
 }
 
 .clickjacking-warn-reader,

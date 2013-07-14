@@ -16,37 +16,49 @@
                     <i>Chap<strong>Stream</strong><small> &alpha;</small></i>
                 </a>
             </section>
-            <!-- left side of the navbar -->
-            <ul class="menu">
-                <li ng-show="entry.liked" class="hint--bottom active" data-hint="You liked">
-                    <i class="cursor-pointer icon-thumbs-up" entry-like></i>
-                </li>
-                <li ng-show="!entry.liked" class="hint--bottom" data-hint="Like">
-                    <i class="cursor-pointer icon-thumbs-up" entry-like></i>
-                </li>
-                <li ng-show="!entry.inReadLater" class="hint--bottom" data-hint="Read later">
-                    <i class="cursor-pointer icon-time" read-later></i>
-                </li>
-                <li ng-show="entry.inReadLater" class="hint--bottom active" data-hint="Remove from the read later list">
-                    <i class="cursor-pointer icon-time" read-later></i>
-                </li>
-                <li class="hint--bottom" data-hint="Bookmark this">
-                    <i class="cursor-pointer icon-star"></i>
-                </li>
-                <li class="hint--bottom" data-hint="Comments">
-                    <i class="cursor-pointer icon-comment"></i>
-                </li>
-                <li class="dropdown">
-                    <i class="cursor-pointer dropdown-cog dropdown-menu icon-cog"></i>
-                    <div class="submenu">
-                        <ul class="root">
-                            <li>
-                                <a href="/user/signout">Sign out</a>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
-            </ul>
+            <span ng-switch on="isAuthenticated">
+                <span ng-switch-when="true">
+                    <!-- left side of the navbar -->
+                    <ul class="menu">
+                        <li ng-show="entry.liked" class="hint--bottom active" data-hint="You liked">
+                            <i class="cursor-pointer icon-thumbs-up" entry-like></i>
+                        </li>
+                        <li ng-show="!entry.liked" class="hint--bottom" data-hint="Like">
+                            <i class="cursor-pointer icon-thumbs-up" entry-like></i>
+                        </li>
+                        <li ng-show="!entry.inReadLater" class="hint--bottom" data-hint="Read later">
+                            <i class="cursor-pointer icon-time" read-later></i>
+                        </li>
+                        <li ng-show="entry.inReadLater" class="hint--bottom active" data-hint="Remove from the read later list">
+                            <i class="cursor-pointer icon-time" read-later></i>
+                        </li>
+                        <li class="hint--bottom" data-hint="Bookmark this">
+                            <i class="cursor-pointer icon-star"></i>
+                        </li>
+                        <li class="hint--bottom" data-hint="Comments">
+                            <i class="cursor-pointer icon-comment"></i>
+                        </li>
+                        <li class="dropdown">
+                            <i class="cursor-pointer dropdown-cog dropdown-menu icon-cog"></i>
+                            <div class="submenu">
+                                <ul class="root">
+                                    <li>
+                                        <a href="/user/signout">Sign out</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                    </ul>
+                </span>
+            </span>
+            <span ng-hide="isAuthenticated">
+                <ul class="menu">
+                    <li class="hint--bottom" data-hint="Join ChapStream">
+                        <i class="cursor-pointer icon-user"></i>
+                    </li>
+                </ul>
+            </span>
+
             <!-- Middle section of the navbar -->
             <ul class="navigation">
                 <li ng-show="!empty(entry.previous)" class="hint--bottom" data-hint="Previous: {{ entry.previous.title }}">

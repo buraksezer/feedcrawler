@@ -20,7 +20,8 @@ $(document).ready(function() {
         return false
     });
 
-    $(document).on('.dropdown-entries .entry', 'click', function(event) {
+    $(document).on('click', '.dropdown-entries .entry', function(event) {
+        console.log("burak");
         $(".submenu").hide();
         $(".dropdown-menu").attr('id', '');
     });

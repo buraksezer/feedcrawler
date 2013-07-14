@@ -682,6 +682,7 @@ input.tt-hint {
 
 .comments-area form.comment-form {
     margin: 0 0 5px;
+    display: none;
 }
 
 textarea.comment {

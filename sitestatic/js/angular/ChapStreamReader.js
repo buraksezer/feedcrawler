@@ -20,6 +20,8 @@ ChapStreamReader.directive('preventDefault', function() {
 });
 
 ChapStreamReader.run(function($rootScope) {
+    $rootScope.username = CsFrontend.Globals.username;
+    $rootScope.isAuthenticated = CsFrontend.Globals.isAuthenticated;
     $rootScope.goToHome = function() {
         document.location.href = "/";
     }
@@ -112,6 +114,7 @@ function ReaderNavbarCtrl($scope, $http, $location) {
             if (typeof $scope.endOfData != 'undefined') return;
             if ($scope.busy) return;
             $scope.busy = true;
+            console.log(data);
             if (!data.length) {
                 $scope.endOfData = true;
                 $scope.busy = false;
