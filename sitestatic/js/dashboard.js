@@ -29,8 +29,5 @@ $(document).ready(function(){
         e.preventDefault();
         e.stopPropagation();
     }); */
-
-    // Initialize bootstrap tooltips
-    $("#header .link-signout i.signout-button").tooltip();
 });
 

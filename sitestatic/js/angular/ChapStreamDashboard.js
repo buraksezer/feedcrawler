@@ -411,16 +411,26 @@ ChapStream.directive('countChar', function($http) {
                 scope.restCharCount = scope.maxCharCount - scope.commentContent.length;
             }
         });
-    }
+    };
 });
 
-ChapStream.directive('calcFromNow', function() {
+ChapStream.directive('calcFromNow', function($timeout) {
     return function(scope, element, attrs) {
         attrs.$observe('ts', function(ts) {
-            scope.created_at = moment(parseInt(ts, 10)).format('MMMM Do YYYY, h:mm:ss a');
-            scope.calcTime = moment(parseInt(ts, 10)).fromNow();
+            function calcTime(timestamp) {
+                scope.safeApply(function() {
+                    scope.created_at = moment(parseInt(ts, 10)).format('MMMM Do YYYY, h:mm:ss a');
+                    scope.calcTime = moment(parseInt(ts, 10)).fromNow();
+                });
+            }
+            calcTime(ts);
+            $timeout(function calcTimeInterval(){
+                calcTime(ts);
+                $timeout(calcTimeInterval, 60000);
+            },60000);
+
         });
-    }
+    };
 });
 
 ChapStream.directive('readLater', function($rootScope, $http) {

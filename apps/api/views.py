@@ -431,7 +431,7 @@ def post_comment(request):
 
     # Result a json for presenting the new comment
     result = {
-        "epoch": int(time.mktime(comment.created_at.timetuple())*1000),
+        "created_at": int(time.mktime(comment.created_at.timetuple())*1000),
         "author": request.user.username,
         "id": comment.id,
         "content": request.POST.get("content").strip(),
