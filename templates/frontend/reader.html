@@ -71,25 +71,46 @@
                 </li>
 
                 <li class="show-other-entries dropdown">
-                    <i ng-click="loadEntries(entry.feed_id)" class="cursor-pointer dropdown-menu icon-list-alt"></i>
+                    <i ng-click="loadEntries()" class="cursor-pointer dropdown-menu icon-list-alt"></i>
                     <div class="dropdown-entries submenu">
-                        <section class="entries-header">
-                            <!-- <ul class="action">
-                                <li ng-repeat="section in sections" ng-class="{active : isSelected(section)}" ng-click="setMaster(section)">{{section.name}}</li>
-                            </ul>-->
-                            <img ng-show="showLoading" src="/static/img/realtime_spinner.gif"/>
-                            <p class="feed-title">{{ entry.feed_title }}</p>
-                            <input type="text" name="search" ng-model="keyword" placeholder="Give a keyword">
-                            <small>Press enter to search in the remote source otherwise searching will be local.</small>
-                        </section>
-                        <div when-scrolled="loadEntries(entry.feed_id)" class="entries">
-                            <div class="entry" ng-repeat="item in other_entries | filter:keyword">
-                                <a href="/reader/{{item.slug}}">{{ item.title }}</a>
+                        <span class="entries-navigation" entries-navigation>
+                            <span class="entries-navigation-item">
+                                <span> &sdot; </span><a id="entries" class="active-entries-nav" href="#" entries>Entries</a>
+                            </span>
+                            <span class="entries-navigation-item">
+                                <span> &sdot; </span><a id="subscriptions" href="#">Subscriptions</a>
+                            </span>
+                            <span class="entries-navigation-item">
+                                <span> &sdot; </span><a id="new-subscription" href="#">New Subscription</a>
+                            </span>
+                        </span>
+                        <div ng-show="showEntriesBlock == true" class="entries-block">
+                            <section class="entries-header">
+                                <img ng-show="showLoading" src="/static/img/realtime_spinner.gif"/>
+                                <p class="feed-title">{{ feedTitle }}</p>
+                                <input type="text" name="search" ng-model="keyword" placeholder="Give a keyword">
+                                <small>Press enter to search in the remote source otherwise searching will be local.</small>
+                            </section>
+                            <div when-scrolled="loadEntries()" class="entries">
+                                <div class="entry" ng-repeat="item in other_entries | filter:keyword">
+                                    <a href="/reader/{{item.slug}}">{{ item.title }}</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div ng-show="showSubscriptionBlock == true" class="subscription-block">
+                            <div class="subscriptions-header">
+                                <img ng-show="showLoading" src="/static/img/realtime_spinner.gif"/>
+                                <input type="text" name="subs-search" ng-model="subsKeyword" placeholder="Type something and wait" search-subscriptions>
+                                <small ng-show="nothingFound">Nothing found</small>
+                            </div>
+                            <div class="subscriptions">
+                                <div class="subscription" ng-repeat="subscription in subscriptions">
+                                    <a href="#" get-entries s-id="{{subscription.id}}">{{ subscription.title }}</a>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </li>
-
                 <li ng-show="!empty(entry.next)" class="hint--bottom" data-hint="Next: {{ entry.next.title }}">
                     <a href="/reader/{{ entry.next.slug }}">
                         <i class="icon-arrow-right"></i>

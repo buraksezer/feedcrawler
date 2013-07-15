@@ -858,7 +858,6 @@ function EntryCtrl($scope, $http, $routeParams) {
             $scope.singleEntry = true;
             $(".comments-area form.comment-form textarea").autosize();
             $(".comments-area form.comment-form").css("display", "block");
-            console.log("bura");
         }
     });
 }

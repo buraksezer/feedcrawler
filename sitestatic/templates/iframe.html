@@ -25,6 +25,8 @@
 $(document).ready(function() {
     $('iframe').iframeTracker({
         blurCallback: function(){
+            $(".subscriptions").getNiceScroll().hide();
+            $(".entries").getNiceScroll().hide();
             $(".submenu").hide();
             $(".dropdown-menu").attr('id', '');
         }

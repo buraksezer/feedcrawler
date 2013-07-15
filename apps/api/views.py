@@ -211,16 +211,25 @@ def feed_detail(request, slug):
 
 
 def subs_search(request, keyword):
-    feeds = Feed.objects.filter(title__icontains=keyword).values("slug", "title")
+    typeahead = request.GET.get("typeahead", 1)
+    feeds = Feed.objects.filter(title__icontains=keyword).values("id", "slug", "title")
     results = []
-    for feed in feeds:
-        tokens = feed["title"].split(" ")
-        results.append({
-            "slug": feed["slug"],
-            "value": feed["title"],
-            "tokens": tokens
-            }
-        )
+    if typeahead == 1:
+        for feed in feeds:
+            tokens = feed["title"].split(" ")
+            results.append({
+                "slug": feed["slug"],
+                "value": feed["title"],
+                "tokens": tokens
+                }
+            )
+    else:
+        for feed in feeds:
+            results.append({
+                "id": feed["id"],
+                "title": feed["title"],
+                }
+            )
     return HttpResponse(json.dumps(results), content_type='application/json')
 
 
@@ -394,7 +403,6 @@ def subscriptions(request):
         results.append(item)
     return HttpResponse(json.dumps(results), content_type="application/json")
 
-@ajax_required
 def entries_by_feed(request, feed_id):
     offset = request.GET.get("offset", 0)
     limit = request.GET.get("limit", 10)

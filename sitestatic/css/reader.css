@@ -178,10 +178,11 @@ section.brand {
 
 .dropdown-entries {
     padding-top: 0px;
-    max-height: 440px;
+    max-height: 460px;
 }
 
 /* header part */
+.dropdown-entries .subscriptions-header,
 .dropdown-entries .entries-header {
     padding: 10px;
 }
@@ -194,6 +195,7 @@ section.brand {
     color: #0081C2;
 }
 
+.subscriptions-header input,
 .entries-header input {
     width: 97%;
     padding: 5px;
@@ -229,6 +231,7 @@ section.brand {
     padding: 5px;
 }
 
+.submenu .subscriptions,
 .submenu .entries {
     max-width: 400px;
     overflow-x: hidden;
@@ -236,24 +239,45 @@ section.brand {
     font-size: 13px;
     max-height: 338px;
 }
-
+.submenu .subscriptions .subscription,
 .submenu .entries .entry {
     padding: 10px;
     border-top: 1px solid #e2e2e2;
 }
 
+.submenu .subscriptions .subscription:hover,
 .submenu .entries .entry:hover {
     background-color: #FBFBFB;
 }
 
+.submenu .subscriptions .subscription a,
 .submenu .entries .entry a {
     color: #555555;
 }
 
+.submenu .subscriptions .subscription a:hover,
 .submenu .entries .entry a:hover {
     color: #0CAEE3;
 }
 
-.liked {
-    color: ;
+.entries-navigation {
+    font-size: 12px;
+    padding-left: 8px;
+}
+
+.entries-navigation a {
+    color: #555555;
+    font-weight: bold;
+}
+
+.entries-navigation-item {
+    padding-right: 10px;
+}
+
+.entries-navigation a:hover {
+    border-bottom: 1px dotted #E2E2E2;
+}
+
+.active-entries-nav {
+    color: #0CAEE3 !important;
 }
