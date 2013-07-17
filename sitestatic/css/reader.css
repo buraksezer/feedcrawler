@@ -6,6 +6,7 @@ body {
     font-family: 'Open Sans',Helvetica,sans-serif;
 }
 
+textarea,
 input {
     background-color: #ffffff;
     border: 1px solid #cccccc;
@@ -81,7 +82,7 @@ a.brand:hover {
     width: 135px;
     display: none;
     margin-left: 10px;
-    padding: 5px 0 5px;
+    padding-top: 5px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
 }
 
@@ -182,6 +183,7 @@ section.brand {
 }
 
 /* header part */
+.dropdown-comments .comments-header,
 .dropdown-entries .subscriptions-header,
 .dropdown-entries .entries-header {
     padding: 10px;
@@ -231,6 +233,7 @@ section.brand {
     padding: 5px;
 }
 
+.dropdown-comments .comments,
 .submenu .subscriptions,
 .submenu .entries {
     max-width: 400px;
@@ -239,20 +242,43 @@ section.brand {
     font-size: 13px;
     max-height: 338px;
 }
+
 .submenu .subscriptions .subscription,
 .submenu .entries .entry {
     padding: 10px;
     border-top: 1px solid #e2e2e2;
 }
 
+.submenu .comments .comment {
+    padding: 10px;
+    border-top : 1px solid #e2e2e2;
+}
+
+textarea:hover {
+    background-color: #FFFFFF !important;
+}
+
+.submenu .comments .comment:hover,
 .submenu .subscriptions .subscription:hover,
 .submenu .entries .entry:hover {
     background-color: #FBFBFB;
 }
 
+.submenu .comments .comment a,
 .submenu .subscriptions .subscription a,
 .submenu .entries .entry a {
     color: #555555;
+}
+
+.comments-area .load-more a.load-more,
+.submenu .comments .comment a {
+    color: #0CAEE3;
+}
+
+.comments-area .load-more a.load-more:hover,
+.submenu .comments .comment a:hover {
+    color: #005580;
+    text-decoration: underline;
 }
 
 .submenu .subscriptions .subscription a:hover,
@@ -280,4 +306,48 @@ section.brand {
 
 .active-entries-nav {
     color: #0CAEE3 !important;
+}
+
+.dropdown-comments .submenu {
+    left: -195px;
+    width: 400px;
+    max-width: 400px;
+}
+
+.dropdown-comments .submenu {
+    color: #555555;
+    font-size: 12px;
+}
+
+.comments-area .load-more {
+    margin-bottom: 5px;
+}
+
+.comments-header form {
+    margin-bottom: 10px;
+}
+
+.comments-area .comment .content {
+    margin-top: -16.3px;
+    margin-bottom: 5px;
+    margin-left: 20px;
+}
+
+.comment-metadata {
+    font-size: 12px;
+}
+
+.comments-area .load-more i {
+    padding-right: 5px;
+    padding-left: 11px;
+    padding-top: 5px;
+}
+
+.comment-metadata a {
+    font-size: 12px !important;
+}
+
+.edit-comment-form textarea.comment {
+    margin-bottom: 5px;
+    font-size: 12px;
 }

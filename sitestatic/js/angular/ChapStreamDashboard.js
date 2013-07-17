@@ -168,10 +168,9 @@ ChapStream.directive('entryLike', function($http) {
 ChapStream.directive('commentBox', function($http) {
     return function (scope, element, attrs) {
         $(element).click(function(event) {
-            target = $(element).closest(".dashboard-entry").find(".comment-form textarea.comment")
+            var target = $(element).closest(".dashboard-entry").find(".comment-form textarea.comment");
             target.autosize();
-            target.focus();
-            $(element).closest(".dashboard-entry").find(".comment-form").css("display", "block");
+            $(element).closest(".dashboard-entry").find(".comment-form").slideToggle("fast");
         });
     }
 });
@@ -222,8 +221,8 @@ ChapStream.directive('editComment', function() {
             var comment = scope.entry.comments.results[attrs.cIndex];
             var comment_content = $(element).closest(".comment .content");
             var comment_edit = $(element).closest(".comment").find(".edit-comment-form");
-            comment_edit.find("textarea").autosize();
             scope.commentContent = scope.entry.comments.results[attrs.cIndex].content;
+            comment_edit.find("textarea").autosize();
             scope.commentEdit = true;
             scope.showCommentEditBox = true;
         });
@@ -368,7 +367,7 @@ ChapStream.directive('sureDeleteComment', function($http) {
             });
         });
     }
-})
+});
 
 ChapStream.directive('cancelComment', function() {
     return function(scope, element, attrs) {
@@ -379,7 +378,7 @@ ChapStream.directive('cancelComment', function() {
             // New comment related variables
             scope.postingComment = false;
             scope.commentContent = "";
-            $(element).closest(".dashboard-entry").find(".comment-form").css("display", "none");
+            $(element).closest(".dashboard-entry").find(".comment-form").slideUp('fast');
         });
     }
 });

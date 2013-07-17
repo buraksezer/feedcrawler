@@ -309,7 +309,8 @@ def reader(request, slug):
     except IndexError:
         pass
 
-    result.update({"next": next, "previous": previous, "feed_id": feed_id})
+    result.update({"next": next, "previous": previous, \
+        "feed_id": feed_id, "comments": get_latest_comments(entry["id"]) })
     return HttpResponse(json.dumps({"code": 1, "result": result}), content_type='application/json')
 
 @ajax_required

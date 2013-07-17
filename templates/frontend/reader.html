@@ -35,8 +35,11 @@
                         <li class="hint--bottom" data-hint="Bookmark this">
                             <i class="cursor-pointer icon-star"></i>
                         </li>
-                        <li class="hint--bottom" data-hint="Comments">
-                            <i class="cursor-pointer icon-comment"></i>
+                        <li class="dropdown-comments dropdown">
+                            <i class="cursor-pointer icon-comment dropdown-menu" prepare-comment-box></i>
+                            <div class="submenu">
+                                <div ng-include="'/static/templates/partials/reader-comments.html'"></div>
+                            </div>
                         </li>
                         <li class="dropdown">
                             <i class="cursor-pointer dropdown-cog dropdown-menu icon-cog"></i>

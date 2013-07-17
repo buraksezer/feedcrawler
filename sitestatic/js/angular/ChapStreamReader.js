@@ -1,8 +1,8 @@
-var ChapStreamReader = angular.module("ChapStreamReader", [],
+var ChapStreamReader = angular.module("ChapStreamReader", ['ngSanitize'],
     function($routeProvider, $locationProvider) {
         $locationProvider.html5Mode(true);
         $routeProvider
-        .when("/reader/:entryId", {templateUrl: '/static/templates/iframe.html', controller: 'ReaderMainCtrl'})
+        .when("/reader/:slug", {templateUrl: '/static/templates/iframe.html', controller: 'ReaderMainCtrl'})
     }
 );
 
@@ -34,6 +34,17 @@ ChapStreamReader.run(function($rootScope) {
 
     $rootScope.empty = function(value) {
         return $.isEmptyObject(value);
+    };
+
+    $rootScope.safeApply = function(fn) {
+        var phase = this.$root.$$phase;
+        if(phase == '$apply' || phase == '$digest') {
+            if(fn && (typeof(fn) === 'function')) {
+                fn();
+            }
+        } else {
+            this.$apply(fn);
+        }
     };
 });
 
@@ -140,6 +151,188 @@ ChapStreamReader.directive('getEntries', function($rootScope) {
     }
 });
 
+/* Comments */
+
+ChapStreamReader.directive('postComment', function($http) {
+    return function (scope, element, attrs) {
+        function post_comment() {
+            if (!scope.commentContent.trim().length) return;
+            scope.postingComment = true;
+            $http({
+                url: '/api/post_comment/',
+                method: "POST",
+                data:  $.param({content: scope.commentContent, entry_id: scope.entry.id}),
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+            }).success(function (data, status, headers, config) {
+                scope.postingComment = false;
+                scope.showCommentBox = false;
+                data.content = nl2br(scope.commentContent);
+                if (scope.entry.comments.last_comment_id != data.id) {
+                    scope.entry.comments.results.push(data);
+                    scope.entry.comments.last_comment_id = data.id;
+                }
+                scope.commentContent = undefined;
+            }).error(function (data, status, headers, config) {
+                // Error case
+            });
+        }
+
+        $(element).closest(".comments-header").find("textarea").keypress(function(event) {
+            if (event.shiftKey) {
+                scope.commentContent =+ "\n";
+            } else {
+                if (event.keyCode != 13) return;
+                event.preventDefault();
+                post_comment();
+            }
+        });
+    }
+});
+
+ChapStreamReader.directive('editComment', function() {
+    return function(scope, element, attrs) {
+        $(element).click(function() {
+            var comment = scope.entry.comments.results[attrs.cIndex];
+            var comment_content = $(element).closest(".comment .content");
+            comment_edit = $(element).closest(".comment").find(".edit-comment-form");
+            scope.commentContent = scope.entry.comments.results[attrs.cIndex].content;
+            comment_edit.find("textarea").autosize();
+            scope.commentEdit = true;
+            scope.showCommentEditBox = true;
+        });
+    }
+});
+
+ChapStreamReader.directive('doneEditComment', function($http) {
+    return function(scope, element, attrs) {
+        function post_comment() {
+            if (!scope.commentContent.trim().length) return;
+            scope.postingComment = true;
+            $http({
+                url: '/api/update_comment/',
+                method: "POST",
+                data:  $.param({content: scope.commentContent, id: attrs.cId}),
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+            }).success(function (data, status, headers, config) {
+                scope.postingComment = false;
+                scope.showCommentEditBox = false;
+                scope.commentEdit = false;
+                scope.entry.comments.results[attrs.cIndex].content = nl2br(scope.commentContent);
+                scope.commentContent = undefined;
+            }).error(function (data, status, headers, config) {
+                // Error case
+            });
+        }
+
+        $(element).keypress(function(event) {
+            if (event.shiftKey) {
+                scope.commentContent =+ "\n";
+            } else {
+                if (event.keyCode != 13) return;
+                event.preventDefault();
+                post_comment();
+            }
+        });
+    }
+});
+
+ChapStreamReader.directive('deleteComment',function($http) {
+    return function (scope, element, attrs) {
+        $(element).click(function(event) {
+            scope.commentDelSure = true;
+        });
+    }
+});
+
+ChapStreamReader.directive('cancelDeleteComment',function($http) {
+    return function (scope, element, attrs) {
+        $(element).click(function(event) {
+            scope.commentDelSure = false;
+        });
+    }
+});
+
+ChapStreamReader.directive('sureDeleteComment', function($http) {
+    return function (scope, element, attrs) {
+        $(element).click(function(event) {
+            scope.commentLoading = true;
+            $http.post("/api/delete_comment/"+attrs.cId+"/").success(function(data) {
+                scope.commentLoading = false;
+                scope.entry.comments.results.splice(attrs.cIndex, 1);
+            });
+        });
+    }
+});
+
+ChapStreamReader.directive('countChar', function($http) {
+    return function(scope, element, attrs) {
+        scope.maxCharCount = 2000;
+        $(element).bind("keypress keyup keydown paste", function(event) {
+            if (typeof scope.commentContent == 'undefined') return;
+            if (scope.restCharCount <= 0) {
+                event.preventDefault();
+            } else {
+                scope.restCharCount = scope.maxCharCount - scope.commentContent.length;
+            }
+        });
+    };
+});
+
+ChapStreamReader.directive('calcFromNow', function($timeout) {
+    return function(scope, element, attrs) {
+        attrs.$observe('ts', function(ts) {
+            function calcTime(timestamp) {
+                scope.safeApply(function() {
+                    scope.created_at = moment(parseInt(ts, 10)).format('MMMM Do YYYY, h:mm:ss a');
+                    scope.calcTime = moment(parseInt(ts, 10)).fromNow();
+                });
+            }
+            calcTime(ts);
+            $timeout(function calcTimeInterval(){
+                calcTime(ts);
+                $timeout(calcTimeInterval, 60000);
+            },60000);
+
+        });
+    };
+});
+
+ChapStreamReader.directive('loadComments', function($http) {
+    return function(scope, element, attrs) {
+        $(element).click(function(event) {
+            $http.get("/api/fetch_comments/"+scope.entry.id+"/").success(function(data) {
+                for(var i=0; i < data.results.length; i++) {
+                    data.results[i].content = nl2br(data.results[i].content);
+                }
+                scope.entry.comments = data;
+            });
+        })
+    }
+});
+
+ChapStreamReader.directive('cancelComment', function() {
+    return function(scope, element, attrs) {
+        $(element).click(function(event) {
+            // Edit related variables
+            scope.showCommentEditBox = false;
+            scope.commentEdit = false;
+            // New comment related variables
+            scope.postingComment = false;
+            scope.commentContent = "";
+        });
+    }
+});
+
+ChapStreamReader.directive('prepareCommentBox', function () {
+    return function(scope, element, attrs) {
+        $(element).click(function(event) {
+            var comment_box = $(".comments-header textarea.comment");
+            comment_box.autosize();
+            $(".comments").niceScroll({cursorcolor:"#555555", cursoropacitymax: "0.5"});
+        });
+    }
+});
+
 function ReaderMainCtrl($scope, $http, $routeParams) {
     // Remove old entry.link value to prevent reloading
     if (typeof $scope.entry != 'undefined') {
@@ -147,7 +340,7 @@ function ReaderMainCtrl($scope, $http, $routeParams) {
     }
 
     $scope.showLoading = true;
-    $http.get("/api/reader/"+$routeParams.entryId).success(function(data) {
+    $http.get("/api/reader/"+$routeParams.slug).success(function(data) {
         $scope.showLoading = false;
         if (data.code == 1) {
             $scope.getEntry(data.result);

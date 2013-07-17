@@ -1,3 +1,7 @@
+body {
+    font-family: 'Open Sans',Helvetica,sans-serif !important;
+}
+
 .cursor-pointer {
     cursor: pointer;
 }
@@ -12,4 +16,61 @@
     -moz-transition: color .5s;
     -o-transition: color .5s;
     transition: color .5s;
+}
+
+textarea.comment {
+    resize: none;
+    border-radius: 0;
+    padding: .5em;
+    background: #fff;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 1em;
+    line-height: 1.5em;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.textbox-transition {
+  vertical-align: top;
+  transition: height 0.2s;
+  -webkit-transition: height 0.2s;
+  -moz-transition: height 0.2s;
+}
+
+.comment-form .redfont {
+    color: red;
+}
+
+.comment .content .from-now {
+    font-weight: lighter;
+    font-size: 11px;
+}
+
+.comment-form a.cancel {
+    font-size: 12px;
+}
+
+.edit-comment-form {
+    margin-top: -13px;
+    margin-bottom: 5px;
+    margin-left: 20px;
+}
+
+.comment-control {
+    margin-left: 5px;
+}
+
+.comment-control a:hover {
+    text-decoration: none !important;
+}
+
+.comment-control i {
+    color: #555555;
+}
+
+.comment-control i:hover {
+    color: #0CAEE3 !important;
 }
