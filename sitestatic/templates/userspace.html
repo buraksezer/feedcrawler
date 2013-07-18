@@ -6,7 +6,7 @@
         <small class="hint--bottom" data-hint="Show your subscriptions" ng-show="subscriptionCount  == 1 "><a href="/subscriptions">{{ subscriptionCount }} subscription</a></small>
         <small class="hint--bottom" data-hint="Show your subscriptions" ng-show="subscriptionCount  > 1 "><a href="/subscriptions">{{ subscriptionCount }} subscriptions</a></small>
         <ul class="top-area pull-right">
-            <li ng-controller="SubscribeController">
+            <li ng-controller="SubscribeCtrl">
                 <i ng-click="cleanSubsModal()" id="subscribe-feed" class="icon-plus-sign-alt" data-toggle="modal" data-target="#subscribeModal"></i>
                 <!-- Modal -->
                 <div id="subscribeModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="subscribeModalLabel" aria-hidden="true">

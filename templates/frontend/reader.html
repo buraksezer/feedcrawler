@@ -2,12 +2,12 @@
 {% block reader_requirements %}
 <link rel="stylesheet" href="/static/css/reader.css"></link>
 <script type="application/javascript" src="/static/js/jquery.iframetracker.js"></script>
-<script type="application/javascript" src="/static/js/angular/ChapStreamReader.js"></script>
+<script type="application/javascript" src="/static/js/ReaderAppBundle.js"></script>
 <script type="application/javascript" src="/static/js/reader.js"></script>
 {% endblock %}
 
 {% block body %}
-<body ng-app="ChapStreamReader">
+<body ng-app="Reader">
     {% verbatim %}
     <div ng-controller="ReaderNavbarCtrl" class="header">
         <div class="container">

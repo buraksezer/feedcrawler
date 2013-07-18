@@ -9,14 +9,14 @@
 <link href="/static/css/style.css" rel="stylesheet">
 
 <script type="application/javascript" src="/static/js/bootstrap.min.js"></script>
-<script type="application/javascript" src="http://twitter.github.io/typeahead.js/js/hogan-2.0.0.js"></script>
+<script type="application/javascript" src="//twitter.github.io/typeahead.js/js/hogan-2.0.0.js"></script>
 <script type="application/javascript" src="/static/js/typeahead.min.js"></script>
-<script type="application/javascript" src="/static/js/angular/ChapStreamDashboard.js"></script>
+<script type="application/javascript" src="/static/js/DashboardAppBundle.js"></script>
 <script type="application/javascript" src="/static/js/dashboard.js"></script>
 {% endblock %}
 
 {% block body %}
-<body ng-app="ChapStream" id="dashboard-layout">
+<body ng-app="Dashboard" id="dashboard-layout">
     <header id="header">
         <div class="container">
             <a class="brand" href="{% url "home" %}"><i>Chap<strong>Stream</strong><small> &alpha;</small></i></a>
@@ -38,7 +38,7 @@
         <div list-control-modal></div>
         <div class="row-fluid">
             <!-- user space -->
-            <div ng-controller="UserspaceCtrl" class="span4 userspace">
+            <div ng-controller="UserSpaceCtrl" class="span4 userspace">
                 <div ng-include="'/static/templates/userspace.html'"></div>
             </div>
             <!-- Timeline -->
