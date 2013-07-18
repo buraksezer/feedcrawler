@@ -4,6 +4,11 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 admin.autodiscover()
 
+from apps.api import views
+from rest_framework import routers
+from rest_framework.urlpatterns import format_suffix_patterns
+
+# Regular and Dummy URLs
 urlpatterns = patterns('',
     url(r'^$', 'apps.frontend.views.home', name='home'),
     url(r'^user/(?P<username>(?!signout|signup|signin)[\.\w-]+)/$', 'apps.userena.views.profile_detail', name='userena_profile_detail'),
@@ -19,50 +24,39 @@ urlpatterns = patterns('',
     url(r'^entry/(?P<entry_id>[\w-]+)/$', 'apps.frontend.views.entry', name='entry'),
     url(r'^list/(?P<list_slug>[-A-Za-z0-9_]+)/$', 'apps.frontend.views.list', name='list'),
 
-
-    # API requests
-    url(r'^api/reader/(?P<slug>[-A-Za-z0-9_]+)/$', 'apps.api.views.reader'),
-    url(r'^api/subs-search/(?P<keyword>[\w-]+)/$', 'apps.api.views.subs_search'),
-    url(r'^api/user_profile/', 'apps.api.views.user_profile'),
-    url(r'^api/timeline/', 'apps.api.views.timeline'),
-    url(r'^api/feed_detail/(?P<slug>[-A-Za-z0-9_]+)/$', 'apps.api.views.feed_detail'),
-    url(r'^api/subscribe_by_id/(?P<feed_id>[\w-]+)/$', 'apps.api.views.subscribe_by_id', name='subscribe_by_id'),
-    url(r'^api/unsubscribe/(?P<feed_id>[\w-]+)/$', 'apps.api.views.unsubscribe', name='unsubscribe'),
-    url(r'^api/subscribe$', 'apps.api.views.subscribe'),
-    url(r'^api/find_source$', 'apps.api.views.find_source'),
-    url(r'^api/subscriptions/', 'apps.api.views.subscriptions'),
-    url(r'^api/entries_by_feed/(?P<feed_id>[\w-]+)/$', 'apps.api.views.entries_by_feed'),
-    url(r'^api/like/(?P<entry_id>[\w-]+)/$', 'apps.api.views.like'),
-    url(r'^api/post_comment/', 'apps.api.views.post_comment'),
-    url(r'^api/update_comment/', 'apps.api.views.update_comment'),
-    url(r'^api/fetch_comments/(?P<entry_id>[\w-]+)/$', 'apps.api.views.fetch_comments'),
-    url(r'^api/delete_comment/(?P<comment_id>[\w-]+)/$', 'apps.api.views.delete_comment'),
-    url(r'^api/interactions/', 'apps.api.views.interactions'),
-    url(r'^api/single_entry/(?P<entry_id>[\w-]+)/$', 'apps.api.views.single_entry'),
-    url(r'^api/readlater/(?P<entry_id>[\w-]+)/$', 'apps.api.views.readlater'),
-    url(r'^api/readlater_list/', 'apps.api.views.readlater_list'),
-    url(r'^api/lists/', 'apps.api.views.lists'),
-    url(r'^api/append_to_list/(?P<list_id>[\w-]+)/(?P<feed_id>[\w-]+)/$', 'apps.api.views.append_to_list'),
-    url(r'^api/delete_from_list/(?P<list_id>[\w-]+)/(?P<feed_id>[\w-]+)/$', 'apps.api.views.delete_from_list'),
-    url(r'^api/delete_list/(?P<list_id>[\w-]+)/$', 'apps.api.views.delete_list'),
-    url(r'^api/create_list/', 'apps.api.views.create_list'),
-    url(r'^api/list/(?P<list_slug>[-A-Za-z0-9_]+)/$', 'apps.api.views._list'),
-    url(r'^api/prepare_list/(?P<list_slug>[-A-Za-z0-9_]+)/$', 'apps.api.views.prepare_list'),
-
-    # This is required for pubsubhubbub
-    #url(r'^subscriber/', include('django_push.subscriber.urls')),
-
-    # Uncomment the admin/doc line below to enable admin documentation:
-    # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-
-    # Uncomment the next line to enable the admin:
+    # Admin
     url(r'^admin/', include(admin.site.urls)),
 )
 
-
-"""
-    url(r'^subscribe_user/', 'apps.frontend.views.subscribe_user', name='subscribe_user'),
-    url(r'^unsubscribe_user/', 'apps.frontend.views.unsubscribe_user', name='unsubscribe_user'),
-    url(r'^check_subscribe/', 'apps.frontend.views.check_subscribe', name='check_subscribe'),
-    url(r'^share_entry/', 'apps.frontend.views.share_entry', name='share_entry'),
-"""
+# RESTful JSON API
+router = routers.DefaultRouter()
+apipatterns = patterns('',
+    url(r'^api/authenticated_user/$', views.AuthenticatedUser.as_view()),
+    url(r'^api/timeline/', views.Timeline.as_view()),
+    url(r'^api/list/(?P<list_slug>[-A-Za-z0-9_]+)/$', views.ListTimeline.as_view()),
+    url(r'^api/prepare_list/(?P<list_slug>[-A-Za-z0-9_]+)/$', views.PrepareList.as_view()),
+    url(r'^api/single_entry/(?P<entry_id>[\w-]+)/$', views.SingleEntry.as_view()),
+    url(r'^api/feed_detail/(?P<slug>[-A-Za-z0-9_]+)/$', views.FeedDetail.as_view()),
+    url(r'^api/subs-search/(?P<keyword>[\w-]+)/$', views.SubsSearch.as_view()),
+    url(r'^api/reader/(?P<slug>[-A-Za-z0-9_]+)/$', views.Reader.as_view()),
+    url(r'^api/unsubscribe/(?P<feed_id>[\w-]+)/$', views.UnsubscribeByFeedId.as_view()),
+    url(r'^api/subscribe_by_id/(?P<feed_id>[\w-]+)/$', views.SubscribeByFeedId.as_view()),
+    url(r'^api/find_source$', views.FindFeedWithURL.as_view()),
+    url(r'^api/subscribe$', views.SubscribeFeed.as_view()),
+    url(r'^api/subscriptions/', views.FeedSubscriptions.as_view()),
+    url(r'^api/entries_by_feed/(?P<feed_id>[\w-]+)/$', views.EntriesByFeed.as_view()),
+    url(r'^api/like_entry/(?P<entry_id>[\w-]+)/$', views.LikeEntry.as_view()),
+    url(r'^api/post_comment/', views.PostComment.as_view()),
+    url(r'^api/update_comment/', views.UpdateComment.as_view()),
+    url(r'^api/delete_comment/(?P<comment_id>[\w-]+)/$', views.DeleteComment.as_view()),
+    url(r'^api/fetch_comments/(?P<entry_id>[\w-]+)/$', views.FetchComments.as_view()),
+    url(r'^api/interactions/', views.Interactions.as_view()),
+    url(r'^api/readlater/(?P<entry_id>[\w-]+)/$', views.ManageReadLater.as_view()),
+    url(r'^api/readlater_list/', views.ReadLaterList.as_view()),
+    url(r'^api/lists/', views.RetrieveLists.as_view()),
+    url(r'^api/append_to_list/(?P<list_id>[\w-]+)/(?P<feed_id>[\w-]+)/$', views.AppendToList.as_view()),
+    url(r'^api/delete_from_list/(?P<list_id>[\w-]+)/(?P<feed_id>[\w-]+)/$', views.DeleteFromList.as_view()),
+    url(r'^api/delete_list/(?P<list_id>[\w-]+)/$', views.DeleteList.as_view()),
+    url(r'^api/create_list/', views.CreateList.as_view()),
+)
+urlpatterns += format_suffix_patterns(apipatterns)

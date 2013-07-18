@@ -51,7 +51,7 @@ ChapStreamReader.run(function($rootScope) {
 ChapStreamReader.directive('entryLike', function($http) {
     return function (scope, element, attrs) {
         $(element).click(function(event) {
-            $http.post("/api/like/"+scope.entry.id+"/").success(function(data) {
+            $http.post("/api/like_entry/"+scope.entry.id+"/").success(function(data) {
                 if (data.code == 1) {
                     scope.entry.liked = true;
                 } else if (data.code == -1) {

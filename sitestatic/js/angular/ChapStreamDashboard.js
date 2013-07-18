@@ -152,7 +152,7 @@ ChapStream.directive('clickjackingWarn', function () {
 ChapStream.directive('entryLike', function($http) {
     return function (scope, element, attrs) {
         $(element).click(function(event) {
-            $http.post("/api/like/"+scope.entry.id+"/").success(function(data) {
+            $http.post("/api/like_entry/"+scope.entry.id+"/").success(function(data) {
                 if (data.code == 1) {
                     scope.entry.like_count += 1;
                     $(element).text(data.msg)
@@ -862,7 +862,7 @@ function EntryCtrl($scope, $http, $routeParams) {
 }
 
 function UserspaceCtrl($scope, $rootScope, $http) {
-    $http.get("/api/user_profile/").success(function(data) {
+    $http.get("/api/authenticated_user/").success(function(data) {
         $rootScope.readlater_count = data.rl_count;
         $rootScope.lists = data.lists;
         $rootScope.subscriptionCount = data.subs_count;
