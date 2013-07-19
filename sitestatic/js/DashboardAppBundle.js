@@ -5,12 +5,6 @@ require("./services");
 require("./controllers");
 require("./directives");
 
-/*
-var factories = require("./factories");
-var directives = require("./directives");
-var controllers = require("./controllers");
-*/
-
 var app = angular.module('Dashboard', ['Dashboard.services', 'Dashboard.controllers', 'Dashboard.directives', 'infinite-scroll', 'ngSanitize'])
     .config(["$routeProvider",
         function($routeProvider) {
@@ -221,7 +215,7 @@ angular.module("Dashboard.controllers", [])
 (function () {
     'use strict';
 
-    function ListCtrl($scope, $routeParams, $http) {
+    function ListCtrl($scope, $http, $routeParams) {
         $http.get("/api/prepare_list/"+$routeParams.listSlug+"/").success(function(data) {
             $scope.listTitle = data.title;
             $scope.listFeedIds = data.feed_ids;

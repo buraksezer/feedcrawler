@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    function ListCtrl($scope, $routeParams, $http) {
+    function ListCtrl($scope, $http, $routeParams) {
         $http.get("/api/prepare_list/"+$routeParams.listSlug+"/").success(function(data) {
             $scope.listTitle = data.title;
             $scope.listFeedIds = data.feed_ids;
