@@ -39,6 +39,7 @@
         <div ng-hide="entry.instantEntry == true" ng-mouseenter="myClass='show'" ng-mouseleave="myClass=''" class="dashboard-entry" ng-repeat="entry in feed_detail.entries">
             <div ng-include="'/static/templates/partials/entry-topbar.html'"></div>
             <div class="entry-content">
+                <span repost-entry-modal></span>
                 <a ng-show="entry.available == 1" ng-click="renderToReader(entry.slug)" class="entry-title" href="/reader/{{entry.slug}}" prevent-default>
                     {{ entry.title }}
                 </a>

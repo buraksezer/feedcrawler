@@ -11,6 +11,8 @@ var SubscribeCtrl = require("./controllers/SubscribeCtrl.js");
 var EntryCtrl = require("./controllers/EntryCtrl.js");
 var ListCtrl = require("./controllers/ListCtrl.js");
 var UserSpaceCtrl = require("./controllers/UserSpaceCtrl.js");
+var UserProfileCtrl = require("./controllers/UserProfileCtrl.js");
+var RepostCtrl = require("./controllers/RepostCtrl.js");
 
 angular.module("Dashboard.controllers", [])
     .controller("UserSpaceCtrl", ["$scope", "$rootScope", "$http", UserSpaceCtrl])
@@ -21,4 +23,6 @@ angular.module("Dashboard.controllers", [])
     .controller("ReadLaterCtrl", ["$scope", "$http", ReadLaterCtrl])
     .controller("SubscribeCtrl", ["$scope", "$http", "$timeout", "$rootScope", SubscribeCtrl])
     .controller("EntryCtrl", ["$scope", "$http", "$routeParams", EntryCtrl])
-    .controller("ListCtrl", ["$scope", "$http", "$routeParams", ListCtrl]);
+    .controller("ListCtrl", ["$scope", "$http", "$routeParams", ListCtrl])
+    .controller("UserProfileCtrl", ["$scope", "$http", "$routeParams", UserProfileCtrl])
+    .controller("RepostCtrl", ["$scope", "$http", "$routeParams", RepostCtrl]);

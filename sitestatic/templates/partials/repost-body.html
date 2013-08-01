@@ -1,0 +1,49 @@
+<div id="timeline-item_{{ entry.repost.id }}" class="entry-content">
+    <span repost-entry-modal></span>
+    <div ng-show="entry.repost" class="repost-item">
+        <div class="repost-body">
+            <span class="header">
+                <a href="/user/{{ entry.repost.owner_username }}">{{ entry.repost.owner_display_name }}</a>
+                reposted
+                <span ng-show="entry.repost.num_owner > 0">
+                    with
+                    <a class="other-reposts" href="#">
+                        {{ entry.repost.num_owner }}
+                        <span ng-switch on="entry.repost.num_owner > 1">
+                            <span ng-switch-when="true">others</span>
+                            <span ng-switch-when="false">other</span>
+                        </span>
+                    </a>
+                </span>
+            </span>
+            <div ng-bind-html="entry.repost.note" class="repost-note"></div>
+        </div>
+    </div>
+    <div class="entry-body quote">
+        <a ng-show="entry.available == 1" ng-click="renderToReader(entry.slug)" class="entry-title" href="/reader/{{entry.slug}}" prevent-default>
+            {{ entry.title }}
+        </a>
+        <a ng-show="entry.available != 1" class="entry-title" href="#" clickjacking-warn>
+            {{ entry.title }}
+        </a>
+        <br/>
+        <a class="feed" href="/feed/{{ entry.feed_slug }}">{{ entry.feed_title }}</a>
+        <div class="timeline-entry-interaction">
+            <span ng-switch on="singleRepost">
+                <a ng-switch-when="undefined" href="/repost/{{ entry.repost.id }}">
+                    <span calc-from-now ts="{{ entry.created_at }}">{{ calcTime }}</span>
+                </a>
+                <span ng-switch-when="true" calc-from-now ts="{{ entry.created_at }}">{{ calcTime }}</span>
+            </span>
+            <span>&sdot;</span>
+            <a href="#" class="like transition" entry-like>{{ entry.like_msg }}</a>
+            <span>&sdot;</span>
+            <a href="#" class="comment transition" comment-box>Comment</a>
+            <span>&sdot;</span>
+            <a href="#" class="share transition" share-box>Share</a>
+            <span ng-show="entry.like_count > 0">&sdot;</span>
+            <span ng-show="entry.like_count == 1">{{ entry.like_count }} like</span>
+            <span ng-show="entry.like_count > 1">{{ entry.like_count }} likes</span>
+        </div>
+    </div>
+</div>

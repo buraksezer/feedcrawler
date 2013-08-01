@@ -1,4 +1,13 @@
             <ul ng-class="myClass" class="entry-topbar">
+                <li ng-switch on="">
+                    <a ng-show="!entry.reposted" data-hint="Repost this entry" class="hint--top" href="#">
+                        <i class="icon-retweet" data-toggle="modal" data-target="#repostModal_{{ entry.id }}" run-repost-entry-modal></i>
+                    </a>
+                    <a ng-show="entry.reposted" data-hint="Undo repost" class="hint--top" href="#" undo-repost>
+                        <i class="icon-retweet" ></i>
+                        <span class="reposted">Reposted</span>
+                    </a>
+                </li>
                 <li>
                     <a ng-show="!entry.inReadLater" data-hint="Read later" class="hint--top read-later" href="#" read-later>
                         <i class="icon-time"></i>

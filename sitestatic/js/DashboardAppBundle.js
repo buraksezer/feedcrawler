@@ -15,13 +15,17 @@ var app = angular.module('Dashboard', ['Dashboard.services', 'Dashboard.controll
             .when('/interactions', { templateUrl: '/static/templates/interactions.html', controller: 'InteractionsCtrl' })
             .when('/readlater', { templateUrl: '/static/templates/readlater.html', controller: 'ReadLaterCtrl' })
             .when('/entry/:entryId', { templateUrl: '/static/templates/entry.html', controller: 'EntryCtrl' })
-            .when('/list/:listSlug', { templateUrl: '/static/templates/list.html', controller: 'ListCtrl' });
+            .when('/repost/:repostId', { templateUrl: '/static/templates/repost.html', controller: 'RepostCtrl' })
+            .when('/list/:listSlug', { templateUrl: '/static/templates/list.html', controller: 'ListCtrl' })
+            .when('/user/:userName', { templateUrl: '/static/templates/user-profile.html', controller: 'UserProfileCtrl' })
+            .when('/user/:userName/followers', { templateUrl: '/static/templates/follower-list.html', controller: 'UserProfileCtrl' })
+            .when('/user/:userName/following', { templateUrl: '/static/templates/following-list.html', controller: 'UserProfileCtrl' });
     }])
     .config(["$locationProvider", function($locationProvider) {
         $locationProvider.html5Mode(true);
     }])
     .config(["$httpProvider", function($httpProvider) {
-        $httpProvider.defaults.headers.post['X-CSRFToken'] = $('input[name=csrfmiddlewaretoken]').val();
+        $httpProvider.defaults.headers.common['X-CSRFToken'] = $('input[name=csrfmiddlewaretoken]').val();
     }]);
 
 app.run(function($rootScope, InitService) {
@@ -46,7 +50,7 @@ app.run(function($rootScope, InitService) {
     $rootScope.readlater_count = 0;
 });
 
-},{"./controllers":2,"./directives":12,"./services":13}],2:[function(require,module,exports){
+},{"./controllers":2,"./directives":14,"./services":15}],2:[function(require,module,exports){
 // Dashboard spesific controllers here.
 
 'use strict';
@@ -60,6 +64,8 @@ var SubscribeCtrl = require("./controllers/SubscribeCtrl.js");
 var EntryCtrl = require("./controllers/EntryCtrl.js");
 var ListCtrl = require("./controllers/ListCtrl.js");
 var UserSpaceCtrl = require("./controllers/UserSpaceCtrl.js");
+var UserProfileCtrl = require("./controllers/UserProfileCtrl.js");
+var RepostCtrl = require("./controllers/RepostCtrl.js");
 
 angular.module("Dashboard.controllers", [])
     .controller("UserSpaceCtrl", ["$scope", "$rootScope", "$http", UserSpaceCtrl])
@@ -70,8 +76,10 @@ angular.module("Dashboard.controllers", [])
     .controller("ReadLaterCtrl", ["$scope", "$http", ReadLaterCtrl])
     .controller("SubscribeCtrl", ["$scope", "$http", "$timeout", "$rootScope", SubscribeCtrl])
     .controller("EntryCtrl", ["$scope", "$http", "$routeParams", EntryCtrl])
-    .controller("ListCtrl", ["$scope", "$http", "$routeParams", ListCtrl]);
-},{"./controllers/EntryCtrl.js":3,"./controllers/FeedDetailCtrl.js":4,"./controllers/InteractionsCtrl.js":5,"./controllers/ListCtrl.js":6,"./controllers/ReadLaterCtrl.js":7,"./controllers/SubscribeCtrl.js":8,"./controllers/SubscriptionsCtrl.js":9,"./controllers/TimelineCtrl.js":10,"./controllers/UserSpaceCtrl.js":11}],3:[function(require,module,exports){
+    .controller("ListCtrl", ["$scope", "$http", "$routeParams", ListCtrl])
+    .controller("UserProfileCtrl", ["$scope", "$http", "$routeParams", UserProfileCtrl])
+    .controller("RepostCtrl", ["$scope", "$http", "$routeParams", RepostCtrl]);
+},{"./controllers/EntryCtrl.js":3,"./controllers/FeedDetailCtrl.js":4,"./controllers/InteractionsCtrl.js":5,"./controllers/ListCtrl.js":6,"./controllers/ReadLaterCtrl.js":7,"./controllers/RepostCtrl.js":8,"./controllers/SubscribeCtrl.js":9,"./controllers/SubscriptionsCtrl.js":10,"./controllers/TimelineCtrl.js":11,"./controllers/UserProfileCtrl.js":12,"./controllers/UserSpaceCtrl.js":13}],3:[function(require,module,exports){
 (function () {
     'use strict';
     function EntryCtrl($scope, $http, $routeParams) {
@@ -267,6 +275,31 @@ angular.module("Dashboard.controllers", [])
 })();
 },{}],8:[function(require,module,exports){
 (function () {
+    'use strict';
+    function RepostCtrl($scope, $http, $routeParams) {
+        $scope.loadingEntry = true;
+        $http.get("/api/single_repost/"+$routeParams.repostId+"/").success(function(data) {
+            $scope.loadingEntry = false;
+            if (data.code == 0) {
+                $scope.notFound = true;
+            } else {
+                document.title = data.title+" | "+CsFrontend.Globals.SiteTitle;
+                data.repost.note = nl2br(data.repost.note);
+                $scope.entry = data;
+                $scope.singleRepost = true;
+                $(document).ready(function() {
+                    $(".comments-area form.comment-form textarea").autosize();
+                    $(".comments-area form.comment-form").css("display", "block");
+                });
+
+            }
+        });
+    }
+    module.exports = RepostCtrl;
+})();
+
+},{}],9:[function(require,module,exports){
+(function () {
   'use strict';
     function SubscribeCtrl($scope, $http, $timeout, $rootScope) {
         var defaultForm = {
@@ -317,7 +350,7 @@ angular.module("Dashboard.controllers", [])
 
     module.exports = SubscribeCtrl;
 })();
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 (function () {
   'use strict';
 
@@ -351,7 +384,7 @@ angular.module("Dashboard.controllers", [])
 
   module.exports = SubscriptionsCtrl;
 })();
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 (function () {
   'use strict';
 
@@ -378,6 +411,10 @@ angular.module("Dashboard.controllers", [])
                     $scope.busy = false;
                 } else {
                     for(var i = 0; i < data.length; i++) {
+                        if (typeof data[i].repost != 'undefined') {
+                            data[i].repost.note = nl2br(data[i].repost.note);
+                            data[i].isRepost = true;
+                        }
                         for(var j=0; j < data[i].comments.results.length; j++) {
                             // A bit confusing?
                             data[i].comments.results[j].content = nl2br(data[i].comments.results[j].content);
@@ -398,7 +435,82 @@ angular.module("Dashboard.controllers", [])
 
   module.exports = TimelineCtrl;
 })();
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
+(function () {
+    'use strict';
+
+    function UserProfileCtrl($scope, $http, $routeParams) {
+        $scope.entries = [];
+        $scope.followerUsers = [];
+        $scope.followingUsers = [];
+
+        $http.get("/api/user_profile/"+$routeParams.userName+"/").success(function(data) {
+            $scope.userProfile = data;
+            document.title = $scope.userProfile.display_name+" on "+CsFrontend.Globals.SiteTitle;
+            $scope.userProfile.current_username = $routeParams.userName;
+        });
+
+        $scope.busy = false;
+        var increment = 15;
+
+        var listOffset = 0;
+        var listLimit = increment
+        $scope.loadRepostList = function() {
+            $http.get("/api/repost_list/"+$routeParams.userName+"/"+"?&offset="+listOffset+"&limit="+listLimit).success(function(data) {
+                if (!data.length) {
+                    $scope.endOfData = true;
+                    $scope.busy = false;
+                } else {
+                    $scope.entries = $scope.entries.concat(data);
+                    listOffset += increment;
+                    listLimit += increment;
+                    $scope.busy = false;
+                }
+            });
+        }
+
+        var followerOffset = 0;
+        var followerLimit = increment;
+        $scope.loadFollowerList = function() {
+            if (typeof $scope.endOfData != 'undefined') return;
+            if ($scope.busy) return;
+            $scope.busy = true;
+            $http.get("/api/user/"+$routeParams.userName+"/followers/"+"?&offset="+followerOffset+"&limit="+followerLimit).success(function(data) {
+                if (!data.length) {
+                    $scope.endOfData = true;
+                    $scope.busy = false;
+                } else {
+                    $scope.followerUsers = $scope.followerUsers.concat(data);
+                    followerOffset += increment;
+                    followerLimit += increment;
+                    $scope.busy = false;
+                }
+            });
+        }
+
+        var followingOffset = 0;
+        var followingLimit = increment;
+        $scope.loadFollowingList = function() {
+            if (typeof $scope.endOfData != 'undefined') return;
+            if ($scope.busy) return;
+            $scope.busy = true;
+            $http.get("/api/user/"+$routeParams.userName+"/following/"+"?&offset="+followingOffset+"&limit="+followingLimit).success(function(data) {
+                if (!data.length) {
+                    $scope.endOfData = true;
+                    $scope.busy = false;
+                } else {
+                    $scope.followingUsers = $scope.followingUsers.concat(data);
+                    followingOffset += increment;
+                    followingLimit += increment;
+                    $scope.busy = false;
+                }
+            });
+        }
+    }
+
+    module.exports = UserProfileCtrl;
+})();
+},{}],13:[function(require,module,exports){
 (function () {
     'use strict';
 
@@ -414,7 +526,7 @@ angular.module("Dashboard.controllers", [])
 
     module.exports = UserSpaceCtrl;
 })();
-},{}],12:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 'use strict';
 
 /* Directives */
@@ -548,7 +660,7 @@ angular.module('Dashboard.directives', []).
 
             $(element).closest(".comments-area").find("textarea").keypress(function(event) {
                 if (event.shiftKey) {
-                    scope.commentContent =+ "\n";
+                    scope.commentContent += "\n";
                 } else {
                     if (event.keyCode != 13) return;
                     event.preventDefault();
@@ -595,7 +707,7 @@ angular.module('Dashboard.directives', []).
 
             $(element).closest(".edit-comment-form").find("textarea").keypress(function(event) {
                 if (event.shiftKey) {
-                    scope.commentContent =+ "\n";
+                    scope.commentContent += "\n";
                 } else {
                     if (event.keyCode != 13) return;
                     event.preventDefault();
@@ -864,10 +976,154 @@ angular.module('Dashboard.directives', []).
                 if (!$(event.target).hasClass("list-manage")) {
                     $("#lists").slideToggle('fast');
                 }
-            })
+            });
         }
-    });
-},{}],13:[function(require,module,exports){
+    }).directive('repostEntryModal', function() {
+        return {
+            templateUrl: '/static/templates/repost-entry-modal.html'
+        }
+    }).directive('runRepostEntryModal', function($rootScope) {
+        return function(scope, element, attrs) {
+            $(element).click(function(event) {
+                $("#repost-notebox_"+scope.entry.id).autosize();
+                scope.repostComment = undefined;
+            });
+        }
+    }).directive("repostEntry", function($http) {
+        return function(scope, element, attr) {
+            function repost_entry() {
+                $http({
+                    url: '/api/repost_entry/'+scope.entry.id+'/',
+                    method: "POST",
+                    data:  $.param({note: scope.repostNote}),
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+                }).success(function (data, status, headers, config) {
+                    $('#repostModal_'+scope.entry.id).modal('hide')
+                    scope.entry.reposted = true;
+
+                    var new_item = jQuery.extend(true, {}, scope.entry);
+                    new_item.created_at = data.created_at;
+                    new_item.isRepost = true;
+                    new_item.repost = {
+                        'note': scope.repostNote,
+                        'id': data.id,
+                        'owner_display_name': "You",
+                        'num_owner': data.num_owner
+                    }
+
+                    scope.safeApply(function() {
+                        scope.entries.unshift(new_item);
+                    });
+                });
+            }
+
+            $(element).keypress(function(event) {
+                if (event.shiftKey) {
+                    scope.repostNote += "\n";
+                } else {
+                    if (event.keyCode != 13) return;
+                    event.preventDefault();
+                    repost_entry();
+                }
+            });
+
+            $(element).closest(".modal").find("button.repost-button").click(function(event) {
+                repost_entry();
+            });
+        }
+    }).directive("undoRepost", function($http) {
+        return function(scope, element, attr) {
+            $(element).click(function(event) {
+                $http({
+                    url: '/api/repost_entry/'+scope.entry.id+'/',
+                    method: "DELETE",
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+                }).success(function (data, status, headers, config) {
+                    scope.entry.reposted = false;
+                    if (scope.entry.isRepost) {
+                        var repost_index = jQuery.inArray(scope.entry, scope.entries);
+                        scope.entries.splice(repost_index, 1);
+                        // Find original entry item if it is ready in current scope
+                        // and change its reposted status
+                        for (var i=0; i<scope.entries.length; i++) {
+                            if (scope.entries[i].id == scope.entry.id) {
+                                scope.entries[i].reposted = false;
+                            }
+                        }
+                    }
+                });
+            });
+        }
+    }).directive("unfollow", function($http) {
+        return function(scope, element, attr) {
+            $(element).click(function(event) {
+                if (typeof attr.username == "undefined") {
+                    var username = scope.userProfile.current_username;
+                } else {
+                    var username = attr.username;
+                }
+                $http({
+                    url: "/api/user_fellowship/"+username+"/",
+                    method: "DELETE",
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+                }).success(function (data, status, headers, config) {
+                    if (data.code == 1) {
+                        if (typeof attr.username == "undefined") {
+                            // An authenticated user views another profile
+                            scope.userProfile.is_following = false;
+                            scope.userProfile.follower_count -= 1;
+                        } else {
+                            // An authenticated user views an follower/following list of someone else
+                            if (typeof scope.followingUser == "undefined") {
+                                scope.followerUser.following = false;
+                            } else {
+                                scope.followingUser.following = false;
+                            }
+                            if (scope.username == scope.userProfile.current_username) {
+                                scope.userProfile.following_count -= 1;
+                            }
+                        }
+                    }
+                });
+            });
+        }
+    }).directive("follow", function($http) {
+        return function(scope, element, attr) {
+            $(element).click(function(event) {
+                if (typeof attr.username == "undefined") {
+                    var username = scope.userProfile.current_username;
+                } else {
+                    var username = attr.username;
+                }
+                $http({
+                    url: "/api/user_fellowship/"+username+"/",
+                    method: "POST",
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+                }).success(function (data, status, headers, config) {
+                    if (data.code == 1) {
+                        scope.safeApply(function() {
+                            if (typeof attr.username == "undefined") {
+                                // An authenticated user views another profile
+                                scope.userProfile.is_following = true;
+                                scope.userProfile.follower_count += 1;
+                            } else {
+                                // An authenticated user views an follower/following list of someone else
+                                if (typeof scope.followerUser == "undefined") {
+                                    scope.followingUser.following = true;
+                                } else {
+                                    scope.followerUser.following = true;
+                                }
+                                if (scope.username == scope.userProfile.current_username) {
+                                    scope.userProfile.following_count += 1;
+                                }
+                            }
+                        })
+                    }
+                });
+            });
+        }
+    })
+},{}],15:[function(require,module,exports){
 'use strict';
 
 /* Dashboard Services */
@@ -888,6 +1144,10 @@ angular.module('Dashboard.services', []).factory('InitService', function() {
                 $("#new-entry").trigger("new_entry_event", {new_entry: data});
             });
 
+            announce.on('new_repost', function(data){
+                console.log(data);
+                $("#new-entry").trigger("new_entry_event", {new_entry: data});
+            });
         }
     }
 });

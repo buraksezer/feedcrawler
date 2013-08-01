@@ -24,6 +24,10 @@
                     $scope.busy = false;
                 } else {
                     for(var i = 0; i < data.length; i++) {
+                        if (typeof data[i].repost != 'undefined') {
+                            data[i].repost.note = nl2br(data[i].repost.note);
+                            data[i].isRepost = true;
+                        }
                         for(var j=0; j < data[i].comments.results.length; j++) {
                             // A bit confusing?
                             data[i].comments.results[j].content = nl2br(data[i].comments.results[j].content);

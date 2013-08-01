@@ -1,0 +1,12 @@
+<div class="reposts-header">
+    Reposts
+</div>
+
+<div infinite-scroll='loadRepostList()' infinite-scroll-disabled='busy' class="dashboard-entries">
+    <div class="dashboard-entry" ng-repeat="entry in entries" ng-mouseenter="myClass='show'" ng-mouseleave="myClass=''">
+        <div ng-include="'/static/templates/partials/entry-topbar.html'"></div>
+        <div ng-include="'/static/templates/partials/repost-body.html'"></div>
+        <div ng-include="'/static/templates/partials/helper-boxes.html'"></div>
+        <div ng-include="'/static/templates/partials/comments.html'"></div>
+    </div>
+</div>

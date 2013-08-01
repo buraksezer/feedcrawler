@@ -13,7 +13,6 @@ input,
     border-radius: 0 !important;
 }
 
-
 .navbar-inner {
     background-color: #FFFFFF;
 }
@@ -244,7 +243,6 @@ div.feed-item span.badge {
 
 .dashboard-entry .entry-content {
     padding: 13px;
-    margin-right: 30px;
 }
 
 .dashboard-entry .entry-title {
@@ -351,9 +349,10 @@ label[for="id_feed_search"] {
     color: #005580;
 }
 
+.follower .mugshot,
 .userspace div.user img.mugshot {
     height: 40px;
-    weight: 40px;
+    width: 40px;
 }
 
 .userspace .user small a {
@@ -645,11 +644,15 @@ input.tt-hint {
     display: block;
 }
 
+.repost-body .other-reposts,
+.repost-body .from-now,
 .timeline-entry-interaction a {
     text-decoration: none;
     color: #555555;
 }
 
+.repost-body .other-reposts:hover,
+.repost-body .from-now:hover,
 #lists li a:hover,
 .timeline-entry-interaction a:hover {
     color: #0088CC;
@@ -848,4 +851,79 @@ input[name="list-name"] {
 
 .list-manage:hover {
     color: #0088cc;
+}
+
+.profile-header {
+    padding: 10px;
+    overflow: hidden;
+    border-bottom: 1px solid #E2E2E2;
+}
+
+.profile-header .mugshot {
+    width: 15%;
+    float: left;
+}
+.profile-header .info-area {
+    width: 85%;
+    float: right;
+}
+
+.profile-header .display-name {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.profile-nothing-reposted {
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 5px;
+}
+
+.repost-item {
+    font-size: 13px;
+    border-bottom: 1px dotted #E2E2E2;
+    margin-bottom: 10px;
+}
+
+.quote {
+    margin-left: 7px;
+}
+
+.reposted {
+    font-size: 12px;
+}
+
+.repost-body .header {
+    font-size: 13.5px;
+}
+
+.profile-header .info-area .user-relations {
+    font-size: 12px;
+}
+
+.userprofile .follower {
+    padding: 5px;
+}
+
+.follower:hover {
+    background-color: #FBFBFB;
+}
+
+.follower .follower-display-name {
+    text-decoration: none;
+    color: #555555;
+}
+
+.follower .follower-display-name:hover {
+    color: #0088CC;
+}
+
+.reposts-header,
+.followers-header,
+.following-header {
+    border-bottom: 1px dotted #E2E2E2;
+    padding: 5px;
+    font-size: 16px;
+    font-weight: bold;
 }

@@ -1,0 +1,34 @@
+    <div class="profile-header">
+        <div class="mugshot">
+            <img class="img-rounded" src="{{ userProfile.mugshot_url }}"/>
+        </div>
+        <div class="info-area">
+            <span class="display-name">{{ userProfile.display_name }}</span>
+            <span ng-hide="username == userProfile.current_username" ng-switch on="userProfile.is_following">
+                <button ng-switch-when="false" class="pull-right btn btn-primary btn-small" follow><strong>Follow</strong></button>
+                <button ng-switch-when="true" class="pull-right btn btn-primary btn-small" unfollow><strong>You Following</strong></button>
+            </span>
+            <span class="user-relations">
+                <br/>
+                <a class="repost-count" href="/user/{{ userProfile.current_username }}">
+                    {{ userProfile.repost_count }}
+                    <span ng-switch on="userProfile.repost_count > 1">
+                        <span ng-switch-when="true"> reposts</span>
+                        <span ng-switch-when="false"> repost</span>
+                    </span>
+                </a>
+                <span>&sdot;</span>
+                <a class="follower-count" href="/user/{{ userProfile.current_username }}/followers">
+                    {{ userProfile.follower_count }}
+                    <span ng-switch on="userProfile.follower_count> 1">
+                        <span ng-switch-when="true"> followers</span>
+                        <span ng-switch-when="false"> follower</span>
+                    </span>
+                </a>
+                <span>&sdot;</span>
+                <a class="following-count" href="/user/{{ userProfile.current_username }}/following">
+                    {{ userProfile.following_count }} following
+                </a>
+            </span>
+        </div>
+    </div>

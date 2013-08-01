@@ -139,7 +139,6 @@ class Feed(models.Model):
         super(Feed, self).save(*args, **kwargs)
 
 
-
 class FeedTag(models.Model):
     tag = models.CharField(unique=True, max_length=512)
     feed = models.ManyToManyField(Feed)
@@ -165,6 +164,8 @@ class EntryTag(models.Model):
 
     def save(self, *args, **kwargs):
         super(EntryTag, self).save(*args, **kwargs)
+
+
 
 class Entry(models.Model):
     title = models.CharField(max_length=2048)
@@ -208,14 +209,27 @@ class Entry(models.Model):
     feed = models.ForeignKey(Feed)
 
     class Meta:
-        ordering = ["-id"]
+        ordering = ["-created_at"]
 
     def __unicode__(self):
         return self.title
 
-
     def save(self, *args, **kwargs):
         super(Entry, self).save(*args, **kwargs)
+
+
+class RepostEntry(models.Model):
+    note = models.TextField(blank=True)
+    owner = models.ForeignKey(User)
+    entry = models.ForeignKey(Entry)
+    target_ids = models.CommaSeparatedIntegerField(blank=True, max_length=200)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __unicode__(self):
+        return self.owner.username+" shared "+self.entry.title
 
 
 class Interaction(models.Model):
@@ -226,6 +240,7 @@ class Interaction(models.Model):
     class Meta:
         ordering = ["-id"]
 
+
 class Comment(Interaction):
     content = models.TextField()
     updated_at = models.DateTimeField(auto_now=True)
@@ -235,6 +250,7 @@ class Comment(Interaction):
 
     def __unicode__(self):
         return str(self.id)
+
 
 class EntryLike(Interaction):
     def __unicode__(self):

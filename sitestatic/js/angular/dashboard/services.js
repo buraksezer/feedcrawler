@@ -18,6 +18,10 @@ angular.module('Dashboard.services', []).factory('InitService', function() {
                 $("#new-entry").trigger("new_entry_event", {new_entry: data});
             });
 
+            announce.on('new_repost', function(data){
+                console.log(data);
+                $("#new-entry").trigger("new_entry_event", {new_entry: data});
+            });
         }
     }
 });

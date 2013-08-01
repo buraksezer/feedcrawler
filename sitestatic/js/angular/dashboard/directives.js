@@ -131,7 +131,7 @@ angular.module('Dashboard.directives', []).
 
             $(element).closest(".comments-area").find("textarea").keypress(function(event) {
                 if (event.shiftKey) {
-                    scope.commentContent =+ "\n";
+                    scope.commentContent += "\n";
                 } else {
                     if (event.keyCode != 13) return;
                     event.preventDefault();
@@ -178,7 +178,7 @@ angular.module('Dashboard.directives', []).
 
             $(element).closest(".edit-comment-form").find("textarea").keypress(function(event) {
                 if (event.shiftKey) {
-                    scope.commentContent =+ "\n";
+                    scope.commentContent += "\n";
                 } else {
                     if (event.keyCode != 13) return;
                     event.preventDefault();
@@ -447,6 +447,150 @@ angular.module('Dashboard.directives', []).
                 if (!$(event.target).hasClass("list-manage")) {
                     $("#lists").slideToggle('fast');
                 }
-            })
+            });
         }
-    });
+    }).directive('repostEntryModal', function() {
+        return {
+            templateUrl: '/static/templates/repost-entry-modal.html'
+        }
+    }).directive('runRepostEntryModal', function($rootScope) {
+        return function(scope, element, attrs) {
+            $(element).click(function(event) {
+                $("#repost-notebox_"+scope.entry.id).autosize();
+                scope.repostComment = undefined;
+            });
+        }
+    }).directive("repostEntry", function($http) {
+        return function(scope, element, attr) {
+            function repost_entry() {
+                $http({
+                    url: '/api/repost_entry/'+scope.entry.id+'/',
+                    method: "POST",
+                    data:  $.param({note: scope.repostNote}),
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+                }).success(function (data, status, headers, config) {
+                    $('#repostModal_'+scope.entry.id).modal('hide')
+                    scope.entry.reposted = true;
+
+                    var new_item = jQuery.extend(true, {}, scope.entry);
+                    new_item.created_at = data.created_at;
+                    new_item.isRepost = true;
+                    new_item.repost = {
+                        'note': scope.repostNote,
+                        'id': data.id,
+                        'owner_display_name': "You",
+                        'num_owner': data.num_owner
+                    }
+
+                    scope.safeApply(function() {
+                        scope.entries.unshift(new_item);
+                    });
+                });
+            }
+
+            $(element).keypress(function(event) {
+                if (event.shiftKey) {
+                    scope.repostNote += "\n";
+                } else {
+                    if (event.keyCode != 13) return;
+                    event.preventDefault();
+                    repost_entry();
+                }
+            });
+
+            $(element).closest(".modal").find("button.repost-button").click(function(event) {
+                repost_entry();
+            });
+        }
+    }).directive("undoRepost", function($http) {
+        return function(scope, element, attr) {
+            $(element).click(function(event) {
+                $http({
+                    url: '/api/repost_entry/'+scope.entry.id+'/',
+                    method: "DELETE",
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+                }).success(function (data, status, headers, config) {
+                    scope.entry.reposted = false;
+                    if (scope.entry.isRepost) {
+                        var repost_index = jQuery.inArray(scope.entry, scope.entries);
+                        scope.entries.splice(repost_index, 1);
+                        // Find original entry item if it is ready in current scope
+                        // and change its reposted status
+                        for (var i=0; i<scope.entries.length; i++) {
+                            if (scope.entries[i].id == scope.entry.id) {
+                                scope.entries[i].reposted = false;
+                            }
+                        }
+                    }
+                });
+            });
+        }
+    }).directive("unfollow", function($http) {
+        return function(scope, element, attr) {
+            $(element).click(function(event) {
+                if (typeof attr.username == "undefined") {
+                    var username = scope.userProfile.current_username;
+                } else {
+                    var username = attr.username;
+                }
+                $http({
+                    url: "/api/user_fellowship/"+username+"/",
+                    method: "DELETE",
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+                }).success(function (data, status, headers, config) {
+                    if (data.code == 1) {
+                        if (typeof attr.username == "undefined") {
+                            // An authenticated user views another profile
+                            scope.userProfile.is_following = false;
+                            scope.userProfile.follower_count -= 1;
+                        } else {
+                            // An authenticated user views an follower/following list of someone else
+                            if (typeof scope.followingUser == "undefined") {
+                                scope.followerUser.following = false;
+                            } else {
+                                scope.followingUser.following = false;
+                            }
+                            if (scope.username == scope.userProfile.current_username) {
+                                scope.userProfile.following_count -= 1;
+                            }
+                        }
+                    }
+                });
+            });
+        }
+    }).directive("follow", function($http) {
+        return function(scope, element, attr) {
+            $(element).click(function(event) {
+                if (typeof attr.username == "undefined") {
+                    var username = scope.userProfile.current_username;
+                } else {
+                    var username = attr.username;
+                }
+                $http({
+                    url: "/api/user_fellowship/"+username+"/",
+                    method: "POST",
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+                }).success(function (data, status, headers, config) {
+                    if (data.code == 1) {
+                        scope.safeApply(function() {
+                            if (typeof attr.username == "undefined") {
+                                // An authenticated user views another profile
+                                scope.userProfile.is_following = true;
+                                scope.userProfile.follower_count += 1;
+                            } else {
+                                // An authenticated user views an follower/following list of someone else
+                                if (typeof scope.followerUser == "undefined") {
+                                    scope.followingUser.following = true;
+                                } else {
+                                    scope.followerUser.following = true;
+                                }
+                                if (scope.username == scope.userProfile.current_username) {
+                                    scope.userProfile.following_count += 1;
+                                }
+                            }
+                        })
+                    }
+                });
+            });
+        }
+    })

@@ -1,0 +1,18 @@
+<div ng-hide="!notFound" class="dashboard-404">
+    <i class="icon-frown"></i>
+    <p>The entry could not be found.</p>
+</div>
+
+<div ng-show="loadingEntry" class="loading-entry" class="loading-entry">
+    <p>Please wait...</p>
+    <img src="/static/img/ajax-loader.gif"/>
+</div>
+
+<div ng-show="entry" class="dashboard-entries">
+        <div ng-hide="entry.instantEntry == true" ng-mouseenter="myClass='show'" ng-mouseleave="myClass=''" class="dashboard-entry">
+            <div ng-include="'/static/templates/partials/entry-topbar.html'"></div>
+            <div ng-include="'/static/templates/partials/repost-body.html'"></div>
+            <div ng-include="'/static/templates/partials/helper-boxes.html'"></div>
+            <div ng-include="'/static/templates/partials/comments.html'"></div>
+        </div>
+</div>

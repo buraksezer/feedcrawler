@@ -1,7 +1,7 @@
 <div ng-show="profile" class="profile">
     <div class="user">
         <img class="mugshot img-rounded" src="{{ profile.mugshot_url }}"/>
-        <dd class="username"><a href="/user/{{ user.username }}/">{{ profile.display_name }}</a></dd>
+        <dd class="username"><a href="/user/{{ profile.username }}/">{{ profile.display_name }}</a></dd>
         <small class="hint--bottom" data-hint="Show your subscriptions" ng-show="subscriptionCount  == 0"><a href="/subscriptions">No subscription</a></small>
         <small class="hint--bottom" data-hint="Show your subscriptions" ng-show="subscriptionCount  == 1 "><a href="/subscriptions">{{ subscriptionCount }} subscription</a></small>
         <small class="hint--bottom" data-hint="Show your subscriptions" ng-show="subscriptionCount  > 1 "><a href="/subscriptions">{{ subscriptionCount }} subscriptions</a></small>
@@ -51,18 +51,15 @@
             </a>
         </div>
         <!--
-        <div id="new-interaction-count" class="control-item interactions" count-new-interactions>
-            <a href="/interactions">
-                <i class="icon-exchange"></i>
+        <div class="control-item chap">
+            <a href="/">
+                <i class="icon-group"></i>
                 <span class="text">
-                    Interactions
-                </span>
-                <span ng-show="interaction_count > 0" class="badge badge-important pull-right interaction-count">
-                    {{ interaction_count }}
+                    Chaps
                 </span>
             </a>
         </div>
-        -->
+    -->
         <div class="control-item interactions">
             <a href="/interactions">
                 <i class="icon-exchange"></i>

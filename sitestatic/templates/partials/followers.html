@@ -1,0 +1,17 @@
+<div class="followers-header">
+    Followers
+</div>
+<div infinite-scroll='loadFollowerList()' infinite-scroll-disabled='busy' class="followers">
+    <div class="follower" ng-repeat="followerUser in followerUsers">
+        <img class="mugshot img-rounded" src="{{ followerUser.mugshot_url }}"/>
+        <a class="follower-display-name" href="/user/{{ followerUser.username }}">{{ followerUser.display_name }}</a>
+        <span ng-hide="username == followerUser.username" ng-switch on="followerUser.following">
+            <button ng-switch-when="false" class="pull-right btn btn-primary btn-small" follow username="{{ followerUser.username }}"><strong>Follow</strong></button>
+            <button ng-switch-when="true" class="pull-right btn btn-primary btn-small" unfollow username="{{ followerUser.username }}"><strong>Following</strong></button>
+        </span>
+    </div>
+</div>
+<div id="timeline-endless-loading">
+    <img ng-show="busy" src="/static/img/ajax-loader.gif"/>
+    <p ng-show="endOfData">~ No more follower ~</p>
+</div>

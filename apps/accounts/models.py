@@ -4,7 +4,12 @@ from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
 from userena.models import UserenaBaseProfile
 
-class MyProfile(UserenaBaseProfile):
+
+class UserProfile(UserenaBaseProfile):
     user = models.OneToOneField(User,unique=True,
-        verbose_name=_('user'),related_name='my_profile')
-    favourite_snack = models.CharField(_('favourite snack'),max_length=5)
+        verbose_name=_('user'),related_name='user_profile')
+
+
+class UserRelation(models.Model):
+    user = models.ForeignKey(User)
+    follower = models.ForeignKey(User, related_name="follower")

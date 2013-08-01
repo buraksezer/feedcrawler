@@ -3,8 +3,9 @@ import datetime
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from apps.storage.models import (Feed, Entry, EntryLike,
-    Comment, ReadLater, List)
-from apps.storage.tasks import SyncFeed
+    Comment, ReadLater, List, RepostEntry)
+from apps.accounts.models import UserRelation
+from apps.storage.tasks import sync_feed
 from userena.utils import get_profile_model, get_user_model
 from utils import feedfinder
 from django.db.models import Q
@@ -40,7 +41,9 @@ def get_user_profile(username):
     try:
         profile = user.get_profile()
     except profile_model.DoesNotExist:
-        profile = profile_model.objects.create(user=user)
+        return False
+        # What the fuck is that?
+        #profile = profile_model.objects.create(user=user)
     return profile
 
 
@@ -73,20 +76,27 @@ def get_latest_comments(entry_id, offset=0, limit=2, whole=False):
     return {"results": results, "count": count}
 
 
+def get_display_name(user):
+    display_name = user.get_full_name()
+    if not display_name:
+        display_name = user.username
+    return display_name
+
+
 class AuthenticatedUser(APIView):
     authentication_classes = (authentication.SessionAuthentication,)
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request, pk=None):
-        profile = get_user_profile(request.user.username)
         user = {
             "username": request.user.username,
-            "subs_count": profile.user.feed_set.count(),
-            "display_name": profile.user.get_full_name() if profile.user.get_full_name() else profile.user.username,
-            "mugshot_url": profile.get_mugshot_url(),
+            "subs_count": request.user.feed_set.count(),
+            "display_name": get_display_name(request.user),
+            "mugshot_url": request.user.user_profile.get_mugshot_url(),
             "rl_count": ReadLater.objects.filter(user=request.user).count(),
             "lists": [{"title": _list.title, "slug": _list.slug, "id": _list.id} for _list in List.objects.filter(user=request.user)]
         }
+
         return Response(user)
 
 
@@ -94,13 +104,12 @@ class Timeline(APIView):
     authentication_classes = (authentication.SessionAuthentication,)
     permission_classes = (permissions.IsAuthenticated,)
 
-    def get(self, request, feed_ids=[], pk=None):
-        offset = request.GET.get("offset", 0)
-        limit = request.GET.get("limit", 15)
-        entries = get_user_timeline(request.user.id, feed_ids=feed_ids, offset=offset, limit=limit)
+    def create_result(self, entries, request, repost=False, follower_ids=[]):
         results = []
+        user_id = request.user.id
         for entry in entries:
             like_msg, like_count = process_like(entry["id"], request.user.id)
+            created_at = entry["repostentry__created_at"] if repost else entry["created_at"]
             item = {
                 'id': entry["id"],
                 'title': entry["title"],
@@ -111,11 +120,61 @@ class Timeline(APIView):
                 'like_msg': like_msg,
                 'like_count': like_count,
                 'slug': entry["slug"],
-                'created_at': int(time.mktime(entry["created_at"].timetuple())*1000),
+                'created_at': int(time.mktime(created_at.timetuple())*1000),
                 'comments': get_latest_comments(entry["id"]),
-                'inReadLater': True if ReadLater.objects.filter(user=request.user, entry__id=entry["id"]) else False
+                'inReadLater': True if ReadLater.objects.filter(user=request.user, entry__id=entry["id"]) else False,
+                'reposted': True if RepostEntry.objects.filter(entry_id=entry["id"], owner=request.user) else False
             }
+            if repost:
+                if entry["repostentry__owner_id"] == user_id:
+                    owner_display_name = "You"
+                else:
+                    owner_display_name = get_display_name(User.objects.get(id=entry["repostentry__owner_id"]))
+
+                repost = {
+                    "note": entry["repostentry__note"],
+                    "id": entry["repostentry__id"],
+                    "owner_display_name": owner_display_name,
+                    "owner_username": entry["repostentry__owner__username"],
+                    "num_owner": RepostEntry.objects.filter(Q(entry__id=entry["id"]) & Q(owner_id__in=follower_ids)).count()-1,
+                    #"created_at": int(time.mktime(entry["RepostEntry__created_at"].timetuple())*1000),
+                }
+                item["repost"] = repost
             results.append(item)
+        return results
+
+    def get(self, request, feed_ids=[], pk=None):
+        offset = request.GET.get("offset", 0)
+        limit = request.GET.get("limit", 15)
+        # Get entry items
+        entries = get_user_timeline(request.user.id, feed_ids=feed_ids, offset=offset, limit=limit)
+        results = self.create_result(entries, request)
+
+        # If feed_ids list is not empty, this is a list request
+        # So getting repost items are unnecessary.
+        if not feed_ids:
+            # Get repost items
+            follower_ids = [follower[0] for follower in UserRelation.objects.filter(follower_id=request.user.id).values_list("user_id")]
+            follower_ids.append(request.user.id)
+            if follower_ids:
+                oldest_entry = entries[int(limit)-int(offset)-1]["created_at"]
+                raw_reposted_items = Entry.objects.filter(Q(repostentry__created_at__gt=oldest_entry) \
+                    & Q(repostentry__owner_id__in=follower_ids)).order_by("-repostentry__created_at").values("id", \
+                    "title", "feed__slug", \
+                    "feed__title", "link", \
+                    "available_in_frame", \
+                    "created_at", "slug", \
+                    "repostentry__note", \
+                    "repostentry__owner_id", \
+                    "repostentry__owner__username", \
+                    "repostentry__id", \
+                    "repostentry__created_at")[offset:limit]
+                reposted_items = []
+                for item in raw_reposted_items:
+                    if not item["id"] in [r_item["id"] for r_item in reposted_items]:
+                        reposted_items.append(item)
+                results += self.create_result(reposted_items, request, repost=True, follower_ids=follower_ids)
+                results.sort(key=lambda result: result["created_at"], reverse=True)
         return Response(results)
 
 
@@ -125,6 +184,9 @@ class ListTimeline(APIView):
 
     def get(self, request, list_slug):
         feed_ids = [feed[0] for feed in List.objects.filter(slug=list_slug).values_list("feed__id")]
+        if len(feed_ids) == 1 and feed_ids[0] is None:
+            # This is an empty list
+            return Response({})
         timeline = Timeline()
         return timeline.get(request, feed_ids)
 
@@ -335,7 +397,7 @@ class UnsubscribeByFeedId(APIView):
     authentication_classes = (authentication.SessionAuthentication,)
     permission_classes = (permissions.IsAuthenticated,)
 
-    def get(self, request, feed_id):
+    def post(self, request, feed_id):
         try:
             feed = Feed.objects.get(id=feed_id)
         except Feed.DoesNotExist:
@@ -359,7 +421,7 @@ class SubscribeByFeedId(APIView):
     authentication_classes = (authentication.SessionAuthentication,)
     permission_classes = (permissions.IsAuthenticated,)
 
-    def get(self, request, feed_id):
+    def post(self, request, feed_id):
         # FIXME: We should handle error cases.
         feed_obj = Feed.objects.get(id=feed_id)
         user = User.objects.get(username=request.user.username)
@@ -402,7 +464,7 @@ class SubscribeFeed(APIView):
             feed_obj = Feed.objects.get(feed_url=url)
             feed_obj.users.add(user)
             feed_obj.save()
-            SyncFeed.apply_async((feed_obj,))
+            sync_feed.apply_async((feed_obj,))
         announce_client.register_group(request.user.id, feed_obj.id)
         return Response({"code": 1, "text": 'New feed source has been added successfully.'})
 
@@ -748,3 +810,280 @@ class CreateList(APIView):
             item = List(title=request.POST.get("title"), user=request.user)
             item.save()
             return Response({"code": 1, "msg": "Successfully created.", "id": item.id, "slug": item.slug})
+
+
+class UserProfile(APIView):
+    authentication_classes = (authentication.SessionAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request, username):
+        profile = get_user_profile(username)
+        user_id = profile.user.id
+        follower_ids = [follower[0] for follower in \
+            UserRelation.objects.filter(user_id=user_id).values_list("follower_id")]
+
+        user = {
+            "subs_count": profile.user.feed_set.count(),
+            "display_name": profile.user.get_full_name() \
+                if profile.user.get_full_name() else profile.user.username,
+            "mugshot_url": profile.get_mugshot_url(),
+            "is_following": True if request.user.id in follower_ids else False,
+            "following_count": UserRelation.objects.filter(follower__username=username).count(),
+            "follower_count": len(follower_ids),
+            "repost_count": RepostEntry.objects.filter(owner_id=user_id).count()
+        }
+
+        return Response(user)
+
+
+class RepostList(APIView):
+    authentication_classes = (authentication.SessionAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request, username):
+        offset = request.GET.get("offset", 0)
+        limit = request.GET.get("limit", 15)
+
+        profile = get_user_profile(username)
+        user_id = profile.user.id
+        follower_ids = [follower[0] for follower in \
+            UserRelation.objects.filter(user_id=user_id).values_list("follower_id")]
+
+        reposts = Entry.objects.filter(repostentry__owner_id=user_id).order_by("-repostentry__created_at").values("id", \
+                "title", "feed__slug", \
+                "feed__title", "link", \
+                "available_in_frame", \
+                "created_at", "slug", \
+                "repostentry__note", \
+                "repostentry__owner_id", \
+                "repostentry__owner__username", \
+                "repostentry__id", \
+                "repostentry__created_at")[offset:limit]
+
+        repost_items = []
+        for repost in reposts:
+            like_msg, like_count = process_like(repost["id"], user_id)
+            item = {
+                'id': repost["id"],
+                'title': repost["title"],
+                'feed_slug': repost["feed__slug"],
+                'feed_title': repost["feed__title"],
+                'link': repost["link"],
+                'available': 1 if repost["available_in_frame"] is None else repost["available_in_frame"],
+                'like_msg': like_msg,
+                'like_count': like_count,
+                'slug': repost["slug"],
+                'created_at': int(time.mktime(repost["repostentry__created_at"].timetuple())*1000),
+                'comments': get_latest_comments(repost["id"]),
+                'inReadLater': True if ReadLater.objects.filter(user=request.user, entry__id=repost["id"]) else False,
+                'reposted': True if RepostEntry.objects.filter(entry_id=repost["id"], owner=request.user) else False
+            }
+
+            repost = {
+                    "note": repost["repostentry__note"],
+                    "id": repost["repostentry__id"],
+                    "owner_display_name": get_display_name(User.objects.get(id=repost["repostentry__owner_id"])),
+                    "owner_username": repost["repostentry__owner__username"],
+                    "num_owner": RepostEntry.objects.filter(Q(entry__id=repost["id"]) & Q(owner_id__in=follower_ids)).count(),
+                    #"created_at": int(time.mktime(entry["RepostEntry__created_at"].timetuple())*1000),
+            }
+            item["repost"] = repost
+            repost_items.append(item)
+        return Response(repost_items)
+
+
+class RepostEntryItem(APIView):
+    authentication_classes = (authentication.SessionAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request, entry_id):
+        note = request.POST.get("note", None)
+        try:
+            reposted_entry = RepostEntry.objects.get(entry_id=entry_id, owner=request.user)
+            return Response({'code': 0, 'msg': 'Already reposted'})
+        except RepostEntry.DoesNotExist:
+            if not note.strip():
+                reposted_entry = RepostEntry(entry_id=entry_id, owner=request.user)
+            reposted_entry = RepostEntry(entry_id=entry_id, owner=request.user, note=note)
+            reposted_entry.save()
+
+            follower_ids = [follower[0] for follower in \
+                            UserRelation.objects.filter(user=request.user).values_list("follower_id")]
+            num_owner = RepostEntry.objects.filter(Q(entry__id=entry_id) \
+                        & Q(owner_id__in=follower_ids)).count()
+
+            entry_item = Entry.objects.filter(id=entry_id).values("id", "slug", "title", \
+                                                                    "feed__id", \
+                                                                    "feed__title", \
+                                                                    "feed__slug", \
+                                                                    "link", "available_in_frame", \
+                                                                    "created_at")[0]
+            data = {
+                'id': entry_item["id"],
+                'slug': entry_item["slug"],
+                'title': entry_item["title"],
+                'feed_id': entry_item["feed__id"],
+                'feed_title': entry_item["feed__title"],
+                'feed_slug': entry_item["feed__slug"],
+                'link': entry_item["link"],
+                'available': 1 if entry_item["available_in_frame"] is None else entry_item["available_in_frame"],
+                'created_at': int(time.mktime(reposted_entry.created_at.timetuple())*1000),
+                'isRepost': True,
+                'repost': {
+                    "note": note,
+                    "id": reposted_entry.id,
+                    "owner_display_name": get_display_name(request.user),
+                    "owner_username": request.user.username,
+                    "num_owner": num_owner
+                }
+            }
+            # Broadcast reposted item to user's followers
+            announce_client.broadcast_group(request.user.username+"_profile", \
+                                            'new_repost', data=data)
+
+            return Response({'code': 1, 'msg': 'Succesfully reposted.', \
+                            'id': reposted_entry.id, \
+                            'created_at': int(time.mktime(reposted_entry.created_at.timetuple())*1000), \
+                            'num_owner': num_owner})
+
+    def delete(self, request, entry_id):
+        try:
+            shared_entry = RepostEntry.objects.get(entry_id=entry_id, owner=request.user)
+            shared_entry.delete()
+            return Response({'code': -1, 'msg': 'Succesfully removed.'})
+        except RepostEntry.DoesNotExist:
+            return Response({'code': 0, 'msg': 'Repost could not be found for %s' % entry_id})
+
+
+class SingleRepost(APIView):
+    authentication_classes = (authentication.SessionAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request, repost_id):
+        try:
+            repost = RepostEntry.objects.filter(id=repost_id).values("id", "entry__id", \
+                "entry__title", "entry__feed__slug", "entry__feed__title", "entry__link", \
+                "entry__available_in_frame", "entry__created_at", "entry__slug", \
+                "note", "created_at", "owner_id")[0]
+        except (RepostEntry.DoesNotExist, IndexError):
+            return Response({'code': 0, 'msg': 'The repost item could not be found.'})
+
+        like_msg, like_count = process_like(repost["id"], request.user.id)
+        item = {
+            'repost_id': repost["id"],
+            'id': repost["entry__id"],
+            'slug': repost["entry__slug"],
+            'title': repost["entry__title"],
+            'feed_slug': repost["entry__feed__slug"],
+            'feed_title': repost["entry__feed__title"],
+            'link': repost["entry__link"],
+            'available': 1 if repost["entry__available_in_frame"] is \
+                                None else repost["entry__available_in_frame"],
+            'like_msg': like_msg,
+            'like_count': like_count,
+            'created_at': int(time.mktime(repost["created_at"].timetuple())*1000),
+            'comments': get_latest_comments(repost["id"], whole=True),
+            'inReadLater': True if ReadLater.objects.filter(user=request.user, \
+                                    entry__id=repost["entry__id"]) else False,
+        }
+        user_id = request.user.id
+        owner_ids = [follower[0] for follower in \
+                        UserRelation.objects.filter(follower_id=user_id).values_list("user_id")]
+
+        if repost["owner_id"] == user_id:
+            owner_display_name = "You"
+        else:
+            owner_display_name = get_display_name(User.objects.get(id=repost["owner_id"]))
+
+        repost_keyword = {
+            "note": repost["note"],
+            "id": repost["id"],
+            "owner_display_name": owner_display_name,
+            "num_owner": RepostEntry.objects.filter(Q(entry__id=repost["entry__id"]) & Q(owner_id__in=owner_ids)).count(),
+        }
+        item["repost"] = repost_keyword
+        return Response(item)
+
+
+class UserFellowship(APIView):
+    authentication_classes = (authentication.SessionAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request, username):
+        if username == request.user.username:
+            return Response({"code": 0, "msg": "You cannot follow yourself."})
+        try:
+            UserRelation.objects.get(user__username=username, follower=request.user)
+            return Response({"code": 0, "msg": "%s already follows %s" % \
+                            (request.user.username, username)})
+        except UserRelation.DoesNotExist:
+            try:
+                user = User.objects.get(username=username)
+            except User.DoesNotExist:
+                return Response({"code": 0, "msg": "Username '%s' could not be found." % username})
+            relation = UserRelation(user=user, follower=request.user)
+            relation.save()
+            # Register user's announce channel to get instant notifications
+            announce_client.register_group(request.user.id, username+"_profile")
+            return Response({"code": 1})
+
+    def delete(self, request, username):
+        try:
+            relation = UserRelation.objects.get(user__username=username, follower=request.user)
+        except UserRelation.DoesNotExist:
+            return Response({"code": 0, "msg": "%s does not follow %s" % \
+                            (request.user.username, username)})
+
+        relation.delete()
+        announce_client.unregister_group(request.user.id, username+"_profile")
+        return Response({"code": 1})
+
+
+class FollowerList(APIView):
+    authentication_classes = (authentication.SessionAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request, username):
+        offset = request.GET.get("offset", 0)
+        limit = request.GET.get("limit", 15)
+
+        followers = []
+        follower_items = UserRelation.objects.select_related().filter(user__username=username)[offset:limit]
+        for follower_item in follower_items:
+            follower_username = follower_item.follower.get_profile().user.username
+            following = True if UserRelation.objects.filter(user__username=follower_username, \
+                follower__username=username) else False
+
+            follower = {
+                "username": follower_username,
+                "display_name": follower_item.follower.get_profile().get_full_name_or_username(),
+                "mugshot_url": follower_item.follower.get_profile().get_mugshot_url(),
+                "following": following
+            }
+            followers.append(follower)
+        return Response(followers)
+
+
+class FollowingList(APIView):
+    authentication_classes = (authentication.SessionAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request, username):
+        offset = request.GET.get("offset", 0)
+        limit = request.GET.get("limit", 15)
+
+        following_users = []
+        following_items = UserRelation.objects.select_related().filter(follower__username=username)[offset:limit]
+        for following_item in following_items:
+            following_username = following_item.user.get_profile().user.username
+            following = True if UserRelation.objects.filter(user__username=following_username, \
+                follower__username=username) else False
+
+            following_user = {
+                "username": following_username,
+                "display_name": following_item.user.get_profile().get_full_name_or_username(),
+                "mugshot_url": following_item.user.get_profile().get_mugshot_url(),
+                "following": following
+            }
+            following_users.append(following_user)
+        return Response(following_users)

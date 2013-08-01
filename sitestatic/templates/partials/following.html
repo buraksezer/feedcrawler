@@ -1,0 +1,17 @@
+<div class="following-header">
+    Following
+</div>
+<div infinite-scroll='loadFollowingList()' infinite-scroll-disabled='busy' class="following">
+    <div class="follower" ng-repeat="followingUser in followingUsers">
+        <img class="mugshot img-rounded" src="{{ followingUser.mugshot_url }}"/>
+        <a class="following-display-name" href="/user/{{ followingUser.username }}">{{ followingUser.display_name }}</a>
+        <span ng-hide="username == followingUser.username" ng-switch on="followingUser.following">
+            <button ng-switch-when="false" class="pull-right btn btn-primary btn-small" follow username="{{ followingUser.username }}"><strong>Follow</strong></button>
+            <button ng-switch-when="true" class="pull-right btn btn-primary btn-small" unfollow username="{{ followingUser.username }}"><strong>Following</strong></button>
+        </span>
+    </div>
+</div>
+<div id="timeline-endless-loading">
+    <img ng-show="busy" src="/static/img/ajax-loader.gif"/>
+    <p ng-show="endOfData">~ No more following ~</p>
+</div>
