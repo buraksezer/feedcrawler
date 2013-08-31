@@ -23,7 +23,6 @@ class Feed(models.Model):
     # The date the feed was last updated,
     # as a string in the same format as it was published in the original feed.
     updated_at = models.DateField(null=True)
-    users = models.ManyToManyField(User)
 
     image = models.CharField(null=True, max_length=2048)
     language = models.CharField(null=True, max_length=512)
