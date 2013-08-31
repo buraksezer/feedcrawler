@@ -151,7 +151,11 @@ angular.module("Dashboard.controllers", [])
         };
 
         $scope.unsubscribeFeed = function(id) {
-            $http.post("/api/unsubscribe/"+id+"/").success(function(data) {
+            $http({
+                url: "/api/unsubscribe/"+id+"/",
+                method: "DELETE",
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+            }).success(function (data, status, headers, config) {
                 if (data.code == 1){
                     $scope.feed_detail.feed.is_subscribed = false;
                     $scope.feed_detail.feed.subs_count -= 1;

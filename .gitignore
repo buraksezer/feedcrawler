@@ -3,6 +3,9 @@ settings.py
 collect_static
 celerybeat-schedule
 log/*.log
+cookbooks
+tmp
+.vagrant
 *.log
 *.py[cod]
 

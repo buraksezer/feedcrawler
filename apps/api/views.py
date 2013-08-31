@@ -1,12 +1,10 @@
 import time
 import datetime
-from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from apps.storage.models import (Feed, Entry, EntryLike,
     Comment, ReadLater, List, RepostEntry)
-from apps.accounts.models import UserRelation
+from apps.accounts.models import UserRelation, FeedUserRelation
 from apps.storage.tasks import sync_feed
-from userena.utils import get_profile_model, get_user_model
 from utils import feedfinder
 from django.db.models import Q
 from django.db import IntegrityError
@@ -35,21 +33,12 @@ def process_like(entry_id, user_id):
     return like_msg, like_count
 
 
-def get_user_profile(username):
-    user = get_object_or_404(get_user_model(), username__iexact=username)
-    profile_model = get_profile_model()
-    try:
-        profile = user.get_profile()
-    except profile_model.DoesNotExist:
-        return False
-        # What the fuck is that?
-        #profile = profile_model.objects.create(user=user)
-    return profile
-
-
 def get_user_timeline(user_id, feed_ids=[], offset=0, limit=15):
     if not feed_ids:
-        feed_ids = [feed_id[0] for feed_id in Feed.objects.filter(users=user_id).values_list("id")]
+        feed_ids = [feed_id[0] for feed_id in \
+                    FeedUserRelation.objects.filter(show_on_stream=True, \
+                        user_id=user_id).values_list("feed_id")]
+
     return Entry.objects.filter(feed_id__in=feed_ids).values("id", "title", "feed__slug", \
         "feed__title", "link", "available_in_frame", "created_at", "slug")[offset:limit]
 
@@ -137,7 +126,6 @@ class Timeline(APIView):
                     "owner_display_name": owner_display_name,
                     "owner_username": entry["repostentry__owner__username"],
                     "num_owner": RepostEntry.objects.filter(Q(entry__id=entry["id"]) & Q(owner_id__in=follower_ids)).count()-1,
-                    #"created_at": int(time.mktime(entry["RepostEntry__created_at"].timetuple())*1000),
                 }
                 item["repost"] = repost
             results.append(item)
@@ -233,6 +221,7 @@ class SingleEntry(APIView):
         }
         return Response(item)
 
+
 class FeedDetail(APIView):
     authentication_classes = (authentication.SessionAuthentication,)
     permission_classes = (permissions.IsAuthenticated,)
@@ -257,7 +246,7 @@ class FeedDetail(APIView):
                 'title': feed["title"],
                 'tagline': feed["tagline"],
                 'link': feed["link"],
-                'is_subscribed': True if feed_query.users.filter(username=request.user.username) else False,
+                'is_subscribed': True if feed_query.feeduserrelation_set.filter(user=request.user) else False,
                 'subs_count': feed_query.users.count(),
                 'last_sync': int(time.mktime(feed["last_sync"].timetuple())*1000),
             }
@@ -311,6 +300,7 @@ class SubsSearch(APIView):
                 )
         return Response(results)
 
+
 class Reader(APIView):
     authentication_classes = (authentication.SessionAuthentication,)
 
@@ -360,30 +350,22 @@ class Reader(APIView):
         try:
             next_item = Entry.objects.filter(feed=feed_id, \
                 id__gt=entry["id"]).order_by("id").values("link", "slug", "title")[0]
-            #n_available = next_item.available_in_frame
-            #if n_available is None:
-            #    n_available = 1
             next = {
                 "feed_id": feed_id,
                 "link": next_item["link"],
                 "slug": next_item["slug"],
                 "title": next_item["title"],
-            #    "available": n_available
             }
         except IndexError:
             pass
         try:
             previous_item = Entry.objects.filter(feed=feed_id, \
                 id__lt=entry["id"]).values("link", "slug", "title")[0]
-            #p_available = previous_item.available_in_frame
-            #if p_available is None:
-            #    p_available = 1
             previous = {
                 "feed_id": feed_id,
                 "link": previous_item["link"],
                 "slug": previous_item["slug"],
                 "title": previous_item["title"],
-            #    "available": p_available
             }
         except IndexError:
             pass
@@ -393,43 +375,40 @@ class Reader(APIView):
         return Response({"code": 1, "result": result})
 
 
-class UnsubscribeByFeedId(APIView):
+class FeedUserRelationByFeedId(APIView):
     authentication_classes = (authentication.SessionAuthentication,)
     permission_classes = (permissions.IsAuthenticated,)
 
+
     def post(self, request, feed_id):
+        # FIXME: We should handle error cases.
         try:
-            feed = Feed.objects.get(id=feed_id)
-        except Feed.DoesNotExist:
-            # FIXME: Use msg instead of text
-            return Response({"code": 0, "text": "This feed does not exist: %s" % feed_id})
+            item = FeedUserRelation.objects.get(feed_id=feed_id, user=request.user)
+            return Response({"code": 1, "msg": "You have already subscribed this feed."})
+        except FeedUserRelation.DoesNotExist:
+            item = FeedUserRelation(feed_id=feed_id, user=request.user)
+            item.save()
+            announce_client.register_group(request.user.id, feed_id)
+            return Response({"code": 1, "msg": "New feed source has been added successfully."})
+
+
+    def delete(self, request, feed_id):
+        try:
+            item = FeedUserRelation.objects.get(user=request.user, feed_id=feed_id)
+        except FeedUserRelation.DoesNotExist:
+            return Response({"code": 0, "msg": "This feed does not exist: %s" % feed_id})
 
         # Unsubcribe from the feed
-        feed.users.remove(User.objects.get(id=request.user.id))
+        item.delete()
         # Unregister feed real time notification group
         try:
-            announce_client.unregister_group(request.user.id, feed.id)
+            announce_client.unregister_group(request.user.id, feed_id)
         except AttributeError:
             # This is an error case. We should return an error message about that case and log this.
             # Maybe we should send an email to admins
             pass
         # FIXME: Use msg instead of text
-        return Response({"code": 1, "text": "You have been unsubscribed successfully from %s." % feed.title})
-
-
-class SubscribeByFeedId(APIView):
-    authentication_classes = (authentication.SessionAuthentication,)
-    permission_classes = (permissions.IsAuthenticated,)
-
-    def post(self, request, feed_id):
-        # FIXME: We should handle error cases.
-        feed_obj = Feed.objects.get(id=feed_id)
-        user = User.objects.get(username=request.user.username)
-        if not feed_obj.users.filter(username__contains=request.user.username):
-            feed_obj.users.add(user)
-            announce_client.register_group(request.user.id, feed_obj.id)
-            return Response({"code": 1, "text":"New feed source has been added successfully."})
-        return Response({"code": 1, "text": "You have already subscribed this feed."})
+        return Response({"code": 1, "msg": "You have been unsubscribed successfully from %s." % feed_id})
 
 
 class FindFeedWithURL(APIView):
@@ -447,25 +426,20 @@ class SubscribeFeed(APIView):
 
     def get(self, request):
         url = request.GET.get("url", None)
-        # FIXME: URL validation needed!
-        #if url is None:
-        #    return HttpResponse(json.dumps({"code":0,
-        #        "text": "A valid feed could not be found for given URL."}), content_type='application/json')
-        user = User.objects.get(username=request.user.username)
+        # TODO: URL validation needed!
+        # Firstly, get or create the feed object
+        feed = Feed.objects.get_or_create(feed_url=url)[0]
+        # Now, check the subscription status and subscribe the feed if not
         try:
-            feed_obj = Feed.objects.get(feed_url=url)
-            if not feed_obj.users.filter(username__contains=request.user.username):
-                feed_obj.users.add(user)
-            else:
-                return Response({"code": 0, "text": "You have already subscribed this feed."})
-        except Feed.DoesNotExist:
-            new_feed = Feed(feed_url=url)
-            new_feed.save()
-            feed_obj = Feed.objects.get(feed_url=url)
-            feed_obj.users.add(user)
-            feed_obj.save()
-            sync_feed.apply_async((feed_obj,))
-        announce_client.register_group(request.user.id, feed_obj.id)
+            FeedUserRelation.objects.get(user=request.user, feed=feed)
+            return Response({"code": 0, "text": "You have already subscribed this feed."})
+        except FeedUserRelation.DoesNotExist:
+            item = FeedUserRelation(user=request.user, feed=feed)
+            item.save()
+            # Trigger first sync task
+            sync_feed.apply_async((feed,))
+        # Register the user to feed's broadcasting group to get real time updates
+        announce_client.register_group(request.user.id, feed.id)
         return Response({"code": 1, "text": 'New feed source has been added successfully.'})
 
 
@@ -476,17 +450,17 @@ class FeedSubscriptions(APIView):
     def get(self, request):
         offset = request.GET.get("offset", 0)
         limit = request.GET.get("limit", 10)
-        subscriptions = Feed.objects.filter(~Q(last_sync=None), \
-            users=request.user).order_by("-entries_last_month").values("id", \
-            "title", "tagline", "subtitle", "link", "slug")[offset:limit]
+        subscriptions = FeedUserRelation.objects.filter(~Q(feed__last_sync=None), \
+            user=request.user).order_by("-feed__entries_last_month").values("feed__id", \
+            "feed__title", "feed__tagline", "feed__subtitle", "feed__link", "feed__slug")[offset:limit]
         results = []
         for subscription in subscriptions:
             item = {
-                "slug": subscription["slug"],
-                "title": subscription["title"],
-                "summary": subscription["tagline"] if subscription["tagline"] \
-                    is not None else subscription["subtitle"],
-                'link': subscription["link"]
+                "slug": subscription["feed__slug"],
+                "title": subscription["feed__title"],
+                "summary": subscription["feed__tagline"] if subscription["feed__tagline"] \
+                    is not None else subscription["feed__subtitle"],
+                'link': subscription["feed__link"]
             }
             results.append(item)
         return Response(results)
@@ -817,16 +791,15 @@ class UserProfile(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request, username):
-        profile = get_user_profile(username)
-        user_id = profile.user.id
+        user_id = request.user.id
         follower_ids = [follower[0] for follower in \
             UserRelation.objects.filter(user_id=user_id).values_list("follower_id")]
 
         user = {
-            "subs_count": profile.user.feed_set.count(),
-            "display_name": profile.user.get_full_name() \
-                if profile.user.get_full_name() else profile.user.username,
-            "mugshot_url": profile.get_mugshot_url(),
+            "subs_count": request.user.feeduserrelation_set.count(),
+            "display_name": request.user.get_full_name() \
+                if request.user.get_full_name() else request.user.username,
+            "mugshot_url": request.user.get_profile().get_mugshot_url(),
             "is_following": True if request.user.id in follower_ids else False,
             "following_count": UserRelation.objects.filter(follower__username=username).count(),
             "follower_count": len(follower_ids),
@@ -844,8 +817,7 @@ class RepostList(APIView):
         offset = request.GET.get("offset", 0)
         limit = request.GET.get("limit", 15)
 
-        profile = get_user_profile(username)
-        user_id = profile.user.id
+        user_id = request.user.id
         follower_ids = [follower[0] for follower in \
             UserRelation.objects.filter(user_id=user_id).values_list("follower_id")]
 
@@ -1087,3 +1059,26 @@ class FollowingList(APIView):
             }
             following_users.append(following_user)
         return Response(following_users)
+
+
+class ShowOnStream(APIView):
+    authentication_classes = (authentication.SessionAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request, feed_id):
+        try:
+            item = FeedUserRelation.objects.get(user=request.user, feed_id=feed_id)
+            item.show_on_stream = True
+            item.save()
+            return Response({"code": 1, "msg": "The feed will be shown on Stream"})
+        except FeedUserRelation.DoesNotExist:
+            return Response({"code": 0, "msg": "You don't subscribe this feed"})
+
+    def delete(self, request, feed_id):
+        try:
+            item = FeedUserRelation.objects.get(user=request.user, feed_id=feed_id)
+            item.show_on_stream = False
+            item.save()
+            return Response({"code": 1, "msg": "The feed is removed from Stream"})
+        except FeedUserRelation.DoesNotExist:
+            return Response({"code": 0, "msg": "You don't subscribe this feed"})
