@@ -50,7 +50,7 @@ class Feed(models.Model):
     def get_next_scheduled_update(self):
         upd  = self.entries_last_month / 30.0
         # TODO: Active users?
-        subs =  User.objects.filter(feed=self.id).count()
+        subs =  User.objects.filter(feeduserrelation__feed=self.id).count()
 
         # UPD = 1  Subs > 1:  t = 5         # 11625  * 1440/5 =       3348000
         # UPD = 1  Subs = 1:  t = 60        # 17231  * 1440/60 =      413544
