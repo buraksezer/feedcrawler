@@ -79,7 +79,7 @@ class AuthenticatedUser(APIView):
     def get(self, request, pk=None):
         user = {
             "username": request.user.username,
-            "subs_count": request.user.feed_set.count(),
+            "subs_count": request.user.feeduserrelation_set.count(),
             "display_name": get_display_name(request.user),
             "mugshot_url": request.user.user_profile.get_mugshot_url(),
             "rl_count": ReadLater.objects.filter(user=request.user).count(),
