@@ -1,22 +1,22 @@
 <div id="timeline-item_{{ entry.repost.id }}" class="entry-content">
     <span repost-entry-modal></span>
-    <div ng-show="entry.repost" class="repost-item">
+    <div class="repost-item">
         <div class="repost-body">
             <span class="header">
-                <a href="/user/{{ entry.repost.owner_username }}">{{ entry.repost.owner_display_name }}</a>
+                <a href="/user/{{ entry.owner_username }}">{{ entry.owner_display_name }}</a>
                 reposted
                 <span ng-show="entry.repost.num_owner > 0">
                     with
                     <a class="other-reposts" href="#">
-                        {{ entry.repost.num_owner }}
-                        <span ng-switch on="entry.repost.num_owner > 1">
+                        {{ entry.num_owner }}
+                        <span ng-switch on="entry.num_owner > 1">
                             <span ng-switch-when="true">others</span>
                             <span ng-switch-when="false">other</span>
                         </span>
                     </a>
                 </span>
             </span>
-            <div ng-bind-html="entry.repost.note" class="repost-note"></div>
+            <div ng-bind-html="entry.note" class="repost-note"></div>
         </div>
     </div>
     <div class="entry-body quote">
@@ -30,7 +30,7 @@
         <a class="feed" href="/feed/{{ entry.feed_slug }}">{{ entry.feed_title }}</a>
         <div class="timeline-entry-interaction">
             <span ng-switch on="singleRepost">
-                <a ng-switch-when="undefined" href="/repost/{{ entry.repost.id }}">
+                <a ng-switch-when="undefined" href="/repost/{{ entry.id }}">
                     <span calc-from-now ts="{{ entry.created_at }}">{{ calcTime }}</span>
                 </a>
                 <span ng-switch-when="true" calc-from-now ts="{{ entry.created_at }}">{{ calcTime }}</span>

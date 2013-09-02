@@ -5,7 +5,7 @@ import django
 from time import mktime
 from datetime import datetime
 from announce import AnnounceClient
-from apps.storage.models import Feed, Entry, EntryTag
+from apps.storage.models import Feed, Entry
 from django.utils.timezone import utc
 from utils import log as logging
 from django.conf import settings

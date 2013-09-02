@@ -138,54 +138,53 @@ class Feed(models.Model):
         super(Feed, self).save(*args, **kwargs)
 
 
-class FeedTag(models.Model):
-    tag = models.CharField(unique=True, max_length=512)
-    feed = models.ManyToManyField(Feed)
-    users = models.ManyToManyField(User)
+# class FeedTag(models.Model):
+#     tag = models.CharField(unique=True, max_length=512)
+#     feed = models.ManyToManyField(Feed)
+#     users = models.ManyToManyField(User)
 
-    def __unicode__(self):
-        return self.tag
+#     def __unicode__(self):
+#         return self.tag
 
-    def save(self, *args, **kwargs):
-        super(FeedTag, self).save(*args, **kwargs)
-
-
-class EntryTag(models.Model):
-    name = models.CharField(max_length=50, unique=True)
-
-    class Meta:
-        verbose_name = 'tag'
-        verbose_name_plural = 'tags'
-        ordering = ('name',)
-
-    def __unicode__(self):
-        return self.name
-
-    def save(self, *args, **kwargs):
-        super(EntryTag, self).save(*args, **kwargs)
+#     def save(self, *args, **kwargs):
+#         super(FeedTag, self).save(*args, **kwargs)
 
 
+# class EntryTag(models.Model):
+#     name = models.CharField(max_length=50, unique=True)
 
-class Entry(models.Model):
+#     class Meta:
+#         verbose_name = 'tag'
+#         verbose_name_plural = 'tags'
+#         ordering = ('name',)
+
+#     def __unicode__(self):
+#         return self.name
+
+#     def save(self, *args, **kwargs):
+#         super(EntryTag, self).save(*args, **kwargs)
+
+
+
+class BaseEntry(models.Model):
     title = models.CharField(max_length=2048)
-    content = models.TextField()
+    content = models.TextField(blank=True)
     # The content type of this piece of content.
     # Most likely values for type:
     #     text/plain
     #     text/html
     #     application/xhtml+xml
-    content_type = models.CharField(max_length=64)
+    content_type = models.CharField(blank=True, max_length=64)
 
     # The language of this piece of content.
-    language = models.CharField(null=True, max_length=128)
-    author = models.CharField(null=True, max_length=256)
+    language = models.CharField(blank=True, null=True, max_length=128)
+    author = models.CharField(blank=True, null=True, max_length=256)
     author_email = models.EmailField(blank=True)
-    link = models.URLField(max_length=2048)
-    tags = models.ManyToManyField(EntryTag)
+    link = models.URLField(blank=True, max_length=2048)
 
     # The date this entry was first published,
     # as a string in the same format as it was published in the original feed.
-    published_at = models.DateTimeField()
+    published_at = models.DateTimeField(null=True, blank=True)
 
     # The date this entry was last updated,
     # as a string in the same format as it was published in the original feed.
@@ -193,13 +192,7 @@ class Entry(models.Model):
 
     date_modified = models.DateTimeField(null=True, blank=True)
 
-    # A globally unique identifier for this entry.
-    entry_id = models.URLField(unique=True, max_length=2048)
-
-    license = models.CharField(null=True, max_length=128)
-
-    # Unique slug for every entry
-    slug = AutoSlugField(populate_from='title', unique=True, null=True)
+    license = models.CharField(blank=True, null=True, max_length=128)
 
     available_in_frame = models.IntegerField(null=True, blank=True)
     last_interaction = models.DateTimeField(null=True, blank=True)
@@ -214,25 +207,38 @@ class Entry(models.Model):
         return self.title
 
     def save(self, *args, **kwargs):
-        super(Entry, self).save(*args, **kwargs)
+        super(BaseEntry, self).save(*args, **kwargs)
 
 
-class RepostEntry(models.Model):
+class Entry(BaseEntry):
+    # Unique slug for every entry
+    slug = AutoSlugField(populate_from='title', unique=True, null=True)
+    # A globally unique identifier for this entry.
+    entry_id = models.URLField(unique=True, max_length=2048)
+
+
+class RepostEntry(BaseEntry):
+    origin_id = models.BigIntegerField()
+    # User adds own opinion about this post.
     note = models.TextField(blank=True)
+    # Who did repost this entry?
     owner = models.ForeignKey(User)
-    entry = models.ForeignKey(Entry)
-    target_ids = models.CommaSeparatedIntegerField(blank=True, max_length=200)
-    created_at = models.DateTimeField(auto_now_add=True)
+    # Unique slug for every entry
+    slug = AutoSlugField(populate_from='title', null=True)
+    # A globally unique identifier for this entry.
+    entry_id = models.URLField(max_length=2048)
+
+    #target_ids = models.CommaSeparatedIntegerField(blank=True, max_length=200)
 
     class Meta:
         ordering = ["-created_at"]
 
     def __unicode__(self):
-        return self.owner.username+" shared "+self.entry.title
+        return self.owner.username+" shared "+self.title
 
 
 class Interaction(models.Model):
-    entry = models.ForeignKey(Entry)
+    entry = models.ForeignKey(BaseEntry)
     user = models.ForeignKey(User)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -257,7 +263,7 @@ class EntryLike(Interaction):
 
 
 class ReadLater(models.Model):
-    entry = models.ForeignKey(Entry)
+    entry = models.ForeignKey(BaseEntry)
     user = models.ForeignKey(User)
     created_at = models.DateTimeField(auto_now_add=True)
 

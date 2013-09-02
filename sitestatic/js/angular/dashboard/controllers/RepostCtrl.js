@@ -8,7 +8,7 @@
                 $scope.notFound = true;
             } else {
                 document.title = data.title+" | "+CsFrontend.Globals.SiteTitle;
-                data.repost.note = nl2br(data.repost.note);
+                data.note = nl2br(data.note);
                 $scope.entry = data;
                 $scope.singleRepost = true;
                 $(document).ready(function() {

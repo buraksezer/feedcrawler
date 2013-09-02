@@ -288,7 +288,7 @@ angular.module("Dashboard.controllers", [])
                 $scope.notFound = true;
             } else {
                 document.title = data.title+" | "+CsFrontend.Globals.SiteTitle;
-                data.repost.note = nl2br(data.repost.note);
+                data.note = nl2br(data.note);
                 $scope.entry = data;
                 $scope.singleRepost = true;
                 $(document).ready(function() {
@@ -541,6 +541,10 @@ angular.module('Dashboard.directives', []).
             scope.newEntryCount = 0;
             scope.originalTitle = document.title;
             $(element).bind("new_entry_event", function(event, data) {
+                if (data.new_entry.isRepost == true &&
+                        scope.username == data.new_entry.owner_username) {
+                    return;
+                }
                 if ($(".list-header").length !== 0) {
                     if (jQuery.inArray(data.new_entry.feed_id, scope.listFeedIds) == -1) {
                         return;
@@ -873,7 +877,13 @@ angular.module('Dashboard.directives', []).
         return function(scope, element, attrs) {
             $(element).click(function(event) {
                 var box = $(element).closest(".dashboard-entry").find(".share-box");
-                box.find("input").val(document.location.origin+"/entry/"+scope.entry.id);
+                var entry_type = null;
+                if (scope.entry.isRepost == true) {
+                    entry_type = "repost";
+                } else {
+                    entry_type = "entry"
+                }
+                box.find("input").val(document.location.origin+"/"+entry_type+"/"+scope.entry.id);
                 box.slideToggle('fast');
             });
         }
@@ -1004,17 +1014,16 @@ angular.module('Dashboard.directives', []).
                 }).success(function (data, status, headers, config) {
                     $('#repostModal_'+scope.entry.id).modal('hide')
                     scope.entry.reposted = true;
-
                     var new_item = jQuery.extend(true, {}, scope.entry);
+                    // Overwrite some values of existed entry.
+                    new_item.id = data.id;
+                    new_item.owner_display_name = "You";
+                    new_item.owner_username = scope.username;
+                    new_item.num_owner = data.num_owner;
                     new_item.created_at = data.created_at;
                     new_item.isRepost = true;
-                    new_item.repost = {
-                        'note': scope.repostNote,
-                        'id': data.id,
-                        'owner_display_name': "You",
-                        'num_owner': data.num_owner
-                    }
-
+                    new_item.note = scope.repostNote;
+                    // Add the new repost item to top of entries array
                     scope.safeApply(function() {
                         scope.entries.unshift(new_item);
                     });
@@ -1149,7 +1158,6 @@ angular.module('Dashboard.services', []).factory('InitService', function() {
             });
 
             announce.on('new_repost', function(data){
-                console.log(data);
                 $("#new-entry").trigger("new_entry_event", {new_entry: data});
             });
         }

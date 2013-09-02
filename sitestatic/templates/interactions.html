@@ -8,7 +8,10 @@
 <div infinite-scroll='loadInteractions()' infinite-scroll-disabled='busy' class="dashboard-entries">
         <div ng-hide="entry.instantEntry == true" ng-mouseenter="myClass='show'" ng-mouseleave="myClass=''" id="entry-{{ entry.slug }}" class="dashboard-entry" ng-repeat="entry in interactions.entries">
             <div ng-include="'/static/templates/partials/entry-topbar.html'"></div>
-            <div ng-include="'/static/templates/partials/entry-body.html'"></div>
+            <span ng-switch on="entry.isRepost">
+                <div ng-switch-when="undefined" ng-include="'/static/templates/partials/entry-body.html'"></div>
+                <div ng-switch-when="true" ng-include="'/static/templates/partials/repost-body.html'"></div>
+            </span>
             <div ng-include="'/static/templates/partials/helper-boxes.html'"></div>
             <div ng-include="'/static/templates/partials/comments.html'"></div>
         </div>

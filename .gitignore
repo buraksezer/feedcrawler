@@ -5,6 +5,10 @@ celerybeat-schedule
 log/*.log
 cookbooks
 tmp
+Cheffile
+Cheffile.lock
+TODO
+Vagrantfile
 .vagrant
 *.log
 *.py[cod]
