@@ -246,7 +246,7 @@ class FeedDetail(APIView):
                 'tagline': feed["tagline"],
                 'link': feed["link"],
                 'is_subscribed': True if feed_query.feeduserrelation_set.filter(user=request.user) else False,
-                'subs_count': feed_query.users.count(),
+                'subs_count': feed_query.feeduserrelation_set.count(),
                 'last_sync': int(time.mktime(feed["last_sync"].timetuple())*1000),
             }
         }
