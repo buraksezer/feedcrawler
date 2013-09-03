@@ -679,6 +679,8 @@ class ManageReadLater(APIView):
 
 
 class ReadLaterList(APIView):
+    """Returns current user's read later list with an limit and offset value"""
+    # TODO: This view has very ugly database queries, any improvment?
     authentication_classes = (authentication.SessionAuthentication,)
     permission_classes = (permissions.IsAuthenticated,)
 
@@ -694,14 +696,23 @@ class ReadLaterList(APIView):
             "entry__created_at",
             "entry__feed__slug",
             "entry__feed__title",
-            "entry__slug"
+            "entry__entry__slug",
+            "entry__repostentry__slug",
+            "entry__repostentry__note",
+            "entry__repostentry__owner__id",
+            "entry__repostentry__owner__username",
+            "entry__repostentry__origin_id"
         )[offset:limit]
+
+        follower_ids = [follower[0] for follower in \
+                            UserRelation.objects.filter(follower_id=request.user.id).values_list("user_id")]
 
         for entry in entries:
             like_msg, like_count = process_like(entry["entry__id"], request.user.id)
             item = {
                 'id': entry["entry__id"],
-                'slug': entry["entry__slug"],
+                'slug': entry["entry__entry__slug"] if entry["entry__repostentry__slug"] \
+                                is None else entry["entry__entry__slug"],
                 'title': entry["entry__title"],
                 'feed_slug': entry["entry__feed__slug"],
                 'feed_title': entry["entry__feed__title"],
@@ -712,6 +723,20 @@ class ReadLaterList(APIView):
                 'created_at': int(time.mktime(entry["entry__created_at"].timetuple())*1000),
                 'comments': get_latest_comments(entry["entry__id"])
             }
+            if entry["entry__repostentry__note"] is not None:
+                if entry["entry__repostentry__owner__id"] == request.user.id:
+                    owner_display_name = "You"
+                else:
+                    owner_display_name = get_display_name(User.objects.get(id=entry["entry__entry__owner__id"]))
+
+                item.update({
+                    "isRepost": True,
+                    "note": entry["entry__repostentry__note"],
+                    "owner_display_name": owner_display_name,
+                    "owner_username": entry["entry__repostentry__owner__username"],
+                    "num_owner": RepostEntry.objects.filter(Q(origin_id=entry["entry__repostentry__origin_id"]) \
+                        & Q(owner_id__in=follower_ids)).count()-1
+                })
             results.append(item)
         return Response(results)
 

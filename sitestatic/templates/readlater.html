@@ -20,7 +20,10 @@
                     </a>
                 </li>
             </ul>
-            <div ng-include="'/static/templates/partials/entry-body.html'"></div>
+            <span ng-switch on="entry.isRepost">
+                <div ng-switch-when="undefined" ng-include="'/static/templates/partials/entry-body.html'"></div>
+                <div ng-switch-when="true" ng-include="'/static/templates/partials/repost-body.html'"></div>
+            </span>
             <div ng-include="'/static/templates/partials/helper-boxes.html'"></div>
             <div ng-include="'/static/templates/partials/comments.html'"></div>
         </div>
