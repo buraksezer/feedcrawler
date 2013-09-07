@@ -28,7 +28,7 @@
                         </div>
                         <span ng-show="username == comment.author">
                             <form ng-hide="!showCommentEditBox" class="edit-comment-form">
-                                <textarea ng-model="commentContent" class='comment textbox-transition' count-char></textarea>
+                                <textarea ng-model="commentContent" class='form-control comment textbox-transition' count-char></textarea>
                                 <button class="btn btn-small btn-primary" type="button" done-edit-comment c-index="{{ $index }}" c-id="{{ comment.id }}">Done</button>
                                 <a href="#" class="cancel" cancel-comment>Cancel</a>
                                 <span ng-class="{redfont: restCharCount == 0}" class="pull-right">{{ maxCharCount - commentContent.length }}</span>
@@ -38,7 +38,7 @@
                     </div>
                 </div>
                 <form class="comment-form">
-                    <textarea ng-model="commentContent" class='comment textbox-transition' count-char></textarea>
+                    <textarea ng-model="commentContent" class='form-control comment textbox-transition' count-char></textarea>
                     <button class="btn btn-small btn-primary" type="button" post-comment>Post</button>
                     <a href="#" class="cancel" cancel-comment>Cancel</a>
                     <span ng-class="{redfont: restCharCount == 0}" class="pull-right">{{ maxCharCount - commentContent.length }}</span>

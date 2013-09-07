@@ -1,0 +1,468 @@
+// Global variables
+@background-grey: #F9FAF7;
+@background-white: #FFFFFF;
+@border: 1px solid #E2E2E2;
+@font-color: #555555;
+@cs-blue: #0CAEE3;
+@link-hover: #005580;
+
+// Globals
+body {
+    background-color: @background-grey;
+    font-family: 'Open Sans',Helvetica,sans-serif !important;
+    color: #555555;
+}
+
+/* No border radius */
+.popover-title,
+.popover,
+input,
+.modal,
+.btn,
+.dropdown-menu {
+    border-radius: 0 !important;
+}
+
+[class*="icon-"],
+a.brand {
+    -webkit-transition: color .5s;
+    -moz-transition: color .5s;
+    -o-transition: color .5s;
+    transition: color .5s;
+}
+
+[class*="icon-"]:hover,
+a.brand:hover {
+    color: @cs-blue;
+}
+
+.cs-header {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.cs-timeline,
+.cs-leftbar {
+    padding: 0;
+}
+
+.cs-timeline {
+    background-color: @background-white;
+    border: @border;
+}
+
+.cs-dashboard-rightbar {
+    width: 73.5%;
+    margin-left: 17px;
+}
+
+a.brand {
+    color: @font-color;
+    text-decoration: none;
+    font-size: 16px;
+    line-height: 2.2;
+}
+
+.header-left {
+    padding-left: 0
+}
+
+.clickjacking-warn {
+    display: none;
+    padding: 13px;
+    font-size: 12px;
+    margin-top: -15px;
+    background-color: #fcf8e3;
+}
+
+
+/* START: User area on Dashboard */
+
+.cs-leftbar .control,
+.cs-leftbar .user {
+    margin-bottom: 10px;
+    background-color: @background-white;
+    border: @border;
+}
+
+.cs-leftbar .user {
+    padding: 14px 8px 14px 8px;
+}
+
+.cs-leftbar .username {
+    margin-left: 50px;
+    margin-top: -41px;
+}
+
+.cs-leftbar .username a {
+    color: @font-color;
+}
+
+.cs-leftbar .username a:hover {
+    color: @link-hover;
+}
+
+.follower .mugshot,
+.cs-leftbar div.user img.mugshot {
+    height: 40px;
+    width: 40px;
+}
+
+.cs-leftbar .user small a {
+    color: @font-color;
+    margin-left: 50px;
+    font-size: 80%;
+}
+
+.cs-leftbar .top-area i {
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.cs-leftbar .control-item {
+    font-size: 13px;
+    padding: 2.5px 8px 2.5px 8px;
+}
+
+.cs-leftbar .control-item a {
+    text-decoration: none;
+    color: @font-color;
+    width: 100%;
+    display: block;
+}
+
+.cs-leftbar .control .active {
+    color: #0088CC;
+}
+
+.cs-leftbar .control-item:hover {
+    cursor: pointer;
+    background-color: @background-grey;
+}
+
+.cs-leftbar .control-item i {
+    font-size: 23px;
+}
+
+.control-item .readlater-count,
+.control-item .interaction-count {
+    -webkit-box-shadow: 0 1px 0 rgba(0,0,0,.1);
+    box-shadow: 0 1px 0 rgba(0,0,0,.1);
+    background-color: #dd4b39;
+    border: none;
+}
+
+/* END: User area on Dashboard */
+
+/* START: Lists */
+#lists {
+    display: none;
+    list-style: none;
+    margin-bottom: 0;
+}
+
+#lists .list {
+    font-size: 13px;
+}
+
+#lists .list a {
+    color: #555555;
+}
+
+#lists span {
+    font-size: 12px;
+}
+
+.lists ul.text {
+    margin: 0;
+}
+
+.lists ul.text li {
+    list-style: none;
+    display: inline;
+}
+
+.list-manage {
+    display: none;
+    font-size: 10px;
+}
+
+.list-manage:hover {
+    color: #0088cc;
+}
+
+.lists ul.text {
+    padding-left: 0;
+}
+
+/* END: Lists */
+
+/* START: Subscribe Modal */
+ul.top-area {
+    margin-left: 0;
+    margin-top: -18px;
+}
+
+ul.top-area li {
+    display: inline;
+    list-style-type: none;
+}
+
+ul.top-area li a {
+    color: @font-color;
+    text-decoration: none;
+}
+
+label[for="id_feed_url"],
+label[for="id_feed_search"] {
+    font-size: 12px !important;
+    color: #777777;
+}
+/* END: Subscribe Modal */
+
+/* START: Dashboard Entries */
+
+.dashboard-entry {
+    border-bottom: @border;
+    color: @font-color;
+}
+
+.dashboard-entry .entry-content {
+    padding: 13px;
+}
+
+.dashboard-entry .entry-title {
+    font-weight: bold;
+    color: @font-color;
+}
+
+.dashboard-entry .entry-content .feed {
+    font-size: 12px;
+}
+
+.dashboard-entry .entry-title:hover {
+    color: @link-hover;
+}
+
+ul.entry-utils {
+    display: none;
+    float: right;
+    font-size: 14px;
+}
+
+ul.entry-utils li a {
+    color: @font-color;
+    text-decoration: none;
+}
+
+ul.entry-utils li {
+    padding-left: 5px;
+    list-style-type: none;
+    display: inline !important;
+}
+
+.timeline-entry-interaction {
+    font-weight: lighter;
+    font-size: 12px;
+}
+
+.new-entry-counter {
+    padding: 10px;
+    background-color: @background-grey;
+    color: @font-color;
+    border-bottom: @border;
+    text-align: center;
+}
+
+.new-entry-counter:hover {
+    cursor: pointer;
+    background-color: #FCFCFC;
+}
+
+.empty-timeline {
+    text-align: center;
+    font-style: italic;
+    font-size: 17px;
+}
+
+/* END: Dashboard Entries */
+
+/* START: Share Box */
+
+.share-box {
+    display: none;
+    border-top: @border;
+    background-color: @background-grey;
+    padding: 5px 13px 5px 13px;
+    font-size: 12px;
+    margin-top: -10px;
+    margin-bottom: 9px;
+}
+
+.share-box p {
+    margin: 0;
+}
+
+.share-box i {
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.share-box input {
+    font-size: 12px;
+    padding: 3px;
+}
+
+/* END: Share Box */
+
+/* START: Comment */
+
+textarea.comment {
+    resize: none;
+    margin-bottom: 5px;
+    border-radius: 0;
+    padding: .5em;
+    background: #FFFFFF;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 1em;
+    line-height: 1.5em;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.textbox-transition {
+  vertical-align: top;
+  transition: height 0.2s;
+  -webkit-transition: height 0.2s;
+  -moz-transition: height 0.2s;
+}
+
+.comment-form .redfont {
+    color: red;
+}
+
+.comment .content .from-now {
+    font-weight: lighter;
+    font-size: 11px;
+}
+
+.comment-form a.cancel {
+    font-size: 12px;
+}
+
+.edit-comment-form {
+    margin-top: -13px;
+    margin-bottom: 5px;
+    margin-left: 20px;
+}
+
+.comment-control {
+    margin-left: 5px;
+}
+
+.comment-control a:hover {
+    text-decoration: none !important;
+}
+
+.comment-control i {
+    color: @font-color;
+}
+
+.comment-control i:hover {
+    color: @link-hover !important;
+}
+
+.comments-area {
+    font-size: 13px;
+    padding-left: 13px;
+    padding-right: 13px;
+    margin-top: -9px;
+}
+
+.comments-area .load-more i {
+    font-size: 10px;
+}
+
+.comments-area .load-more a {
+    font-size: 13px;
+}
+
+.comments-area .comment .content {
+    margin-top: -20.3px;
+    margin-bottom: 5px;
+    margin-left: 20px;
+}
+
+.comments-area form.comment-form {
+    margin: 0 0 5px;
+    display: none;
+}
+/* END: Comment */
+
+
+.repost-body .other-reposts:hover,
+.repost-body .from-now:hover,
+#lists li a:hover,
+.timeline-entry-interaction a:hover {
+    color: @link-hover;
+}
+
+/* START: Interactions */
+.list-header,
+.readlater-header,
+.interactions-header {
+    border-bottom: @border;
+    padding: 5px;
+    font-size: 16px;
+    font-weight: bold;
+}
+/* END: Interactions */
+
+/* START: Repost */
+
+.repost-body .other-reposts,
+.repost-body .from-now,
+.timeline-entry-interaction a {
+    text-decoration: none;
+    color: @font-color
+}
+
+.repost-body .other-reposts:hover,
+.repost-body .from-now:hover,
+#lists li a:hover,
+.timeline-entry-interaction a:hover {
+    color: @link-hover;
+}
+
+.repost-item {
+    font-size: 13px;
+    border-bottom: 1px dotted #E2E2E2;
+    margin-bottom: 10px;
+}
+
+.reposted {
+    font-size: 12px;
+}
+
+.repost-body .header {
+    font-size: 13.5px;
+}
+
+.reposts-header,
+.followers-header,
+.following-header {
+    border-bottom: 1px dotted #E2E2E2;
+    padding: 5px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.quote {
+    margin-left: 7px;
+}
+
+
+/* END: Repost */

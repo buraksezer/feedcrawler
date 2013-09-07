@@ -1,21 +1,28 @@
 {% extends "chapstream_base.html" %}
 
 {% block dashboard_requirements %}
-<style type="text/css">
-    body { padding-bottom: 40px; }
-</style>
-<link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css" rel="stylesheet">
-<link href="/static/css/bootstrap-responsive.min.css" rel="stylesheet">
-<link href="/static/css/style.css" rel="stylesheet">
+<!-- Start of Twitter Bootstrap -->
+<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.no-icons.min.css" rel="stylesheet">
+<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
 
-<script type="application/javascript" src="/static/js/bootstrap.min.js"></script>
+<!-- We use less for better CSS experience -->
+<link rel="stylesheet/less" type="text/css" href="/static/css/dashboard.less" />
+<!-- For development and testing purposes -->
+<script src="/static/js/less-1.4.1.min.js" type="text/javascript"></script>
+
 <script type="application/javascript" src="//twitter.github.io/typeahead.js/js/hogan-2.0.0.js"></script>
 <script type="application/javascript" src="/static/js/typeahead.min.js"></script>
+<!-- End of Twitter Bootstrap -->
+<style>
+
+</style>
+
 <script type="application/javascript" src="/static/js/DashboardAppBundle.js"></script>
 <script type="application/javascript" src="/static/js/dashboard.js"></script>
 {% endblock %}
 
 {% block body %}
+<!--
 <body ng-app="Dashboard" id="dashboard-layout">
     <header id="header">
         <div class="container">
@@ -23,8 +30,6 @@
             <div class="pull-right settings-dropdown dropdown">
                 <a class="dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-cogs"></i></a>
                 <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
-                    <!-- <li><a href="#" tabindex="-1" data-toggle="modal" data-target="#listControlModal" run-list-control-modal>Manage Lists</a></li>
-                    <li class="divider"></li>-->
                     <li><a tabindex="-1" class="link-signout" href="/user/signout" prevent-default sign-out>Sign Out</a></li>
                 </ul>
             </div>
@@ -37,12 +42,38 @@
     <div id="dashboard" class="container">
         <div list-control-modal></div>
         <div class="row-fluid">
-            <!-- user space -->
             <div ng-controller="UserSpaceCtrl" class="span4 userspace">
                 <div ng-include="'/static/templates/userspace.html'"></div>
             </div>
-            <!-- Timeline -->
             <div class="span8 timeline">
+                <div ng-view></div>
+            </div>
+        </div>
+    </div>
+</body>
+-->
+
+<body ng-app="Dashboard">
+    <div class="container">
+        <div class="cs-header row">
+            <div class="header-left col-md-3">
+                <a class="brand" href="/">
+                    <i>
+                        Chap<strong>Stream</strong><small> α</small>
+                    </i>
+                </a>
+            </div>
+            <div class="cs-dashboard-rightbar col-md-9">Search Box and other control buttons</div>
+        </div>
+
+        <!-- Put list control modal's HTML to be global -->
+        <div list-control-modal></div>
+
+        <div class="cs-content row">
+            <div ng-controller="UserSpaceCtrl" class="cs-leftbar col-md-3">
+                <div ng-include="'/static/templates/userspace.html'"></div>
+            </div>
+            <div class="cs-dashboard-rightbar cs-timeline col-md-9">
                 <div ng-view></div>
             </div>
         </div>

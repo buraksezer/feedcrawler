@@ -37,7 +37,6 @@
 
     <div infinite-scroll='loadFeedDetail()' infinite-scroll-disabled='busy' class="dashboard-entries">
         <div ng-hide="entry.instantEntry == true" ng-mouseenter="myClass='show'" ng-mouseleave="myClass=''" class="dashboard-entry" ng-repeat="entry in feed_detail.entries">
-            <div ng-include="'/static/templates/partials/entry-topbar.html'"></div>
             <div class="entry-content">
                 <span repost-entry-modal></span>
                 <a ng-show="entry.available == 1" ng-click="renderToReader(entry.slug)" class="entry-title" href="/reader/{{entry.slug}}" prevent-default>
@@ -59,6 +58,7 @@
                     <span ng-show="entry.like_count > 0">&sdot;</span>
                     <span ng-show="entry.like_count == 1">{{ entry.like_count }} like</span>
                     <span ng-show="entry.like_count > 1">{{ entry.like_count }} likes</span>
+                    <span ng-include="'/static/templates/partials/entry-utils.html'"></span>
                 </div>
             </div>
             <div ng-include="'/static/templates/partials/helper-boxes.html'"></div>

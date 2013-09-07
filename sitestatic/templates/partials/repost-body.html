@@ -44,6 +44,7 @@
             <span ng-show="entry.like_count > 0">&sdot;</span>
             <span ng-show="entry.like_count == 1">{{ entry.like_count }} like</span>
             <span ng-show="entry.like_count > 1">{{ entry.like_count }} likes</span>
+            <span ng-include="'/static/templates/partials/entry-utils.html'"></span>
         </div>
     </div>
 </div>

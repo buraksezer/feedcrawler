@@ -3,23 +3,6 @@
 </div>
 <div infinite-scroll='loadReadLaterList()' infinite-scroll-disabled='busy' class="dashboard-entries">
         <div ng-hide="entry.instantEntry == true" ng-mouseenter="myClass='show'" ng-mouseleave="myClass=''" class="dashboard-entry" ng-repeat="entry in entries">
-            <ul ng-class="myClass" class="entry-topbar">
-                <li>
-                    <a data-hint="Remove from the list" class="hint--top read-later" href="#" read-later>
-                        <i class="icon-eraser"></i>
-                    </a>
-                </li>
-                <li>
-                    <a data-hint="Original Link" class="hint--top" href="{{ entry.link }}" target="_blank">
-                        <i class="icon-share-alt"></i>
-                    </a>
-                </li>
-                <li>
-                    <a data-hint="Open new tab" class="hint--top" href="/reader/{{ entry.slug }}" target="_blank">
-                        <i class="icon-share"></i>
-                    </a>
-                </li>
-            </ul>
             <span ng-switch on="entry.isRepost">
                 <div ng-switch-when="undefined" ng-include="'/static/templates/partials/entry-body.html'"></div>
                 <div ng-switch-when="true" ng-include="'/static/templates/partials/repost-body.html'"></div>

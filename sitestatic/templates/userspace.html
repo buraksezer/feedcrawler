@@ -44,25 +44,23 @@
     <div class="control-items">
         <div class="control-item stream">
             <a href="/">
-                <i class="icon-globe"></i>
+                <i class="control-icon icon-globe"></i>
                 <span class="text">
                     Stream
                 </span>
             </a>
         </div>
-        <!--
         <div class="control-item chap">
             <a href="/">
-                <i class="icon-group"></i>
+                <i class="control-icon icon-group"></i>
                 <span class="text">
                     Chaps
                 </span>
             </a>
         </div>
-    -->
         <div class="control-item interactions">
             <a href="/interactions">
-                <i class="icon-exchange"></i>
+                <i class="control-icon icon-exchange"></i>
                 <span class="text">
                     Interactions
                 </span>
@@ -71,7 +69,7 @@
         <div ng-mouseenter="myClass='show'" ng-mouseleave="myClass=''" class="control-item lists">
             <a href="#" show-lists>
                 <ul class="text">
-                    <li><i class="icon-list"></i></li>
+                    <li><i class="control-icon icon-th-list"></i></li>
                     <li>Lists</li>
                     <li>
                         <span ng-class="myClass" class="list-manage pull-right cursor-pointer" data-toggle="modal" data-target="#listControlModal" run-list-control-modal>Manage</span>
@@ -85,14 +83,14 @@
             <i ng-hide="lists" class="icon-warning-sign"></i>
             <span ng-hide="lists">No list found.</span>
             <li class="list" ng-repeat="list in lists">
-                <i class="icon-asterisk"></i>
+                <i class="icon-caret-right"></i>
                 <a href="/list/{{ list.slug }}" class="transition">{{ list.title }}</span>
             </li>
         </ul>
 
         <div class="control-item">
             <a href="/readlater">
-                <i class="icon-time"></i>
+                <i class="control-icon icon-time"></i>
                 <span class="text">
                     Read later
                 </span>
