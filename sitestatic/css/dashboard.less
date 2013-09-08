@@ -53,14 +53,25 @@ a.brand:hover {
 
 .cs-dashboard-rightbar {
     width: 73.5%;
-    margin-left: 17px;
+    margin-left: 15px;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.rightbar-control {
+    color: @font-color;
+    font-size: 20px;
+    padding-right: 0;
+}
+
+.rightbar-control i {
+    margin-left: 5px;
 }
 
 a.brand {
     color: @font-color;
     text-decoration: none;
     font-size: 16px;
-    line-height: 2.2;
 }
 
 .header-left {
@@ -121,7 +132,11 @@ a.brand {
 
 .cs-leftbar .control-item {
     font-size: 13px;
-    padding: 2.5px 8px 2.5px 8px;
+    padding: 1px 8px 2px 8px;
+}
+
+.control-right-element {
+    margin-right: 3px;
 }
 
 .cs-leftbar .control-item a {
@@ -144,12 +159,22 @@ a.brand {
     font-size: 23px;
 }
 
-.control-item .readlater-count,
-.control-item .interaction-count {
+.control-item .readlater-count {
     -webkit-box-shadow: 0 1px 0 rgba(0,0,0,.1);
     box-shadow: 0 1px 0 rgba(0,0,0,.1);
     background-color: #dd4b39;
     border: none;
+}
+
+.control-icon {
+    display: inline-block !important;
+    min-width: 30px;
+    padding: 2px 5px 2px 0;
+}
+
+.control-item .text {
+    display:inline-block;
+    min-width: 30px;
 }
 
 /* END: User area on Dashboard */
@@ -463,6 +488,84 @@ textarea.comment {
 .quote {
     margin-left: 7px;
 }
-
-
 /* END: Repost */
+
+/* START: Sign-in Page */
+.form-signin {
+  max-width: 330px;
+  padding: 15px;
+  margin: 0 auto;
+}
+
+.signin-heading {
+    text-align: center;
+}
+
+.form-signin .form-signin-heading,
+.form-signin .checkbox {
+  margin-bottom: 10px;
+}
+.form-signin .checkbox {
+  font-weight: normal;
+}
+.form-signin .form-control {
+  position: relative;
+  font-size: 16px;
+  height: auto;
+  padding: 10px;
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+}
+.form-signin .form-control:focus {
+  z-index: 2;
+}
+.form-signin input[type="text"] {
+  margin-bottom: -1px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.form-signin input[type="password"] {
+  margin-bottom: 10px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+/* END: Sign-in Page */
+
+/* START: Misc */
+
+#timeline-endless-loading p {
+    margin: 0;
+    text-align: center;
+    font-style: italic;
+}
+
+#timeline-endless-loading img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+#navbar-loading {
+    margin-top: 10px;
+    margin-bottom: -47px;
+    margin-left: auto;
+    margin-right: auto;
+    display: none;
+}
+
+.no-link {
+    color: @font-color;
+}
+/* TODO: LESS fix? */
+.no-link:hover {
+    text-decoration: none;
+}
+
+.link-hover:hover {
+    color: @link-hover;
+}
+/* END: Misc */

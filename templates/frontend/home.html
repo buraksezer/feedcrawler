@@ -1,24 +1,7 @@
 {% extends "chapstream_base.html" %}
 
 {% block dashboard_requirements %}
-<!-- Start of Twitter Bootstrap -->
-<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.no-icons.min.css" rel="stylesheet">
-<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
 
-<!-- We use less for better CSS experience -->
-<link rel="stylesheet/less" type="text/css" href="/static/css/dashboard.less" />
-<!-- For development and testing purposes -->
-<script src="/static/js/less-1.4.1.min.js" type="text/javascript"></script>
-
-<script type="application/javascript" src="//twitter.github.io/typeahead.js/js/hogan-2.0.0.js"></script>
-<script type="application/javascript" src="/static/js/typeahead.min.js"></script>
-<!-- End of Twitter Bootstrap -->
-<style>
-
-</style>
-
-<script type="application/javascript" src="/static/js/DashboardAppBundle.js"></script>
-<script type="application/javascript" src="/static/js/dashboard.js"></script>
 {% endblock %}
 
 {% block body %}
@@ -63,9 +46,19 @@
                     </i>
                 </a>
             </div>
-            <div class="cs-dashboard-rightbar col-md-9">Search Box and other control buttons</div>
+            <div class="col-md-6">
+                <div class="searchbox input-group input-group-sm">
+                    <input type="text" class="form-control" placeholder="Search for sites, people and entries">
+                    <span class="input-group-addon"><i class="icon-search"></i></span>
+                </div>
+            </div>
+            <div class="rightbar-control col-md-3">
+                <div class="pull-right">
+                    <a class="no-link link-hover" href="#signout"><i class="settings icon-cogs"></i></a>
+                    <a class="no-link link-hover" href="#settings"><i class="signout icon-signout"></i></a>
+                </div>
+            </div>
         </div>
-
         <!-- Put list control modal's HTML to be global -->
         <div list-control-modal></div>
 
