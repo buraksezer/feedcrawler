@@ -3,24 +3,21 @@
 @background-white: #FFFFFF;
 @border: 1px solid #E2E2E2;
 @font-color: #555555;
-@cs-blue: #0CAEE3;
+@cs-blue: #428bca;
 @link-hover: #005580;
 
-// Globals
-body {
-    background-color: @background-grey;
-    font-family: 'Open Sans',Helvetica,sans-serif !important;
-    color: #555555;
+body, html
+{
+    height: 100%;
 }
 
-/* No border radius */
-.popover-title,
-.popover,
-input,
-.modal,
-.btn,
-.dropdown-menu {
-    border-radius: 0 !important;
+body {
+    font-family: 'Open Sans',Helvetica,sans-serif !important;
+    color: #555555;
+    /* Bu gecici bir sey */
+    overflow: hidden;
+    height: 100%;
+    width: 100%;
 }
 
 [class*="icon-"],
@@ -31,51 +28,19 @@ a.brand {
     transition: color .5s;
 }
 
+
 [class*="icon-"]:hover,
 a.brand:hover {
     color: @cs-blue;
 }
 
-.cs-header {
-    padding-top: 10px;
-    padding-bottom: 10px;
-}
-
-.cs-timeline,
-.cs-leftbar {
-    padding: 0;
-}
-
-.cs-timeline {
-    background-color: @background-white;
-    border: @border;
-}
-
-.cs-dashboard-rightbar {
-    width: 73.5%;
-    margin-left: 15px;
-    padding-left: 0;
-    padding-right: 0;
-}
-
-.rightbar-control {
-    color: @font-color;
-    font-size: 20px;
-    padding-right: 0;
-}
-
-.rightbar-control i {
-    margin-left: 5px;
-}
-
-a.brand {
-    color: @font-color;
-    text-decoration: none;
-    font-size: 16px;
-}
-
-.header-left {
-    padding-left: 0
+.popover-title,
+.popover,
+input,
+.modal,
+.btn,
+.dropdown-menu {
+    border-radius: 2px !important;
 }
 
 .clickjacking-warn {
@@ -86,164 +51,128 @@ a.brand {
     background-color: #fcf8e3;
 }
 
-
-/* START: User area on Dashboard */
-
-.cs-leftbar .control,
-.cs-leftbar .user {
-    margin-bottom: 10px;
-    background-color: @background-white;
-    border: @border;
+#wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: white;
 }
 
-.cs-leftbar .user {
-    padding: 14px 8px 14px 8px;
+#sidebar {
+    background: #040014;
+    width: 39px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    overflow: hidden;
 }
 
-.cs-leftbar .username {
-    margin-left: 50px;
-    margin-top: -41px;
+.app-content {
+    position: absolute;
+    left: 39px;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    min-width: 93.92523364485982%;
+    box-shadow: -1px 0 10px 0 rgba(0,0,0,0.5);
+    -webkit-animation: .25s fade-in;
 }
 
-.cs-leftbar .username a {
-    color: @font-color;
+#stream {
+    width: 30%;
+    min-width: 30%;
+    position: absolute;
+    bottom: 0;
+    top: 0;
+    z-index: 2;
+    border-left: 1px solid #E2E2E2;
+    border-right: 1px solid #E2E2E2;
+    background-color: #FDFDFD;
 }
 
-.cs-leftbar .username a:hover {
-    color: @link-hover;
-}
-
-.follower .mugshot,
-.cs-leftbar div.user img.mugshot {
-    height: 40px;
-    width: 40px;
-}
-
-.cs-leftbar .user small a {
-    color: @font-color;
-    margin-left: 50px;
-    font-size: 80%;
-}
-
-.cs-leftbar .top-area i {
-    cursor: pointer;
-    font-size: 16px;
-}
-
-.cs-leftbar .control-item {
-    font-size: 13px;
-    padding: 1px 8px 2px 8px;
-}
-
-.control-right-element {
-    margin-right: 3px;
-}
-
-.cs-leftbar .control-item a {
-    text-decoration: none;
-    color: @font-color;
-    width: 100%;
+.stream-header {
     display: block;
+    padding: 10px;
+    border-bottom: 1px solid #E2E2E2;
+    font-size: 16px;
+    font-weight: bold;
+    box-shadow:0 0 2px rgba(0,0,0,0.2);
+    background-color: #FFFFFF;
 }
 
-.cs-leftbar .control .active {
-    color: #0088CC;
+/* This is no good. We should UL element for list stream control buttons */
+.stream-hide {
+    margin-right: 5px;
+    float: right;
 }
 
-.cs-leftbar .control-item:hover {
-    cursor: pointer;
-    background-color: @background-grey;
+.stream-pause {
+    float: right;
 }
 
-.cs-leftbar .control-item i {
-    font-size: 23px;
+#dashboard {
+    position: absolute;
+    min-width: 70%;
+    width: 70%;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 10;
+    background: #fff;
 }
 
-.control-item .readlater-count {
-    -webkit-box-shadow: 0 1px 0 rgba(0,0,0,.1);
-    box-shadow: 0 1px 0 rgba(0,0,0,.1);
-    background-color: #dd4b39;
-    border: none;
+iframe {
+    width: 100%;
+    height: 100%;
+    display: block;
+    overflow: hidden;
 }
 
-.control-icon {
-    display: inline-block !important;
-    min-width: 30px;
-    padding: 2px 5px 2px 0;
+.sidebar-cslogo {
+
 }
 
-.control-item .text {
-    display:inline-block;
-    min-width: 30px;
-}
-
-/* END: User area on Dashboard */
-
-/* START: Lists */
-#lists {
-    display: none;
+.sidebar-control {
     list-style: none;
+    padding: 0;
+    position: absolute;
+    bottom: 0;
+}
+
+.sidebar-icons {
+    margin-top: 9px;
+    min-width: 3%;
+    list-style: none;
+    padding: 0;
+    position: relative;
+}
+
+.sidebar-icon {
+    margin-bottom: 15px;
+    font-size: 20px;
+    padding-left: 9px;
+}
+
+.sidebar-icon a {
+    color: #B5B5C1 !important;
+    text-decoration: none;
+    border-bottom: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-icon i:hover {
+    color: white !important;
+}
+
+.sidebar-icon.signout {
     margin-bottom: 0;
 }
 
-#lists .list {
-    font-size: 13px;
+.cursor-pointer:hover {
+    cursor: pointer;
 }
-
-#lists .list a {
-    color: #555555;
-}
-
-#lists span {
-    font-size: 12px;
-}
-
-.lists ul.text {
-    margin: 0;
-}
-
-.lists ul.text li {
-    list-style: none;
-    display: inline;
-}
-
-.list-manage {
-    display: none;
-    font-size: 10px;
-}
-
-.list-manage:hover {
-    color: #0088cc;
-}
-
-.lists ul.text {
-    padding-left: 0;
-}
-
-/* END: Lists */
-
-/* START: Subscribe Modal */
-ul.top-area {
-    margin-left: 0;
-    margin-top: -18px;
-}
-
-ul.top-area li {
-    display: inline;
-    list-style-type: none;
-}
-
-ul.top-area li a {
-    color: @font-color;
-    text-decoration: none;
-}
-
-label[for="id_feed_url"],
-label[for="id_feed_search"] {
-    font-size: 12px !important;
-    color: #777777;
-}
-/* END: Subscribe Modal */
 
 /* START: Dashboard Entries */
 
@@ -311,6 +240,7 @@ ul.entry-utils li {
 }
 
 /* END: Dashboard Entries */
+
 
 /* START: Share Box */
 

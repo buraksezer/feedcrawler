@@ -18,7 +18,9 @@ var app = angular.module('Dashboard', ['Dashboard.services', 'Dashboard.controll
             .when('/list/:listSlug', { templateUrl: '/static/templates/list.html', controller: 'ListCtrl' })
             .when('/user/:userName', { templateUrl: '/static/templates/user-profile.html', controller: 'UserProfileCtrl' })
             .when('/user/:userName/followers', { templateUrl: '/static/templates/follower-list.html', controller: 'UserProfileCtrl' })
-            .when('/user/:userName/following', { templateUrl: '/static/templates/following-list.html', controller: 'UserProfileCtrl' });
+            .when('/user/:userName/following', { templateUrl: '/static/templates/following-list.html', controller: 'UserProfileCtrl' })
+            .when('/reader/:slug', { templateUrl: '/static/templates/reader.html', controller: 'ReaderCtrl'});
+
     }])
     .config(["$locationProvider", function($locationProvider) {
         $locationProvider.html5Mode(true);
@@ -27,13 +29,24 @@ var app = angular.module('Dashboard', ['Dashboard.services', 'Dashboard.controll
         $httpProvider.defaults.headers.common['X-CSRFToken'] = $('input[name=csrfmiddlewaretoken]').val();
     }]);
 
-app.run(function($rootScope, InitService) {
+app.run(function($rootScope, $location, $route, InitService) {
     $rootScope.username = CsFrontend.Globals.username;
     $rootScope.isAuthenticated = CsFrontend.Globals.isAuthenticated;
+    $rootScope.viewMode = "dashboard";
+    $rootScope.lastRoute = null;
+    $rootScope.hiddenStream = false;
     InitService.realtime();
-    $rootScope.renderToReader = function(id) {
-        document.location.href = "/reader/"+id;
-    };
+
+    $rootScope.previous_location = null;
+    $rootScope.switchMode = function() {
+        if ($rootScope.viewMode == "reader") {
+            $rootScope.viewMode = "dashboard";
+        } else {
+            $rootScope.previous_location = $location.path();
+            $rootScope.viewMode = "reader";
+
+        }
+    }
 
     $rootScope.safeApply = function(fn) {
         var phase = this.$root.$$phase;
@@ -45,6 +58,15 @@ app.run(function($rootScope, InitService) {
             this.$apply(fn);
         }
     };
+
+    $rootScope.$on('$locationChangeSuccess', function () {
+        console.log($route.current.controller);
+        console.log($rootScope.lastRoute.controller);
+        if ($route.current.controller == "ReaderCtrl" || $route.current.controller == $rootScope.lastRoute.controller) {
+            $route.current = $rootScope.lastRoute;
+        }
+        console.log('$locationChangeSuccess changed!', new Date());
+    });
 
     $rootScope.readlater_count = 0;
 });

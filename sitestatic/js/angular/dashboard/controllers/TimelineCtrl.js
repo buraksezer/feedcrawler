@@ -1,8 +1,9 @@
 (function () {
   'use strict';
 
-    function TimelineCtrl($scope, $routeParams, $http) {
+    function TimelineCtrl($scope, $routeParams, $http, $route, $rootScope) {
         // If this is a list, a custom timeline, use a different URL.
+        $rootScope.lastRoute = $route.current;
         var urlBody = "timeline";
         if ($(".list-header").length !== 0) {
             urlBody = "list/"+$routeParams.listSlug;

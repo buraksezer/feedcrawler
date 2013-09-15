@@ -19,7 +19,9 @@ var app = angular.module('Dashboard', ['Dashboard.services', 'Dashboard.controll
             .when('/list/:listSlug', { templateUrl: '/static/templates/list.html', controller: 'ListCtrl' })
             .when('/user/:userName', { templateUrl: '/static/templates/user-profile.html', controller: 'UserProfileCtrl' })
             .when('/user/:userName/followers', { templateUrl: '/static/templates/follower-list.html', controller: 'UserProfileCtrl' })
-            .when('/user/:userName/following', { templateUrl: '/static/templates/following-list.html', controller: 'UserProfileCtrl' });
+            .when('/user/:userName/following', { templateUrl: '/static/templates/following-list.html', controller: 'UserProfileCtrl' })
+            .when('/reader/:slug', { templateUrl: '/static/templates/reader.html', controller: 'ReaderCtrl'});
+
     }])
     .config(["$locationProvider", function($locationProvider) {
         $locationProvider.html5Mode(true);
@@ -28,13 +30,24 @@ var app = angular.module('Dashboard', ['Dashboard.services', 'Dashboard.controll
         $httpProvider.defaults.headers.common['X-CSRFToken'] = $('input[name=csrfmiddlewaretoken]').val();
     }]);
 
-app.run(function($rootScope, InitService) {
+app.run(function($rootScope, $location, $route, InitService) {
     $rootScope.username = CsFrontend.Globals.username;
     $rootScope.isAuthenticated = CsFrontend.Globals.isAuthenticated;
+    $rootScope.viewMode = "dashboard";
+    $rootScope.lastRoute = null;
+    $rootScope.hiddenStream = false;
     InitService.realtime();
-    $rootScope.renderToReader = function(id) {
-        document.location.href = "/reader/"+id;
-    };
+
+    $rootScope.previous_location = null;
+    $rootScope.switchMode = function() {
+        if ($rootScope.viewMode == "reader") {
+            $rootScope.viewMode = "dashboard";
+        } else {
+            $rootScope.previous_location = $location.path();
+            $rootScope.viewMode = "reader";
+
+        }
+    }
 
     $rootScope.safeApply = function(fn) {
         var phase = this.$root.$$phase;
@@ -47,10 +60,19 @@ app.run(function($rootScope, InitService) {
         }
     };
 
+    $rootScope.$on('$locationChangeSuccess', function () {
+        console.log($route.current.controller);
+        console.log($rootScope.lastRoute.controller);
+        if ($route.current.controller == "ReaderCtrl" || $route.current.controller == $rootScope.lastRoute.controller) {
+            $route.current = $rootScope.lastRoute;
+        }
+        console.log('$locationChangeSuccess changed!', new Date());
+    });
+
     $rootScope.readlater_count = 0;
 });
 
-},{"./controllers":2,"./directives":14,"./services":15}],2:[function(require,module,exports){
+},{"./controllers":2,"./directives":15,"./services":16}],2:[function(require,module,exports){
 // Dashboard spesific controllers here.
 
 'use strict';
@@ -66,20 +88,22 @@ var ListCtrl = require("./controllers/ListCtrl.js");
 var UserSpaceCtrl = require("./controllers/UserSpaceCtrl.js");
 var UserProfileCtrl = require("./controllers/UserProfileCtrl.js");
 var RepostCtrl = require("./controllers/RepostCtrl.js");
+var ReaderCtrl = require("./controllers/ReaderCtrl.js");
 
 angular.module("Dashboard.controllers", [])
     .controller("UserSpaceCtrl", ["$scope", "$rootScope", "$http", UserSpaceCtrl])
-    .controller("InteractionsCtrl", ["$scope", "$http", "$rootScope", InteractionsCtrl])
+    .controller("InteractionsCtrl", ["$scope", "$http", "$rootScope", "$route", InteractionsCtrl])
     .controller("SubscriptionsCtrl", ["$scope", "$http", SubscriptionsCtrl])
     .controller("FeedDetailCtrl", ["$scope", "$http", "$routeParams", "$rootScope", FeedDetailCtrl])
-    .controller("TimelineCtrl", ["$scope", "$routeParams", "$http", TimelineCtrl])
-    .controller("ReadLaterCtrl", ["$scope", "$http", ReadLaterCtrl])
+    .controller("TimelineCtrl", ["$scope", "$routeParams", "$http", '$route', "$rootScope", TimelineCtrl])
+    .controller("ReadLaterCtrl", ["$scope", "$http", "$rootScope", "$route", ReadLaterCtrl])
     .controller("SubscribeCtrl", ["$scope", "$http", "$timeout", "$rootScope", SubscribeCtrl])
     .controller("EntryCtrl", ["$scope", "$http", "$routeParams", EntryCtrl])
     .controller("ListCtrl", ["$scope", "$http", "$routeParams", ListCtrl])
     .controller("UserProfileCtrl", ["$scope", "$http", "$routeParams", UserProfileCtrl])
-    .controller("RepostCtrl", ["$scope", "$http", "$routeParams", RepostCtrl]);
-},{"./controllers/EntryCtrl.js":3,"./controllers/FeedDetailCtrl.js":4,"./controllers/InteractionsCtrl.js":5,"./controllers/ListCtrl.js":6,"./controllers/ReadLaterCtrl.js":7,"./controllers/RepostCtrl.js":8,"./controllers/SubscribeCtrl.js":9,"./controllers/SubscriptionsCtrl.js":10,"./controllers/TimelineCtrl.js":11,"./controllers/UserProfileCtrl.js":12,"./controllers/UserSpaceCtrl.js":13}],3:[function(require,module,exports){
+    .controller("RepostCtrl", ["$scope", "$http", "$routeParams", RepostCtrl])
+    .controller("ReaderCtrl", ["$scope", "$http", "$routeParams", "$route", "$rootScope", ReaderCtrl]);
+},{"./controllers/EntryCtrl.js":3,"./controllers/FeedDetailCtrl.js":4,"./controllers/InteractionsCtrl.js":5,"./controllers/ListCtrl.js":6,"./controllers/ReadLaterCtrl.js":7,"./controllers/ReaderCtrl.js":8,"./controllers/RepostCtrl.js":9,"./controllers/SubscribeCtrl.js":10,"./controllers/SubscriptionsCtrl.js":11,"./controllers/TimelineCtrl.js":12,"./controllers/UserProfileCtrl.js":13,"./controllers/UserSpaceCtrl.js":14}],3:[function(require,module,exports){
 (function () {
     'use strict';
     function EntryCtrl($scope, $http, $routeParams) {
@@ -181,7 +205,8 @@ angular.module("Dashboard.controllers", [])
 (function () {
   'use strict';
 
-    function InteractionsCtrl($scope, $http, $rootScope) {
+    function InteractionsCtrl($scope, $http, $rootScope, $route) {
+        $rootScope.lastRoute = $route.current;
         document.title = "Interactions"+" | "+CsFrontend.Globals.SiteTitle;
         // Reset interaction count in user space
         $("#new-interaction-count").trigger("reset_interaction_count");
@@ -240,7 +265,8 @@ angular.module("Dashboard.controllers", [])
 (function () {
   'use strict';
 
-    function ReadLaterCtrl($scope, $http) {
+    function ReadLaterCtrl($scope, $http, $rootScope, $route) {
+        $rootScope.lastRoute = $route.current;
         document.title = "Read Later List | "+CsFrontend.Globals.SiteTitle;
 
         $scope.busy = false;
@@ -280,6 +306,14 @@ angular.module("Dashboard.controllers", [])
 },{}],8:[function(require,module,exports){
 (function () {
     'use strict';
+
+    function ReaderCtrl($scope, $http, $routeParams, $route, $rootScope) {
+    }
+    module.exports = ReaderCtrl;
+})();
+},{}],9:[function(require,module,exports){
+(function () {
+    'use strict';
     function RepostCtrl($scope, $http, $routeParams) {
         $scope.loadingEntry = true;
         $http.get("/api/single_repost/"+$routeParams.repostId+"/").success(function(data) {
@@ -302,7 +336,7 @@ angular.module("Dashboard.controllers", [])
     module.exports = RepostCtrl;
 })();
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 (function () {
   'use strict';
     function SubscribeCtrl($scope, $http, $timeout, $rootScope) {
@@ -354,7 +388,7 @@ angular.module("Dashboard.controllers", [])
 
     module.exports = SubscribeCtrl;
 })();
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 (function () {
   'use strict';
 
@@ -388,12 +422,13 @@ angular.module("Dashboard.controllers", [])
 
   module.exports = SubscriptionsCtrl;
 })();
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 (function () {
   'use strict';
 
-    function TimelineCtrl($scope, $routeParams, $http) {
+    function TimelineCtrl($scope, $routeParams, $http, $route, $rootScope) {
         // If this is a list, a custom timeline, use a different URL.
+        $rootScope.lastRoute = $route.current;
         var urlBody = "timeline";
         if ($(".list-header").length !== 0) {
             urlBody = "list/"+$routeParams.listSlug;
@@ -439,7 +474,7 @@ angular.module("Dashboard.controllers", [])
 
   module.exports = TimelineCtrl;
 })();
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 (function () {
     'use strict';
 
@@ -514,7 +549,7 @@ angular.module("Dashboard.controllers", [])
 
     module.exports = UserProfileCtrl;
 })();
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 (function () {
     'use strict';
 
@@ -530,7 +565,7 @@ angular.module("Dashboard.controllers", [])
 
     module.exports = UserSpaceCtrl;
 })();
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 'use strict';
 
 /* Directives */
@@ -1135,8 +1170,56 @@ angular.module('Dashboard.directives', []).
                 });
             });
         }
+    }).directive("readerMode", function($http, $location, $route) {
+        return function(scope, element, attr) {
+            $(element).click(function(event) {
+                if (scope.viewMode == "reader") {
+                    $("#dashboard-container").hide();
+                    $("#reader-container").show();
+                    $("body").css("overflow-y", "hidden");
+                    $("iframe").attr("src", scope.entry.link);
+                    scope.safeApply(function() {
+                        $location.path("/reader/"+scope.entry.slug);
+                    });
+                } else {
+                    // Hide reader container
+                    $("#dashboard-container").show();
+                    $("#reader-container").hide();
+                    $("body").css("overflow-y", "");
+                    $("iframe").attr("src", "");
+                    scope.safeApply(function() {
+                        $location.path(scope.previous_location);
+                    });
+                }
+            });
+        }
+    }).directive("toggleStream", function($http, $location, $route,  $rootScope) {
+        return function(scope, element, attr) {
+            /* Burda daha akilli hareket etmemiz gerekiyor. Cunki
+            resize olnca patlıyor tum layout
+            */
+            $(element).click(function(event) {
+                if ($("#stream:visible").length) {
+                    $("#stream").hide();
+                    $("#dashboard").width("100%");
+                    scope.safeApply(function() {
+                        $rootScope.hiddenStream = true;
+                    });
+                } else {
+                    $("#stream").show();
+                    var dashboard_width = ( 100 * parseFloat($('#dashboard').width()) /
+                                            parseFloat($('#dashboard').parent().width()) );
+                    var stream_width = ( 100 * parseFloat($('#stream').width()) /
+                                             parseFloat($('#stream').parent().width()) );
+                    $("#dashboard").width(dashboard_width-Math.ceil(stream_width)+"%");
+                    scope.safeApply(function() {
+                        $rootScope.hiddenStream = false;
+                    });
+                }
+            });
+        }
     })
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 'use strict';
 
 /* Dashboard Services */

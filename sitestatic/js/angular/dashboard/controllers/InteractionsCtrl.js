@@ -1,7 +1,8 @@
 (function () {
   'use strict';
 
-    function InteractionsCtrl($scope, $http, $rootScope) {
+    function InteractionsCtrl($scope, $http, $rootScope, $route) {
+        $rootScope.lastRoute = $route.current;
         document.title = "Interactions"+" | "+CsFrontend.Globals.SiteTitle;
         // Reset interaction count in user space
         $("#new-interaction-count").trigger("reset_interaction_count");

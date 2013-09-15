@@ -1,7 +1,8 @@
 (function () {
   'use strict';
 
-    function ReadLaterCtrl($scope, $http) {
+    function ReadLaterCtrl($scope, $http, $rootScope, $route) {
+        $rootScope.lastRoute = $route.current;
         document.title = "Read Later List | "+CsFrontend.Globals.SiteTitle;
 
         $scope.busy = false;

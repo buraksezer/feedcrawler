@@ -1,75 +1,20 @@
 {% extends "chapstream_base.html" %}
-
-{% block dashboard_requirements %}
-
-{% endblock %}
-
 {% block body %}
-<!--
-<body ng-app="Dashboard" id="dashboard-layout">
-    <header id="header">
-        <div class="container">
-            <a class="brand" href="{% url "home" %}"><i>Chap<strong>Stream</strong><small> &alpha;</small></i></a>
-            <div class="pull-right settings-dropdown dropdown">
-                <a class="dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-cogs"></i></a>
-                <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
-                    <li><a tabindex="-1" class="link-signout" href="/user/signout" prevent-default sign-out>Sign Out</a></li>
-                </ul>
-            </div>
-            <form class="navbar-search">
-                <input type="text" class="search-query span4" placeholder="Search in your subscriptions">
-            </form>
-        </div>
-    </header>
-
-    <div id="dashboard" class="container">
-        <div list-control-modal></div>
-        <div class="row-fluid">
-            <div ng-controller="UserSpaceCtrl" class="span4 userspace">
-                <div ng-include="'/static/templates/userspace.html'"></div>
-            </div>
-            <div class="span8 timeline">
-                <div ng-view></div>
-            </div>
-        </div>
-    </div>
-</body>
--->
 
 <body ng-app="Dashboard">
-    <div class="container">
-        <div class="cs-header row">
-            <div class="header-left col-md-3">
-                <a class="brand" href="/">
-                    <i>
-                        Chap<strong>Stream</strong><small> α</small>
-                    </i>
-                </a>
-            </div>
-            <div class="col-md-6">
-                <div class="searchbox input-group input-group-sm">
-                    <input type="text" class="form-control" placeholder="Search for sites, people and entries">
-                    <span class="input-group-addon"><i class="icon-search"></i></span>
-                </div>
-            </div>
-            <div class="rightbar-control col-md-3">
-                <div class="pull-right">
-                    <a class="no-link link-hover" href="#signout"><i class="settings icon-cogs"></i></a>
-                    <a class="no-link link-hover" href="#settings"><i class="signout icon-signout"></i></a>
-                </div>
-            </div>
+    <div id="wrapper">
+        <div id="sidebar">
+            <div ng-include="'/static/templates/sidebar.html'"></div>
         </div>
-        <!-- Put list control modal's HTML to be global -->
-        <div list-control-modal></div>
-
-        <div class="cs-content row">
-            <div ng-controller="UserSpaceCtrl" class="cs-leftbar col-md-3">
-                <div ng-include="'/static/templates/userspace.html'"></div>
-            </div>
-            <div class="cs-dashboard-rightbar cs-timeline col-md-9">
+        <div class="app-content" >
+            <div id="stream">
                 <div ng-view></div>
+            </div>
+            <div id="dashboard">
+                <iframe border="0" frameborder="0" hspace="0" vspace="0" marginheight="0" marginwidth="0" src="http://hadronproject.org"></iframe>
             </div>
         </div>
     </div>
 </body>
+
 {% endblock %}

@@ -1,5 +1,15 @@
-<div class="interactions-header">
+<!--<div class="interactions-header">
     Interactions
+</div> -->
+
+<div class="stream-header">
+    <span class="stream-headline">Interactions</span>
+    <button type="button" class="stream-pause btn btn-primary btn-xs">
+        <strong>Pause</strong>
+    </button>
+    <button type="button" class="stream-hide btn btn-primary btn-xs" toggle-stream>
+        <strong>Hide</strong>
+    </button>
 </div>
 <div id="new-interaction" ng-show="hiddenEntry == true" class="new-entry-counter" catch-new-interaction show-hidden-entry>
     <a href="#" ng-show="newEntryCount == 1">{{ newEntryCount }} new interaction</a>
