@@ -1,14 +1,7 @@
-<!--<div class="interactions-header">
-    Interactions
-</div> -->
-
 <div class="stream-header">
     <span class="stream-headline">Interactions</span>
-    <button type="button" class="stream-pause btn btn-primary btn-xs">
+    <button type="button" class="stream-pause btn btn-primary btn-xs pull-right">
         <strong>Pause</strong>
-    </button>
-    <button type="button" class="stream-hide btn btn-primary btn-xs" toggle-stream>
-        <strong>Hide</strong>
     </button>
 </div>
 <div id="new-interaction" ng-show="hiddenEntry == true" class="new-entry-counter" catch-new-interaction show-hidden-entry>
@@ -17,7 +10,6 @@
 </div>
 <div infinite-scroll='loadInteractions()' infinite-scroll-disabled='busy' class="dashboard-entries">
         <div ng-hide="entry.instantEntry == true" ng-mouseenter="myClass='show'" ng-mouseleave="myClass=''" id="entry-{{ entry.slug }}" class="dashboard-entry" ng-repeat="entry in interactions.entries">
-            <span ng-include="'/static/templates/partials/entry-utils.html'"></span>
             <span ng-switch on="entry.isRepost">
                 <div ng-switch-when="undefined" ng-include="'/static/templates/partials/entry-body.html'"></div>
                 <div ng-switch-when="true" ng-include="'/static/templates/partials/repost-body.html'"></div>

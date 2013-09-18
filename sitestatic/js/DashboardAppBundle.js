@@ -1170,18 +1170,15 @@ angular.module('Dashboard.directives', []).
                 });
             });
         }
-    }).directive("readerMode", function($http, $location, $route) {
+    }).directive("readThis", function($http, $location, $route) {
         return function(scope, element, attr) {
             $(element).click(function(event) {
-                if (scope.viewMode == "reader") {
-                    $("#dashboard-container").hide();
-                    $("#reader-container").show();
-                    $("body").css("overflow-y", "hidden");
+                console.log(scope.viewMode);
                     $("iframe").attr("src", scope.entry.link);
                     scope.safeApply(function() {
                         $location.path("/reader/"+scope.entry.slug);
                     });
-                } else {
+                 /*else {
                     // Hide reader container
                     $("#dashboard-container").show();
                     $("#reader-container").hide();
@@ -1190,14 +1187,11 @@ angular.module('Dashboard.directives', []).
                     scope.safeApply(function() {
                         $location.path(scope.previous_location);
                     });
-                }
+                }*/
             });
         }
     }).directive("toggleStream", function($http, $location, $route,  $rootScope) {
         return function(scope, element, attr) {
-            /* Burda daha akilli hareket etmemiz gerekiyor. Cunki
-            resize olnca patlıyor tum layout
-            */
             $(element).click(function(event) {
                 if ($("#stream:visible").length) {
                     $("#stream").hide();

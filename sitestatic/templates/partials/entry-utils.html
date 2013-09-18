@@ -1,29 +1,29 @@
-            <ul ng-class="myClass" class="entry-utils">
-                <li ng-switch on="">
-                    <a ng-show="!entry.reposted" data-hint="Repost this entry" class="hint--top" href="#">
-                        <i class="icon-retweet" data-toggle="modal" data-target="#repostModal_{{ entry.id }}" run-repost-entry-modal></i>
-                    </a>
-                    <a ng-show="entry.reposted" data-hint="Undo repost" class="hint--top" href="#" undo-repost>
-                        <i class="icon-retweet" ></i>
-                        <span class="reposted">Reposted</span>
-                    </a>
-                </li>
-                <li>
-                    <a ng-show="!entry.inReadLater" data-hint="Read later" class="hint--top read-later" href="#" read-later>
-                        <i class="icon-time"></i>
-                    </a>
-                    <a ng-show="entry.inReadLater" data-hint="Remove from the read later list" class="hint--top read-later" href="#" read-later>
-                        <i class="icon-eraser"></i>
-                    </a>
-                </li>
-                <li>
-                    <a data-hint="Original Link" class="hint--top" href="{{ entry.link }}" target="_blank">
-                        <i class="icon-share-alt"></i>
-                    </a>
-                </li>
-                <li>
-                    <a data-hint="Open new tab" class="hint--top" href="/reader/{{ entry.slug }}" target="_blank">
-                        <i class="icon-share"></i>
-                    </a>
-                </li>
-            </ul>
+<ul ng-class="myClass" class="entry-utils">
+    <li ng-switch on="">
+        <a ng-show="!entry.reposted" data-hint="Repost this entry" class="hint--top" href="#">
+            <i class="icon-retweet" data-toggle="modal" data-target="#repostModal_{{ entry.id }}" run-repost-entry-modal></i>
+        </a>
+        <a ng-show="entry.reposted" data-hint="Undo repost" class="hint--top" href="#" undo-repost>
+            <i class="icon-retweet" ></i>
+            <span class="reposted">Reposted</span>
+        </a>
+    </li>
+    <li>
+        <a ng-show="!entry.inReadLater" data-hint="Read later" class="hint--top read-later" href="#" read-later>
+            <i class="icon-time"></i>
+        </a>
+        <a ng-show="entry.inReadLater" data-hint="Remove from the read later list" class="hint--top read-later" href="#" read-later>
+            <i class="icon-eraser"></i>
+        </a>
+    </li>
+    <li>
+        <a data-hint="Original Link" class="hint--top" href="{{ entry.link }}" target="_blank">
+            <i class="icon-share-alt"></i>
+        </a>
+    </li>
+    <li>
+        <a data-hint="Open new tab" class="hint--top" href="/reader/{{ entry.slug }}" target="_blank">
+            <i class="icon-share"></i>
+        </a>
+    </li>
+</ul>

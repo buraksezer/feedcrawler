@@ -602,7 +602,7 @@ angular.module('Dashboard.directives', []).
                 });
             });
         }
-    }).directive("readerMode", function($http, $location, $route) {
+    }).directive("readThis", function($http, $location, $route) {
         return function(scope, element, attr) {
             $(element).click(function(event) {
                 if (scope.viewMode == "reader") {

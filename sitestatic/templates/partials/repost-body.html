@@ -30,7 +30,7 @@
         <a class="feed" href="/feed/{{ entry.feed_slug }}">{{ entry.feed_title }}</a>
         <div class="timeline-entry-interaction">
             <span ng-switch on="singleRepost">
-                <a ng-switch-when="undefined" href="/repost/{{ entry.id }}">
+                <a ng-switch-when="undefined" href="/repost/{{ entry.id }}" read-this>
                     <span calc-from-now ts="{{ entry.created_at }}">{{ calcTime }}</span>
                 </a>
                 <span ng-switch-when="true" calc-from-now ts="{{ entry.created_at }}">{{ calcTime }}</span>

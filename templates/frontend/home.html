@@ -1,6 +1,7 @@
 {% extends "chapstream_base.html" %}
 {% block body %}
 
+<!--
 <body ng-app="Dashboard">
     <div id="wrapper">
         <div id="sidebar">
@@ -17,4 +18,97 @@
     </div>
 </body>
 
+-->
+
+<body ng-app="Dashboard">
+    <!--
+    <div class="cs-navbar navbar navbar-default navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#"><i>Chap<strong>Stream</strong> &alpha;</i>   </a>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <form class="navbar-form navbar-left" role="search">
+                        <div class="cs-search input-group">
+                            <input type="text" class="form-control" placeholder="Search something">
+                            <span class="input-group-addon">
+                                <i class="icon-search"></i>
+                            </span>
+                        </div>
+                    </form>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+-->
+
+    <!-- Fixed navbar -->
+    <div class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#"><i>Chap<strong>Stream</strong> &alpha;</i></a>
+        </div>
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav cs-search-form">
+            <form class="navbar-form navbar-left" role="search">
+              <div class="cs-search form-group">
+                <input type="text" class="form-control" placeholder="Search">
+              </div>
+    <button type="button" class="btn btn-primary btn-sm">
+        <i class="icon-search"></i>
+    </button>
+
+            </form>
+          </ul>
+                <ul class="cs-navbar-control nav navbar-nav navbar-right">
+                    <li><a href="#"><i class="icon-cogs"></i></a></li>
+                    <li><a href="#"><i class="icon-signout"></i></a></li>
+                </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+
+
+
+<!--
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-4 nav-brand">
+                <a class="navbar-brand" href="#"><i>Chap<strong>Stream</strong> &alpha;</i></a>
+            </div>
+            <div class="col-xs-8 nav-control">
+                <form class="navbar-form navbar-left" role="search">
+                    <div class="cs-search input-group">
+                        <input type="text" class="form-control" placeholder="Search something">
+                        <span class="input-group-addon cs-search-button">
+                            <i class="icon-search"></i>
+                        </span>
+                    </div>
+                </form>
+                <span class="cs-navbar-control navbar-right nav navbar-nav ">
+                    <a href="#"><i class="icon-cogs"></i></a>
+                    <a href="#"><i class="icon-signout"></i></a>
+                </span>
+            </div>
+        </div>
+    </div> -->
+
+    <div class="container">
+        <div class="row">
+            <div ng-controller="UserSpaceCtrl" class="col-xs-4 userspace">
+                <div ng-include="'/static/templates/userspace.html'"></div>
+            </div>
+            <div class="col-xs-8 main-stream">
+                <div ng-view></div>
+            </div>
+        </div>
+    </div> <!-- /container -->
+</body>
 {% endblock %}
