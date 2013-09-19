@@ -1,6 +1,6 @@
 <div id="timeline-item_{{ entry.id }}" class="entry-content">
     <span repost-entry-modal></span>
-    <a ng-show="entry.available == 1" ng-click="switchMode()" class="entry-title" href="/reader/{{entry.slug}}" prevent-default read-this>
+    <a ng-click="switchMode()" ng-show="entry.available == 1" ng-click="switchMode()" class="entry-title" href="/reader/{{entry.slug}}" prevent-default read-this>
         {{ entry.title }}
     </a>
     <a ng-show="entry.available != 1" class="entry-title" href="#" clickjacking-warn>

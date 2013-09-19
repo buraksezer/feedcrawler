@@ -606,7 +606,8 @@ angular.module('Dashboard.directives', []).
         return function(scope, element, attr) {
             $(element).click(function(event) {
                 if (scope.viewMode == "reader") {
-                    $("#dashboard-container").hide();
+                    $("#dashboard").hide();
+                    $("#navbar").hide();
                     $("#reader-container").show();
                     $("body").css("overflow-y", "hidden");
                     $("iframe").attr("src", scope.entry.link);
@@ -614,9 +615,9 @@ angular.module('Dashboard.directives', []).
                         $location.path("/reader/"+scope.entry.slug);
                     });
                 } else {
-                    // Hide reader container
-                    $("#dashboard-container").show();
                     $("#reader-container").hide();
+                    $("#dashboard").show();
+                    $(".navbar").show();
                     $("body").css("overflow-y", "");
                     $("iframe").attr("src", "");
                     scope.safeApply(function() {

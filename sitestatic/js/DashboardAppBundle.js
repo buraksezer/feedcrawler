@@ -1173,21 +1173,25 @@ angular.module('Dashboard.directives', []).
     }).directive("readThis", function($http, $location, $route) {
         return function(scope, element, attr) {
             $(element).click(function(event) {
-                console.log(scope.viewMode);
+                if (scope.viewMode == "reader") {
+                    $("#dashboard").hide();
+                    $("#navbar").hide();
+                    $("#reader-container").show();
+                    $("body").css("overflow-y", "hidden");
                     $("iframe").attr("src", scope.entry.link);
                     scope.safeApply(function() {
                         $location.path("/reader/"+scope.entry.slug);
                     });
-                 /*else {
-                    // Hide reader container
-                    $("#dashboard-container").show();
+                } else {
                     $("#reader-container").hide();
+                    $("#dashboard").show();
+                    $(".navbar").show();
                     $("body").css("overflow-y", "");
                     $("iframe").attr("src", "");
                     scope.safeApply(function() {
                         $location.path(scope.previous_location);
                     });
-                }*/
+                }
             });
         }
     }).directive("toggleStream", function($http, $location, $route,  $rootScope) {
