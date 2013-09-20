@@ -1,12 +1,12 @@
-Django==1.5.3
+Django==1.5.4
 PIL==1.1.7
 South==0.8.2
-amqp==1.0.13
+amqp==1.2.1
 anyjson==0.3.3
 argparse==1.2.1
 billiard==2.7.3.32
 celery==3.0.23
-distribute==0.6.34
+distribute==0.7.3
 django-announce==0.1.5
 django-autoslug==1.7.1
 django-celery==3.0.23

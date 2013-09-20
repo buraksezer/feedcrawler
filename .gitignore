@@ -12,6 +12,7 @@ Vagrantfile
 .vagrant
 *.log
 *.py[cod]
+.idea
 
 # C extensions
 *.so
