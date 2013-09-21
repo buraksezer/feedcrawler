@@ -19,9 +19,8 @@ var app = angular.module('Dashboard', ['Dashboard.services', 'Dashboard.controll
             .when('/list/:listSlug', { templateUrl: '/static/templates/list.html', controller: 'ListCtrl' })
             .when('/user/:userName', { templateUrl: '/static/templates/user-profile.html', controller: 'UserProfileCtrl' })
             .when('/user/:userName/followers', { templateUrl: '/static/templates/follower-list.html', controller: 'UserProfileCtrl' })
-            .when('/user/:userName/following', { templateUrl: '/static/templates/following-list.html', controller: 'UserProfileCtrl' })
-            .when('/reader/:slug', { templateUrl: '/static/templates/reader.html', controller: 'ReaderCtrl'});
-
+            .when('/user/:userName/following', { templateUrl: '/static/templates/following-list.html', controller: 'UserProfileCtrl' });
+            /*.when('/reader/:slug', { templateUrl: '/static/templates/reader.html', controller: 'ReaderCtrl'});*/
     }])
     .config(["$locationProvider", function($locationProvider) {
         $locationProvider.html5Mode(true);
@@ -60,14 +59,15 @@ app.run(function($rootScope, $location, $route, InitService) {
         }
     };
 
-    $rootScope.$on('$locationChangeSuccess', function () {
+    /*$rootScope.$on('$locationChangeSuccess', function () {
         console.log($route.current.controller);
         console.log($rootScope.lastRoute.controller);
         if ($route.current.controller == "ReaderCtrl" || $route.current.controller == $rootScope.lastRoute.controller) {
             $route.current = $rootScope.lastRoute;
         }
         console.log('$locationChangeSuccess changed!', new Date());
-    });
+    });*/
+
 
     $rootScope.readlater_count = 0;
 });
@@ -1179,18 +1179,19 @@ angular.module('Dashboard.directives', []).
                     $("#reader-container").show();
                     $("body").css("overflow-y", "hidden");
                     $("iframe").attr("src", scope.entry.link);
-                    scope.safeApply(function() {
+                    /*scope.safeApply(function() {
                         $location.path("/reader/"+scope.entry.slug);
-                    });
+                    });*/
                 } else {
                     $("#reader-container").hide();
                     $("#dashboard").show();
-                    $(".navbar").show();
+                    $("#navbar").show();
                     $("body").css("overflow-y", "");
                     $("iframe").attr("src", "");
-                    scope.safeApply(function() {
+                    $("body").width(scope.currentWidth);
+                    /*scope.safeApply(function() {
                         $location.path(scope.previous_location);
-                    });
+                    });*/
                 }
             });
         }

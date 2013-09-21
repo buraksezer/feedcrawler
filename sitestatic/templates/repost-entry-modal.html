@@ -1,12 +1,18 @@
-<div id="repostModal_{{ entry.id }}" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="repostModalLabel" aria-hidden="true">
-    <div class="modal-body">
-        <textarea ng-model="repostNote" class='comment textbox-transition' id="repost-notebox_{{ entry.id }}" placeholder="Add a note" repost-entry></textarea>
-        <div class="original-entry">
-            <strong>{{ entry.title }}</strong> on <a href="#">{{ entry.feed_title }}</a>
+<div id="repostModal_{{ entry.id }}" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="repostModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-body">
+                    <textarea ng-model="repostNote" class='comment textbox-transition' id="repost-notebox_{{ entry.id }}" placeholder="Add a note" repost-entry></textarea>
+                    <div class="original-entry">
+                        <strong>{{ entry.title }}</strong> on <a href="#">{{ entry.feed_title }}</a>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-link" data-dismiss="modal" aria-hidden="true">Close</button>
+                    <button class="repost-button btn btn-success"><strong>Repost</strong></button>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="modal-footer">
-        <button class="btn btn-link" data-dismiss="modal" aria-hidden="true">Close</button>
-        <button class="repost-button btn btn-success"><strong>Repost</strong></button>
     </div>
 </div>

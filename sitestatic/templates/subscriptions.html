@@ -1,3 +1,7 @@
+<div class="stream-header">
+    <span class="stream-headline">Subscriptions</span>
+</div>
+
 <div infinite-scroll='loadSubscriptions()' infinite-scroll-disabled='busy' class="subscriptions">
     <div class="subscription" ng-repeat="subscription in subscriptions">
         <div ng-mouseenter="myClass='show'" ng-mouseleave="myClass=''" class="subscription-content">

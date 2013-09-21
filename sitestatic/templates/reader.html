@@ -7,6 +7,31 @@
                 </a>
             </section>
         </div>
+        <span class="pull-right" ng-switch on="isAuthenticated">
+            <span ng-switch-when="true">
+                <!-- left side of the navbar -->
+                <ul class="menu">
+                    <li ng-show="entry.liked" class="hint--bottom active" data-hint="You liked">
+                        <i class="cursor-pointer icon-thumbs-up" entry-like></i>
+                    </li>
+                    <li ng-show="!entry.liked" class="hint--bottom" data-hint="Like">
+                        <i class="cursor-pointer icon-thumbs-up" entry-like></i>
+                    </li>
+                    <li ng-show="!entry.inReadLater" class="hint--bottom" data-hint="Read later">
+                        <i class="cursor-pointer icon-time" read-later></i>
+                    </li>
+                    <li ng-show="entry.inReadLater" class="hint--bottom active" data-hint="Remove from the read later list">
+                        <i class="cursor-pointer icon-time" read-later></i>
+                    </li>
+                    <li class="hint--bottom" data-hint="Bookmark this">
+                        <i class="cursor-pointer icon-star"></i>
+                    </li>
+                    <li class="hint--bottom" data-hint="Return to dashboard">
+                        <i ng-click="switchMode()" class="cursor-pointer icon-remove" read-this></i>
+                    </li>
+                </ul>
+            </span>
+        </span>
     </div>
-    <iframe border="0" frameborder="0" hspace="0" vspace="0" marginheight="0" marginwidth="0" src=""></iframe>
+    <iframe border="0" frameborder="0" src=""></iframe>
 </div>
