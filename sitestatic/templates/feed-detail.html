@@ -39,7 +39,7 @@
         <div ng-hide="entry.instantEntry == true" ng-mouseenter="myClass='show'" ng-mouseleave="myClass=''" class="dashboard-entry" ng-repeat="entry in feed_detail.entries">
             <div class="entry-content">
                 <span repost-entry-modal></span>
-                <a ng-show="entry.available == 1" class="entry-title" href="/reader/{{entry.slug}}" prevent-default reader-mode>
+                <a ng-show="entry.available == 1" class="entry-title" href="/reader/{{entry.slug}}" prevent-default read-this>
                     {{ entry.title }}
                 </a>
                 <a ng-show="entry.available != 1" class="entry-title" href="#" clickjacking-warn>
