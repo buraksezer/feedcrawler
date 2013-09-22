@@ -20,7 +20,7 @@
         </div>
     </div>
     <div class="entry-body quote">
-        <a ng-show="entry.available == 1" class="entry-title" href="/reader/{{entry.slug}}" prevent-default repost-body read-this>
+        <a ng-click="switchMode()" ng-show="entry.available == 1" class="entry-title" href="/reader/{{entry.slug}}" prevent-default repost-body read-this>
             {{ entry.title }}
         </a>
         <a ng-show="entry.available != 1" class="entry-title" href="#" clickjacking-warn>
@@ -30,7 +30,7 @@
         <a class="feed" href="/feed/{{ entry.feed_slug }}">{{ entry.feed_title }}</a>
         <div class="timeline-entry-interaction">
             <span ng-switch on="singleRepost">
-                <a ng-switch-when="undefined" href="/repost/{{ entry.id }}" read-this>
+                <a ng-switch-when="undefined" href="/repost/{{ entry.id }}">
                     <span calc-from-now ts="{{ entry.created_at }}">{{ calcTime }}</span>
                 </a>
                 <span ng-switch-when="true" calc-from-now ts="{{ entry.created_at }}">{{ calcTime }}</span>
