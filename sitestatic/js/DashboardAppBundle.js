@@ -638,7 +638,7 @@ angular.module('Dashboard.directives', []).
     }).directive('signOut', function() {
         return function (scope, element, attrs) {
             $(element).click(function() {
-                document.location.href = "/user/signout";
+                document.location.href = "/user/signout/";
             });
         }
     }).directive('preventDefault', function() {
@@ -1188,36 +1188,13 @@ angular.module('Dashboard.directives', []).
                     $("#navbar").show();
                     $("body").css("overflow-y", "");
                     $("iframe").attr("src", "");
-                    $("body").width(scope.currentWidth);
                     /*scope.safeApply(function() {
                         $location.path(scope.previous_location);
                     });*/
                 }
             });
         }
-    }).directive("toggleStream", function($http, $location, $route,  $rootScope) {
-        return function(scope, element, attr) {
-            $(element).click(function(event) {
-                if ($("#stream:visible").length) {
-                    $("#stream").hide();
-                    $("#dashboard").width("100%");
-                    scope.safeApply(function() {
-                        $rootScope.hiddenStream = true;
-                    });
-                } else {
-                    $("#stream").show();
-                    var dashboard_width = ( 100 * parseFloat($('#dashboard').width()) /
-                                            parseFloat($('#dashboard').parent().width()) );
-                    var stream_width = ( 100 * parseFloat($('#stream').width()) /
-                                             parseFloat($('#stream').parent().width()) );
-                    $("#dashboard").width(dashboard_width-Math.ceil(stream_width)+"%");
-                    scope.safeApply(function() {
-                        $rootScope.hiddenStream = false;
-                    });
-                }
-            });
-        }
-    })
+    });
 },{}],16:[function(require,module,exports){
 'use strict';
 

@@ -70,7 +70,7 @@ angular.module('Dashboard.directives', []).
     }).directive('signOut', function() {
         return function (scope, element, attrs) {
             $(element).click(function() {
-                document.location.href = "/user/signout";
+                document.location.href = "/user/signout/";
             });
         }
     }).directive('preventDefault', function() {
