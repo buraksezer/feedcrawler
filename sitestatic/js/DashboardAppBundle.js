@@ -1170,28 +1170,35 @@ angular.module('Dashboard.directives', []).
                 });
             });
         }
-    }).directive("readThis", function($http, $location, $route) {
+    }).directive("readThis", function($http) {
         return function(scope, element, attr) {
             $(element).click(function(event) {
+                if (typeof scope.entry.content == "undefined") {
+                    $http.get("/api/get_baseentry_content/"+scope.entry.id+"/").success(function(data) {
+                        console.log(data);
+                        scope.safeApply(function() {
+                            scope.entry.content = data[0];
+                        });
+                    });
+                } else {
+                    scope.safeApply(function() {
+                        scope.entry.content = undefined;
+                    });
+                }
+                /*
                 if (scope.viewMode == "reader") {
                     $("#dashboard").hide();
                     $("#navbar").hide();
                     $("#reader-container").show();
                     $("body").css("overflow-y", "hidden");
                     $("iframe").attr("src", scope.entry.link);
-                    /*scope.safeApply(function() {
-                        $location.path("/reader/"+scope.entry.slug);
-                    });*/
                 } else {
                     $("#reader-container").hide();
                     $("#dashboard").show();
                     $("#navbar").show();
                     $("body").css("overflow-y", "");
                     $("iframe").attr("src", "");
-                    /*scope.safeApply(function() {
-                        $location.path(scope.previous_location);
-                    });*/
-                }
+                }*/
             });
         }
     });

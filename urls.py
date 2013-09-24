@@ -69,5 +69,6 @@ apipatterns = patterns('',
     url(r'^api/user/(?P<username>[-A-Za-z0-9_]+)/followers/$', views.FollowerList.as_view()),
     url(r'^api/user/(?P<username>[-A-Za-z0-9_]+)/following/$', views.FollowingList.as_view()),
     url(r'^api/show_on_stream/(?P<feed_id>[\w-]+)/$', views.ShowOnStream.as_view()),
+    url(r'^api/get_baseentry_content/(?P<entry_id>[\w-]+)/$', views.GetBaseEntryContent.as_view()),
 )
 urlpatterns += format_suffix_patterns(apipatterns)

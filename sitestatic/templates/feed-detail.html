@@ -45,6 +45,7 @@
                 <a ng-show="entry.available != 1" class="entry-title" href="#" clickjacking-warn>
                     {{ entry.title }}
                 </a>
+                <div ng-bind-html="entry.content" class="entry-text"></div>
                 <div class="timeline-entry-interaction">
                     <a href="/entry/{{entry.id}}">
                         <span calc-from-now ts="{{ entry.created_at }}">{{ calcTime }}</span>

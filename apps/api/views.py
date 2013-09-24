@@ -1117,3 +1117,18 @@ class ShowOnStream(APIView):
             return Response({"code": 1, "msg": "The feed is removed from Stream"})
         except FeedUserRelation.DoesNotExist:
             return Response({"code": 0, "msg": "You don't subscribe this feed"})
+
+
+class GetBaseEntryContent(APIView):
+    """
+    Gets content for given entry_id
+    """
+    authentication_classes = (authentication.SessionAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request, entry_id):
+        try:
+            content = BaseEntry.objects.filter(id=entry_id).values_list("content", flat=True)
+            return Response(content)
+        except BaseEntry.DoesNotExist:
+            return Response({"code":0, "msg": "Entry not found:%s" % entry_id})

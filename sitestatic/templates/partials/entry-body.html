@@ -8,6 +8,7 @@
     </a>
     <br>
     <a class="feed" href="/feed/{{ entry.feed_slug }}">{{ entry.feed_title }}</a>
+    <div ng-bind-html="entry.content" class="entry-text"></div>
     <div class="timeline-entry-interaction">
         <span ng-switch on="singleEntry">
             <a ng-switch-when="undefined" href="/entry/{{ entry.id }}">
