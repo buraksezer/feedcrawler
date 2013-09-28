@@ -29,6 +29,7 @@
     </div>
 
     <div id="dashboard" class="container">
+        <div content-modal></div>
         <div class="row">
             <div ng-controller="UserSpaceCtrl" class="col-xs-4 userspace">
                 <div ng-include="'/static/templates/userspace.html'"></div>
@@ -38,6 +39,5 @@
             </div>
         </div>
     </div> <!-- /container -->
-    <div ng-include="'/static/templates/reader.html'"></div>
 </body>
 {% endblock %}

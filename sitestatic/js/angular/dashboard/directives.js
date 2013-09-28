@@ -602,34 +602,23 @@ angular.module('Dashboard.directives', []).
                 });
             });
         }
-    }).directive("readThis", function($http) {
+    }).directive('contentModal', function() {
+        return {
+            templateUrl: '/static/templates/partials/content-modal.html'
+        }
+    }).directive("readThis", function($http, $rootScope) {
         return function(scope, element, attr) {
             $(element).click(function(event) {
                 if (typeof scope.entry.content == "undefined") {
                     $http.get("/api/get_baseentry_content/"+scope.entry.id+"/").success(function(data) {
                         scope.safeApply(function() {
-                            scope.entry.content = data[0];
+                            $rootScope.entry = scope.entry;
+                            $rootScope.entry.content = data[0];
                         });
                     });
-                } else {
-                    scope.safeApply(function() {
-                        scope.entry.content = undefined;
-                    });
                 }
-                /*
-                if (scope.viewMode == "reader") {
-                    $("#dashboard").hide();
-                    $("#navbar").hide();
-                    $("#reader-container").show();
-                    $("body").css("overflow-y", "hidden");
-                    $("iframe").attr("src", scope.entry.link);
-                } else {
-                    $("#reader-container").hide();
-                    $("#dashboard").show();
-                    $("#navbar").show();
-                    $("body").css("overflow-y", "");
-                    $("iframe").attr("src", "");
-                }*/
+                $("#contentModal").modal("show");
             });
         }
     });
+

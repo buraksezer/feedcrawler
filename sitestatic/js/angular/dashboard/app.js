@@ -36,17 +36,6 @@ app.run(function($rootScope, $location, $route, InitService) {
     $rootScope.hiddenStream = false;
     InitService.realtime();
 
-    $rootScope.previous_location = null;
-    $rootScope.switchMode = function() {
-        if ($rootScope.viewMode == "reader") {
-            $rootScope.viewMode = "dashboard";
-        } else {
-            $rootScope.previous_location = $location.path();
-            $rootScope.viewMode = "reader";
-
-        }
-    }
-
     $rootScope.safeApply = function(fn) {
         var phase = this.$root.$$phase;
         if(phase == '$apply' || phase == '$digest') {

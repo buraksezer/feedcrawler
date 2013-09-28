@@ -1,19 +1,32 @@
 import time
-import redis
-import feedparser
-import django
 from time import mktime
 from datetime import datetime
-from announce import AnnounceClient
-from apps.storage.models import Feed, Entry
-from django.utils.timezone import utc
-from utils import log as logging
-from django.conf import settings
 from urlparse import urlparse
 
+
+import requests
+import feedparser
+from announce import AnnounceClient
+from apps.storage.models import Entry
+from utils import log as logging
 from django.db import connection
+from breadability.readable import Article
 
 announce_client = AnnounceClient()
+
+
+def extract_site_content(url):
+    """
+    Extracts content of the given url if its possible
+    """
+    try:
+        r = requests.get(url)
+        doc = Article(r.content, url=url)
+        return doc.readable
+    except Exception:
+        # TODO: Add and error handler to here for passing
+        # error messages to log database
+        pass
 
 class ProcessEntry(object):
     def __init__(self, feed, entries, available=1):
@@ -32,17 +45,27 @@ class ProcessEntry(object):
             entry_item = Entry(title=entry.title, feed=self.feed)
             # FIXME: What if entry object has not link variable?
             entry_item.entry_id = entry.id if hasattr(entry, "id") else entry.link
-            if hasattr(entry, "content"):
-                entry_item.content = entry.content[0].value
-                if hasattr(entry.content[0], "language") and entry.content[0].language is not None:
-                    entry_item.language = entry.content[0]["language"]
-                if hasattr(entry.content[0], "type"):
-                    entry_item.content_type = entry.content[0].type
+
+            if hasattr(entry, "feedburner_origlink"):
+                entry_item.link = entry.feedburner_origlink
             else:
-                entry_item.content = entry.summary
-                entry_item.content_type = entry.summary_detail.type
-                if hasattr(entry.summary_detail, "language") and entry.summary_detail.language is not None:
-                    entry_item.language = entry.summary_detail.language
+                entry_item.link = entry.link
+
+            possible_content = extract_site_content(entry_item.link)
+            if possible_content is not None:
+                entry_item.content = possible_content
+            else:
+                if hasattr(entry, "content"):
+                    entry_item.content = entry.content[0].value
+                    if hasattr(entry.content[0], "language") and entry.content[0].language is not None:
+                        entry_item.language = entry.content[0]["language"]
+                    if hasattr(entry.content[0], "type"):
+                        entry_item.content_type = entry.content[0].type
+                else:
+                    entry_item.content = entry.summary
+                    entry_item.content_type = entry.summary_detail.type
+                    if hasattr(entry.summary_detail, "language") and entry.summary_detail.language is not None:
+                        entry_item.language = entry.summary_detail.language
 
             if hasattr(entry, "published_parsed") and entry.published_parsed is not None:
                 entry_item.published_at = datetime.fromtimestamp(mktime(entry.published_parsed))
@@ -54,11 +77,6 @@ class ProcessEntry(object):
 
             if hasattr(entry, "license") and entry.license is not None:
                 entry_item.license = entry.license
-
-            if hasattr(entry, "feedburner_origlink"):
-                entry_item.link = entry.feedburner_origlink
-            else:
-                entry_item.link = entry.link
 
             feed_hostname = urlparse(self.feed.link).hostname
             if urlparse(entry_item.link).hostname == urlparse(self.feed.link).hostname:
